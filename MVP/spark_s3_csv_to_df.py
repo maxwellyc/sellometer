@@ -30,7 +30,7 @@ def main():
     # timestep of specific item data to group by, in seconds, for plotting
     tstep = 60
     # start time for time series plotting, I'll set this to a specific time for now
-    t0 = datetime.datetime.strptime("2019-11-01 00:00:00 UTC", '%Y-%m-%d %H:%M:%S %Z').timetuple()
+    t0 = int(time.mktime(datetime.datetime.strptime("2019-11-01 00:00:00 UTC", '%Y-%m-%d %H:%M:%S %Z').timetuple()))    
     ################################################################################
 
     # read csv file on s3 into spark dataframe
@@ -53,13 +53,13 @@ def main():
 
 
 
-    df = df.withColumn("time_period", (df.timestamp - t0) // tstep)
-    df = df.withColumn("time_period", lpad(df.timestamp,10,'0'))
+    df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
+    df = df.withColumn("time_period", lpad(df.time_period,10,'0'))
 
-    df.show(n=100, truncate=False)
-    return
+    #df.show(n=100, truncate=False)
+    
     df = df.withColumn('pid_timeperiod',
-    [concat(col("product_id"), lit("-"), lpad(df.timestamp - t0,10,0))])
+    [concat(col("product_id"), lit("-"), col("time_period"))])
 
     #df = df.select([concat(col("product_id"), lit("-"), col("timestamp"))] + df.columns )
     # df2 = df2.withColumnRenamed(df2.columns[0], "pid_timestamp")
