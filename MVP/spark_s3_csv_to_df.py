@@ -62,9 +62,11 @@ def main():
     # df = df.withColumnRenamed(df.columns[0], "pid_timeperiod")
     # df = df.sort("pid_timeperiod")
 
-    df1 = df.groupBy("product_id","time_period","event_type","event_type").count().sort("product_id","time_period")
+    df1 = df.groupBy("product_id","time_period","event_type").count().sort("product_id","time_period")
 
-    df1.show(n=100, truncate=False)
+    df2 = df1.withColumn('ccol',concat(df1['source'],lit('_cnt'))).groupby('region').pivot('ccol').agg(F.first('count')).fillna(0)
+
+    df2.show(n=100, truncate=False)
 
 if __name__ == "__main__":
     main()
