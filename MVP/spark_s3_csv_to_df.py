@@ -29,7 +29,7 @@ def main():
 
     # other settings ###############################################################
     # timestep of specific item data to group by, in seconds, for plotting
-    tstep = 60
+    tstep = 3600
     start_time = "2019-11-01 00:00:00 UTC"
     time_format = '%Y-%m-%d %H:%M:%S %Z'
     # start time for time series plotting, I'll set this to a specific time for now
@@ -38,9 +38,9 @@ def main():
 
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
-
-    # drop unused column
-    df = df.drop('_c0')
+    #
+    # # drop unused column
+    # df = df.drop('_c0')
 
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
@@ -62,9 +62,9 @@ def main():
     # df = df.withColumnRenamed(df.columns[0], "pid_timeperiod")
     # df = df.sort("pid_timeperiod")
 
-    df = df.groupBy("product_id","time_period","event_type").count()
+    df1 = df.groupBy("product_id","time_period","event_type","event_type").count().sort("product_id","time_period")
 
-    df.show(n=100, truncate=False)
+    df1.show(n=100, truncate=False)
 
 if __name__ == "__main__":
     main()
