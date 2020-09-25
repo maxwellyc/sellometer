@@ -24,7 +24,7 @@ def main():
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     spark_session = spark.builder.getOrCreate()
-    # sql_c = SQLContext(sc)
+    sql_c = SQLContext(sc)
     ################################################################################
 
     # other settings ###############################################################
@@ -57,13 +57,12 @@ def main():
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
     df = df.withColumn("time_period", lpad(df.time_period,10,'0'))
 
-    # merge and rename new column
-    df = df.select([concat(col("product_id"), lit("-"), col("time_period"))] + df.columns )
-    df = df.withColumnRenamed(df.columns[0], "pid_timeperiod")
+    # merge, rename, sort new column
+    # df = df.select([concat(col("product_id"), lit("-"), col("time_period"))] + df.columns )
+    # df = df.withColumnRenamed(df.columns[0], "pid_timeperiod")
+    # df = df.sort("pid_timeperiod")
 
-    df = df.sort("pid_timeperiod")
-
-    df.groupBy("product_id","time_period","event_type").sum("total event")
+    df = df.groupBy("product_id","time_period","event_type").count()
 
     df.show(n=100, truncate=False)
 
