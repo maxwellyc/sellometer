@@ -59,7 +59,7 @@ def main():
 
     df1 = df.groupBy("product_id","time_period","event_type").count().sort("product_id","time_period")
 
-    df2 = df1.withColumn('ccol',F.concat(df1['event_type'],F.lit('_cnt'))).groupby('product_id').pivot('ccol').agg(F.first('count')).fillna(0)
+    df2 = df1.withColumn('ccol',F.concat(df1['event_type'],F.lit('_cnt'))).groupby('product_id',"time_period").pivot('ccol').agg(F.first('count')).fillna(0)
 
     df2.show(n=100, truncate=False)
 
