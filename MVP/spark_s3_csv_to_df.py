@@ -15,8 +15,8 @@ def main():
     # define data location on S3 ###################################################
     region = 'us-east-2'
     bucket = 'maxwell-insight'
-    #key = '2019-Nov.csv'
-    key = 'sample.csv'
+    key = '2019-Oct.csv'
+    #key = 'sample.csv'
     s3file = f's3a://{bucket}/{key}'
     ################################################################################
 
@@ -29,8 +29,8 @@ def main():
 
     # other settings ###############################################################
     # timestep of specific item data to group by, in seconds, for plotting
-    tstep = 3600
-    start_time = "2019-11-01 00:00:00 UTC"
+    tstep = 3600*24
+    start_time = "2019-10-01 00:00:00 UTC"
     time_format = '%Y-%m-%d %H:%M:%S %Z'
     # start time for time series plotting, I'll set this to a specific time for now
     t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
@@ -39,8 +39,10 @@ def main():
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
     #
-    # # drop unused column
-    # df = df.drop('_c0')
+    # drop unused column
+    df = df.drop('_c0')
+
+    df.show(n=50, truncate = False)
 
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
@@ -59,9 +61,10 @@ def main():
 
     df1 = df.groupBy("product_id","time_period","event_type").count().sort("product_id","time_period")
 
-    df2 = df1.withColumn('ccol',F.concat(df1['event_type'],F.lit('_cnt'))).groupby('product_id',"time_period").pivot('ccol').agg(F.first('count')).fillna(0)
+    df2 = df1.withColumn('ccol',F.concat(df1['event_type'],
+    F.lit('_cnt'))).groupby('product_id',"time_period").pivot('ccol').agg(F.first('count')).fillna(0)
 
-    df2.show(n=100, truncate=False)
+    df2.show(n=50, truncate=False)
 
 if __name__ == "__main__":
     main()
