@@ -2,6 +2,13 @@ from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql import SQLContext
 from pyspark.sql.functions import col, substring, unix_timestamp, concat, lit, lpad
+import datetime
+import time
+
+def timeConverter(timestamp):
+    time_tuple = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.000").timetuple()
+    timevalue = int(time.mktime(time_tuple)) # convert to int here
+    return timevalue
 
 def main():
     conf = SparkConf().setAppName("read_csv").setMaster("local")
@@ -23,7 +30,7 @@ def main():
     # timestep of specific item data to group by, in seconds, for plotting
     tstep = 60
     # start time for time series plotting, I'll set this to a specific time for now
-    t0 = unix_timestamp("2019-11-01 00:00:00 UTC", 'yyyy-MM-dd HH:mm:ss z')
+    t0 = datetime.datetime.strptime("2019-11-01 00:00:00 UTC", '%Y-%m-%d %H:%M:%S %Z').timetuple()
     ################################################################################
 
     # read csv file on s3 into spark dataframe
@@ -44,12 +51,13 @@ def main():
     # Eg. Views of product_id 10000000001 between 00:00:00 to 00:01:00 will have new column
     # value to be 10000000001-000000
 
-    df.show(n=100, truncate=False)
 
-    df = df.withColumn("time_period", df.timestamp - t0)
+
+    df = df.withColumn("time_period", (df.timestamp - t0) // tstep)
     df = df.withColumn("time_period", lpad(df.timestamp,10,'0'))
 
-    return 
+    df.show(n=100, truncate=False)
+    return
     df = df.withColumn('pid_timeperiod',
     [concat(col("product_id"), lit("-"), lpad(df.timestamp - t0,10,0))])
 
