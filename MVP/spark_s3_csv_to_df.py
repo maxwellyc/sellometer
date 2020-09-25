@@ -45,9 +45,11 @@ def main():
     # value to be 10000000001-000000
 
     df.show(n=100, truncate=False)
-    
-    return
 
+    df = df.withColumn("time_period", df.timestamp - t0)
+    df = df.withColumn("time_period", lpad(df.timestamp,10,'0'))
+
+    return 
     df = df.withColumn('pid_timeperiod',
     [concat(col("product_id"), lit("-"), lpad(df.timestamp - t0,10,0))])
 
