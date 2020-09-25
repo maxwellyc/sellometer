@@ -23,14 +23,17 @@ def main():
     # initialize spark session and spark context####################################
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
-    sql_c = SQLContext(sc)
+    spark_session = spark.builder.getOrCreate()
+    # sql_c = SQLContext(sc)
     ################################################################################
 
     # other settings ###############################################################
     # timestep of specific item data to group by, in seconds, for plotting
     tstep = 60
+    start_time = "2019-11-01 00:00:00 UTC"
+    time_format = '%Y-%m-%d %H:%M:%S %Z'
     # start time for time series plotting, I'll set this to a specific time for now
-    t0 = int(time.mktime(datetime.datetime.strptime("2019-11-01 00:00:00 UTC", '%Y-%m-%d %H:%M:%S %Z').timetuple()))
+    t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
     ################################################################################
 
     # read csv file on s3 into spark dataframe
@@ -48,23 +51,19 @@ def main():
     # create new column consisting of product_id + "-" + number of timesteps from
     # start time t0. Rows belonging to same product_id and within same chunck of timestep
     # will be aggregated together.
-    # Eg. Views of product_id 10000000001 between 00:00:00 to 00:01:00 will have new column
-    # value to be 10000000001-000000
-
-
+    # Eg. Views of product_id 1001588 between 00:00:00 to 00:01:00 (tstep = 60)
+    # will have new column value as 1001588-0000000006
 
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
     df = df.withColumn("time_period", lpad(df.time_period,10,'0'))
 
-    #df.show(n=100, truncate=False)
-
+    # merge and rename new column
     df = df.select([concat(col("product_id"), lit("-"), col("time_period"))] + df.columns )
     df = df.withColumnRenamed(df.columns[0], "pid_timeperiod")
 
-    #df = df.select([concat(col("product_id"), lit("-"), col("timestamp"))] + df.columns )
-    # df2 = df2.withColumnRenamed(df2.columns[0], "pid_timestamp")
-
     df = df.sort("pid_timeperiod")
+
+    df.groupBy("product_id","time_period","event_type").sum("total event")
 
     df.show(n=100, truncate=False)
 
