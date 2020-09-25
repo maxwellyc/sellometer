@@ -1,7 +1,7 @@
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession
 from pyspark.sql import SQLContext
-from pyspark.sql.functions import col, substring, unix_timestamp, concat, lit, lpad
+from pyspark.sql import functions as F
 import datetime
 import time
 
@@ -45,7 +45,7 @@ def main():
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
     df = df.withColumn(
-        'timestamp', unix_timestamp(col("event_time"), 'yyyy-MM-dd HH:mm:ss z')
+        'timestamp', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss z')
         ).select(['timestamp']+df.columns[:-1]).drop('event_time')
 
     # create new column consisting of product_id + "-" + number of timesteps from
@@ -55,16 +55,11 @@ def main():
     # will have new column value as 1001588-0000000006
 
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
-    df = df.withColumn("time_period", lpad(df.time_period,10,'0'))
-
-    # merge, rename, sort new column
-    # df = df.select([concat(col("product_id"), lit("-"), col("time_period"))] + df.columns )
-    # df = df.withColumnRenamed(df.columns[0], "pid_timeperiod")
-    # df = df.sort("pid_timeperiod")
+    df = df.withColumn("time_period", F.lpad(df.time_period,10,'0'))
 
     df1 = df.groupBy("product_id","time_period","event_type").count().sort("product_id","time_period")
 
-    df2 = df1.withColumn('ccol',concat(df1['event_type'],lit('_cnt'))).groupby('product_id').pivot('ccol').agg(F.first('count')).fillna(0)
+    df2 = df1.withColumn('ccol',F.concat(df1['event_type'],F.lit('_cnt'))).groupby('product_id').pivot('ccol').agg(F.first('count')).fillna(0)
 
     df2.show(n=100, truncate=False)
 
