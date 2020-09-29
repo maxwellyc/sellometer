@@ -1,9 +1,7 @@
 from pyspark import SparkContext, SparkConf
-from pyspark.sql import SparkSession
-from pyspark.sql import SQLContext
+from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
-import datetime
-import time
+import time, datetime
 
 def timeConverter(timestamp):
     time_tuple = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.000").timetuple()
@@ -15,8 +13,8 @@ def main():
     # define data location on S3 ###################################################
     region = 'us-east-2'
     bucket = 'maxwell-insight'
-    key = '2019-Oct.csv'
-    #key = 'sample.csv'
+    # key = '2019-Oct.csv'
+    key = 'sample.csv'
     s3file = f's3a://{bucket}/{key}'
     ################################################################################
 
@@ -64,9 +62,16 @@ def main():
     df2 = df1.withColumn('ccol',F.concat(df1['event_type'],
     F.lit('_cnt'))).groupby('product_id',"time_period").pivot('ccol').agg(F.first('count')).fillna(0)
 
-
-
     df2.show(n=50, truncate=False)
+
+    # write dataframe to postgreSQL
+    my_writer = DataFrameWriter(df2)
+    url_connect = "jdbc:postgresql://10.0.0.6:5431"
+    table = "event_counts"
+    mode = "overwrite"
+    properties = {"user":"maxwell_insight", "password":"Insight2020CDESV"}
+    my_writer.jdbc(url_connect, table, mode, properties)
+
 
 if __name__ == "__main__":
     main()
