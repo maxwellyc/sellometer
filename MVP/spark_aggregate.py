@@ -23,7 +23,7 @@ def main():
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     spark_session = spark.builder\
-    .appName("read_csv")
+    .appName("read_csv")\
     .config("spark.driver.extraClassPath", "/usr/share/java/postgresql/postgresql-42.2.16.jre7.jar")\
     .getOrCreate()
     sql_c = SQLContext(sc)
