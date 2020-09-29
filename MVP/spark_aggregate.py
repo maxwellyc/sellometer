@@ -73,9 +73,9 @@ def main():
     url_connect = "jdbc:postgresql://10.0.0.6:5431"
     table = "event_counts"
     mode = "overwrite"
-    driver = "org.postgresql.Driver"
-    properties = {"user":"maxwell_insight", "password":"Insight2020CDESV"}
-    my_writer.jdbc(url_connect=url_connect, table=table, mode=mode, properties=properties, driver=driver)
+    properties = {"user":"maxwell_insight", "password":"Insight2020CDESV",
+    "driver" = "org.postgresql.Driver" }
+    my_writer.jdbc(url_connect, table, mode, properties)
 
     # df2.write\
     # .format("jdbc")\
