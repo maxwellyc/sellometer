@@ -84,7 +84,8 @@ def main():
     .option("user",os.environ['psql_username'])\
     .option("password",os.environ['psql_pw'])\
     .option("driver","org.postgresql.Driver")\
-    .mode("overwrite")
+    .mode("overwrite")\
+    .save()
 
     df2.show(n=30, truncate=False)
 
