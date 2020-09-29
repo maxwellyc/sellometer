@@ -22,10 +22,10 @@ def main():
     conf = SparkConf().setAppName("read_csv").setMaster("local")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
-    spark_session = spark.builder\
-    .appName("read_csv")\
-    .config("spark.driver.extraClassPath", "/usr/share/java/postgresql/postgresql-42.2.16.jre7.jar")\
-    .getOrCreate()
+    # spark_session = spark.builder\
+    # .appName("read_csv")\
+    # .config("spark.driver.extraClassPath", "/usr/share/java/postgresql/postgresql-42.2.16.jre7.jar")\
+    # .getOrCreate()
     sql_c = SQLContext(sc)
     ################################################################################
 
@@ -69,12 +69,22 @@ def main():
     df2.show(n=50, truncate=False)
 
     # write dataframe to postgreSQL
-    my_writer = DataFrameWriter(df2)
-    url_connect = "jdbc:postgresql://10.0.0.6:5431"
-    table = "event_counts"
-    mode = "overwrite"
-    properties = {"user":"maxwell_insight", "password":"Insight2020CDESV"}
-    my_writer.jdbc(url_connect, table, mode, properties)
+    # my_writer = DataFrameWriter(df2)
+    # url_connect = "jdbc:postgresql://10.0.0.6:5431"
+    # table = "event_counts"
+    # mode = "overwrite"
+    # properties = {"user":"maxwell_insight", "password":"Insight2020CDESV"}
+    # my_writer.jdbc(url_connect=url_connect, table=table, mode=mode, properties=properties)
+
+    df2.write\
+    .format("jdbc")\
+    .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
+    .option("dbtable","event_count")\
+    .option("user","maxwell_insight")\
+    .option("password","Insight2020CDESV")\
+    .option("driver","org.postgresql.Driver")\
+    .save()
+
 
 
 if __name__ == "__main__":
