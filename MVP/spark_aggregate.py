@@ -9,6 +9,7 @@ def timeConverter(timestamp):
     return timevalue
 
 def main():
+
     # define data location on S3 ###################################################
     region = 'us-east-2'
     bucket = 'maxwell-insight'
@@ -18,16 +19,13 @@ def main():
     ################################################################################
 
     # initialize spark session and spark context####################################
-    # conf = SparkConf().setAppName("read_csv").setMaster("local")
-    # sc = SparkContext(conf=conf)
-    sc = SparkContext()
-    # spark = SparkSession(sc)
-    # spark_session = spark.builder.getOrCreate()
-    spark = SparkSession(sc) \
-        .builder \
-        .appName("eRetail sample test") \
-        .config("spark.driver.extraClassPath", "/usr/share/java/postgresql/postgresql-42.1.4.jar") \
-        .getOrCreate()
+    conf = SparkConf().setAppName("read_csv").setMaster("local")
+    sc = SparkContext(conf=conf)
+    spark = SparkSession(sc)
+    spark_session = spark.builder\
+    .appName("read_csv")
+    .config("spark.driver.extraClassPath", "/usr/share/java/postgresql/postgresql-42.2.16.jre7.jar")\
+    .getOrCreate()
     sql_c = SQLContext(sc)
     ################################################################################
 
