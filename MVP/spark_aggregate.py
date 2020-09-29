@@ -1,7 +1,7 @@
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
-import time, datetime
+import time, datetime, os
 
 def timeConverter(timestamp):
     time_tuple = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.000").timetuple()
@@ -81,8 +81,8 @@ def main():
     .format("jdbc")\
     .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
     .option("dbtable","event_count")\
-    .option("user","maxwell_insight")\
-    .option("password","Insight2020CDESV")\
+    .option("user",os.environ['psql_username'])\
+    .option("password",os.environ['psql_pw'])\
     .option("driver","org.postgresql.Driver")\
     .mode("overwrite")
 
