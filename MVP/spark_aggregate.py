@@ -69,23 +69,22 @@ def main():
     df2.show(n=50, truncate=False)
 
     # write dataframe to postgreSQL
-    my_writer = DataFrameWriter(df2)
-    url = "jdbc:postgresql://10.0.0.6:5431"
-    table = "event_counts"
-    mode = "overwrite"
-    properties = {"user":"maxwell_insight", "password":"Insight2020CDESV",
-    "driver":"org.postgresql.Driver" }
-    my_writer.jdbc(url, table, mode, properties=properties)
+    # my_writer = DataFrameWriter(df2)
+    # url = "jdbc:postgresql://10.0.0.6:5431"
+    # table = "event_counts"
+    # mode = "overwrite"
+    # properties = {"user":"maxwell_insight", "password":"Insight2020CDESV",
+    # "driver":"org.postgresql.Driver" }
+    # my_writer.jdbc(url, table, mode, properties=properties)
 
-    # df2.write\
-    # .format("jdbc")\
-    # .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
-    # .option("dbtable","event_count")\
-    # .option("user","maxwell_insight")\
-    # .option("password","Insight2020CDESV")\
-    # .option("driver","org.postgresql.Driver")\
-    # .option("mode","overwrite")\
-    # .save()
+    df2.write\
+    .format("jdbc")\
+    .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
+    .option("dbtable","event_count")\
+    .option("user","maxwell_insight")\
+    .option("password","Insight2020CDESV")\
+    .option("driver","org.postgresql.Driver")\
+    .option("mode","overwrite")#.save()
 
 
 
