@@ -44,7 +44,7 @@ def main():
     # drop unused column
     df = df.drop('_c0')
 
-    df.show(n=50, truncate = False)
+    # df.show(n=50, truncate = False)
 
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
@@ -68,23 +68,24 @@ def main():
 
     df2.show(n=50, truncate=False)
 
-    # write dataframe to postgreSQL
-    # my_writer = DataFrameWriter(df2)
-    # url_connect = "jdbc:postgresql://10.0.0.6:5431"
-    # table = "event_counts"
-    # mode = "overwrite"
-    # properties = {"user":"maxwell_insight", "password":"Insight2020CDESV"}
-    # my_writer.jdbc(url_connect=url_connect, table=table, mode=mode, properties=properties)
+    write dataframe to postgreSQL
+    my_writer = DataFrameWriter(df2)
+    url_connect = "jdbc:postgresql://10.0.0.6:5431"
+    table = "event_counts"
+    mode = "overwrite"
+    driver = "org.postgresql.Driver"
+    properties = {"user":"maxwell_insight", "password":"Insight2020CDESV"}
+    my_writer.jdbc(url_connect, table, mode, properties, driver)
 
-    df2.write\
-    .format("jdbc")\
-    .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
-    .option("dbtable","event_count")\
-    .option("user","maxwell_insight")\
-    .option("password","Insight2020CDESV")\
-    .option("driver","org.postgresql.Driver")\
-    .option("mode","overwrite")\
-    .save()
+    # df2.write\
+    # .format("jdbc")\
+    # .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
+    # .option("dbtable","event_count")\
+    # .option("user","maxwell_insight")\
+    # .option("password","Insight2020CDESV")\
+    # .option("driver","org.postgresql.Driver")\
+    # .option("mode","overwrite")\
+    # .save()
 
 
 
