@@ -68,14 +68,14 @@ def main():
 
     df2.show(n=50, truncate=False)
 
-    write dataframe to postgreSQL
+    # write dataframe to postgreSQL
     my_writer = DataFrameWriter(df2)
     url_connect = "jdbc:postgresql://10.0.0.6:5431"
     table = "event_counts"
     mode = "overwrite"
     driver = "org.postgresql.Driver"
     properties = {"user":"maxwell_insight", "password":"Insight2020CDESV"}
-    my_writer.jdbc(url_connect, table, mode, properties, driver)
+    my_writer.jdbc(url_connect=url_connect, table=table, mode=mode, properties=properties, driver=driver)
 
     # df2.write\
     # .format("jdbc")\
