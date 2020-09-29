@@ -84,8 +84,9 @@ def main():
     .option("user","maxwell_insight")\
     .option("password","Insight2020CDESV")\
     .option("driver","org.postgresql.Driver")\
-    .option("mode","overwrite")#.save()
+    .mode("overwrite")
 
+    df2.show(n=30, truncate=False)
 
 
 if __name__ == "__main__":
