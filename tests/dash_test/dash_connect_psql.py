@@ -38,7 +38,7 @@ print (list(g1))
 print (g1.head())
 
 df1 = df1.groupby( [ "product_id", "time_period"] ).size().to_frame(name = 'count').reset_index()
-
+print (df1.head())
 # # dash Application
 # app = dash.Dash(__name__)
 #
