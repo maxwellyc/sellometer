@@ -25,10 +25,12 @@ from sqlalchemy import create_engine
 engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@localhost:5431/my_db")
 print (engine)
 df = pd.read_sql_table("event_count", engine)
-gb = df.groupby(by="product_id").sum()#.apply(lambda _df: _df.sort_values('view_cnt'))
+df1 = df.copy()
+df1.sort_values(by="product")
+#gb = df.groupby(by="product_id").sum()#.apply(lambda _df: _df.sort_values('view_cnt'))
 #df1.sort_values(by=["view_cnt"], ascending=False)
 
-print (gb.head(20))
+print (df1.head())
 
 # # dash Application
 # app = dash.Dash(__name__)
