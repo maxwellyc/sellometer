@@ -33,8 +33,8 @@ g1 = df1.groupby(by="product_id").sum()#.sort_values(by="view_cnt")
 #df1.sort_values(by=["view_cnt"], ascending=False)
 g1.add_suffix('_Count').reset_index()
 g1 = g1.sort_values(by="view_cnt", ascending=False)
-print (g1.head(50))
-top_20_id = list(g1.index.get_level_values(0))[:20]
+
+top_20_id = list(g1.index.get_level_values(0))[:10]
 
 views_ts = {}
 for id in top_20_id:
@@ -91,7 +91,8 @@ def update_graph(option_slctd):
     fig = px.line(
         data_frame=dff,
         x = 'time_period',
-        y = 'view_cnt'
+        y = 'view_cnt',
+        color = 'product_id'
         template='plotly_dark'
     )
 
