@@ -22,7 +22,7 @@ cur.execute('''SELECT * FROM event_count''')
 # cur.fetchall()
 
 for row in cur.fetchall():
-    print row
+    print (row)
 
 # df = pd.read_csv("intro_bees.csv")
 #
