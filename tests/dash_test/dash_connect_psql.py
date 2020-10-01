@@ -47,59 +47,66 @@ dropdown_op = []
 for id in views_ts:
     dropdown_op.append({"label":str(id), "value": id})
 
-# dash Application
-app = dash.Dash(__name__)
 
-# ------------------------------------------------------------------------------
-# App layout
-app.layout = html.Div([
+dff = df.copy()
+dff = dff[dff["product_id"] == option_slctd]
+print (dff)
+dff = pd.to_numeric(dff)
+print (dff)
 
-    html.H1("Web Application Dashboards with Dash", style={'text-align': 'center'}),
-
-    dcc.Dropdown(id="slct_item",
-                 options=dropdown_op,
-                 multi=False,
-                 value=min(views_ts.keys()),
-                 style={'width': "40%"}
-                 ),
-
-    html.Div(id='output_container', children=[]),
-    html.Br(),
-
-    dcc.Graph(id='views_timeseries', figure={})
-
-])
-
-
-# ------------------------------------------------------------------------------
-# Connect the Plotly graphs with Dash Components
-@app.callback(
-    [Output(component_id='output_container', component_property='children'),
-     Output(component_id='views_timeseries', component_property='figure')],
-    [Input(component_id='slct_item', component_property='value')]
-)
-def update_graph(option_slctd):
-    print(option_slctd)
-    print(type(option_slctd))
-
-    container = "The item chosen by user was: {}".format(option_slctd)
-
-    dff = df.copy()
-    dff = dff[dff["product_id"] == option_slctd]
-    dff = pd.to_numeric(dff)
-
-    # Plotly Express
-    fig = px.line(
-        data_frame=dff,
-        x = 'time_period',
-        y = 'view_cnt',
-        color = 'product_id',
-        template='plotly_dark'
-    )
-
-    return container, fig
-
-
-# ------------------------------------------------------------------------------
-if __name__ == '__main__':
-    app.run_server(debug=True, port=8051, host="10.0.0.6")
+# # dash Application
+# app = dash.Dash(__name__)
+#
+# # ------------------------------------------------------------------------------
+# # App layout
+# app.layout = html.Div([
+#
+#     html.H1("Web Application Dashboards with Dash", style={'text-align': 'center'}),
+#
+#     dcc.Dropdown(id="slct_item",
+#                  options=dropdown_op,
+#                  multi=False,
+#                  value=min(views_ts.keys()),
+#                  style={'width': "40%"}
+#                  ),
+#
+#     html.Div(id='output_container', children=[]),
+#     html.Br(),
+#
+#     dcc.Graph(id='views_timeseries', figure={})
+#
+# ])
+#
+#
+# # ------------------------------------------------------------------------------
+# # Connect the Plotly graphs with Dash Components
+# @app.callback(
+#     [Output(component_id='output_container', component_property='children'),
+#      Output(component_id='views_timeseries', component_property='figure')],
+#     [Input(component_id='slct_item', component_property='value')]
+# )
+# def update_graph(option_slctd):
+#     print(option_slctd)
+#     print(type(option_slctd))
+#
+#     container = "The item chosen by user was: {}".format(option_slctd)
+#
+#     dff = df.copy()
+#     dff = dff[dff["product_id"] == option_slctd]
+#     dff = pd.to_numeric(dff)
+#
+#     # Plotly Express
+#     fig = px.line(
+#         data_frame=dff,
+#         x = 'time_period',
+#         y = 'view_cnt',
+#         color = 'product_id',
+#         template='plotly_dark'
+#     )
+#
+#     return container, fig
+#
+#
+# # ------------------------------------------------------------------------------
+# if __name__ == '__main__':
+#     app.run_server(debug=True, port=8051, host="10.0.0.6")
