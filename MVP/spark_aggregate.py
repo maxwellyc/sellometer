@@ -31,8 +31,8 @@ def main():
 
     # other settings ###############################################################
     # timestep of specific item data to group by, in seconds, for plotting
-    tstep = 3600*24
-    start_time = "2019-10-01 00:00:00 UTC"
+    tstep = 3600
+    start_time = "2019-11-01 00:00:00 UTC"
     time_format = '%Y-%m-%d %H:%M:%S %Z'
     # start time for time series plotting, I'll set this to a specific time for now
     t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
