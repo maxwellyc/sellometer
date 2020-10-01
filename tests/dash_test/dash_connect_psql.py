@@ -102,9 +102,8 @@ def update_graph(option_slctd):
         y = 'view_cnt',
         color = 'product_id',
         labels={'view_cnt': 'view counts',
-        'time_period':'time since start (minutes)',
+        'time_period':'time since start (minutes)'},
         template='plotly_dark'
-
     )
 
     return container, fig
