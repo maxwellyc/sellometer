@@ -86,7 +86,7 @@ def update_graph(option_slctd):
 
     dff = df.copy()
     dff = dff[dff["product_id"] == option_slctd]
-    dff = dff.to_numeric()
+    dff = pd.to_numeric(dff)
 
     # Plotly Express
     fig = px.line(
