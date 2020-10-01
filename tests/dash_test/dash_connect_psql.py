@@ -34,8 +34,10 @@ g1 = df1.groupby(by="product_id").sum()#.sort_values(by="view_cnt")
 g1.add_suffix('_Count').reset_index()
 g1 = g1.sort_values(by="view_cnt", ascending=False)
 print (g1.head(50))
-print (list((g1.index.get_level_values(0))))
+top_20_id = list(g1.index.get_level_values(0))[:20]
 
+for id in top_20_id:
+    print (df.loc[df['product_id'] == id])
 
 # # dash Application
 # app = dash.Dash(__name__)
