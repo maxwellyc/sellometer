@@ -36,8 +36,11 @@ g1 = g1.sort_values(by="view_cnt", ascending=False)
 print (g1.head(50))
 top_20_id = list(g1.index.get_level_values(0))[:20]
 
+views_ts = {}
 for id in top_20_id:
-    print (df.loc[df['product_id'] == id])
+    views_ts[id] = [list((df.loc[df['product_id'] == id]).['time_period']),
+    list((df.loc[df['product_id'] == id]).['view_cnt'])]
+    print (views_ts[id])
 
 # # dash Application
 # app = dash.Dash(__name__)
