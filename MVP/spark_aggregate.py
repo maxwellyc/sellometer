@@ -31,7 +31,7 @@ def main():
 
     # other settings ###############################################################
     # timestep of specific item data to group by, in seconds, for plotting
-    tstep = 3600
+    tstep = 60
     start_time = "2019-11-01 00:00:00 UTC"
     time_format = '%Y-%m-%d %H:%M:%S %Z'
     # start time for time series plotting, I'll set this to a specific time for now
