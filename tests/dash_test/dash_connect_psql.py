@@ -50,7 +50,7 @@ dff = dff[dff["product_id"] == min(views_ts.keys())]
 print (dff)
 s = pd.to_numeric(dff['time_period'])
 print (dff.columns)
-dff.drop(axis='time_period')
+dff.drop(['time_period'])
 dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
 print (dff)
 
