@@ -15,7 +15,7 @@ app = dash.Dash(__name__)
 
 # ------------------------------------------------------------------------------
 # Import data from postgreSQL database
-conn = psycopg2.connect(f'dbname=event_count user=os.environ['psql_username'] password=os.environ['psql_pw'] host=localhost') # connection string
+conn = psycopg2.connect(f"dbname=event_count user=os.environ['psql_username'] password=os.environ['psql_pw'] host=localhost") # connection string
 
 print (conn)
 
