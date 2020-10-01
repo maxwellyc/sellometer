@@ -44,14 +44,14 @@ def main():
     # drop unused column
     df = df.drop('_c0')
 
-    # df.show(n=50, truncate = False)
+    df.show(n=50, truncate = False)
 
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
     df = df.withColumn(
         'timestamp', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss z')
         ).select(['timestamp']+df.columns[:-1]).drop('event_time')
-
+    df.show(n=50, truncate = False)
     # create new column consisting of product_id + "-" + number of timesteps from
     # start time t0. Rows belonging to same product_id and within same chunck of timestep
     # will be aggregated together.
