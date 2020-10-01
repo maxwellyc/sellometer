@@ -42,67 +42,62 @@ for id in top_20_id:
     list((df.loc[df['product_id'] == id])['view_cnt'])]
     print (views_ts[id])
 
-# # dash Application
-# app = dash.Dash(__name__)
-#
-# # ------------------------------------------------------------------------------
-# # App layout
-# app.layout = html.Div([
-#
-#     html.H1("Web Application Dashboards with Dash", style={'text-align': 'center'}),
-#
-#     dcc.Dropdown(id="slct_year",
-#                  options=[
-#                      {"label": "2015", "value": 2015},
-#                      {"label": "2016", "value": 2016},
-#                      {"label": "2017", "value": 2017},
-#                      {"label": "2018", "value": 2018}],
-#                  multi=False,
-#                  value=2015,
-#                  style={'width': "40%"}
-#                  ),
-#
-#     html.Div(id='output_container', children=[]),
-#     html.Br(),
-#
-#     dcc.Graph(id='my_bee_map', figure={})
-#
-# ])
-#
-#
-# # ------------------------------------------------------------------------------
-# # Connect the Plotly graphs with Dash Components
-# @app.callback(
-#     [Output(component_id='output_container', component_property='children'),
-#      Output(component_id='my_bee_map', component_property='figure')],
-#     [Input(component_id='slct_year', component_property='value')]
-# )
-# def update_graph(option_slctd):
-#     print(option_slctd)
-#     print(type(option_slctd))
-#
-#     container = "The year chosen by user was: {}".format(option_slctd)
-#
-#     dff = df.copy()
-#     dff = dff[dff["Year"] == option_slctd]
-#     dff = dff[dff["Affected by"] == "Varroa_mites"]
-#
-#     # Plotly Express
-#     fig = px.choropleth(
-#         data_frame=dff,
-#         locationmode='USA-states',
-#         locations='state_code',
-#         scope="usa",
-#         color='Pct of Colonies Impacted',
-#         hover_data=['State', 'Pct of Colonies Impacted'],
-#         color_continuous_scale=px.colors.sequential.YlOrRd,
-#         labels={'Pct of Colonies Impacted': '% of Bee Colonies'},
-#         template='plotly_dark'
-#     )
-#
-#     return container, fig
-#
-#
-# # ------------------------------------------------------------------------------
-# if __name__ == '__main__':
-#     app.run_server(debug=True, port=8051, host="10.0.0.6")
+dropdown_op = []
+
+for id in views_ts:
+    dropdown_op.append({"label":str(id), "value": id})
+
+# dash Application
+app = dash.Dash(__name__)
+
+# ------------------------------------------------------------------------------
+# App layout
+app.layout = html.Div([
+
+    html.H1("Web Application Dashboards with Dash", style={'text-align': 'center'}),
+
+    dcc.Dropdown(id="slct_item",
+                 options=dropdown_op,
+                 multi=False,
+                 value=min(views_ts.keys()),
+                 style={'width': "40%"}
+                 ),
+
+    html.Div(id='output_container', children=[]),
+    html.Br(),
+
+    dcc.Graph(id='views_timeseries', figure={})
+
+])
+
+
+# ------------------------------------------------------------------------------
+# Connect the Plotly graphs with Dash Components
+@app.callback(
+    [Output(component_id='output_container', component_property='children'),
+     Output(component_id='views_timeseries', component_property='figure')],
+    [Input(component_id='slct_item', component_property='value')]
+)
+def update_graph(option_slctd):
+    print(option_slctd)
+    print(type(option_slctd))
+
+    container = "The item chosen by user was: {}".format(option_slctd)
+
+    dff = df.copy()
+    # dff = dff[dff["product_id"] == option_slctd]
+
+    # Plotly Express
+    fig = px.line(
+        data_frame=dff,
+        x = 'time_period',
+        y = 'view_cnt'
+        template='plotly_dark'
+    )
+
+    return container, fig
+
+
+# ------------------------------------------------------------------------------
+if __name__ == '__main__':
+    app.run_server(debug=True, port=8051, host="10.0.0.6")
