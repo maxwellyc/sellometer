@@ -9,20 +9,22 @@ from dash.dependencies import Input, Output
 
 import psycopg2
 import os
+from sqlalchemy import create_engine
 
-# ------------------------------------------------------------------------------
-# Import data from postgreSQL database
-conn = psycopg2.connect(dbname="my_db", user=os.environ['psql_username'],\
- password=os.environ['psql_pw'], host="localhost", port=5431) # connection string
+# # ------------------------------------------------------------------------------
+# # Import data from postgreSQL using psycopg2
+# conn = psycopg2.connect(dbname="my_db", user=os.environ['psql_username'],\
+#  password=os.environ['psql_pw'], host="localhost", port=5431) # connection string
+# cur = conn.cursor() # cursor object
+#
+# cur.execute('''SELECT * FROM event_count''')
+# for row in cur.fetchall():
+#     print (row)
 
-cur = conn.cursor() # cursor object
+# Import data from postgreSQL using sqlalchemy
+engine = create_engine("postgresql://os.environ['psql_username']:os.environ['psql_pw']@localhost:5431/my_db")
 
-cur.execute('''SELECT * FROM event_count''')
-
-# cur.fetchall()
-
-for row in cur.fetchall():
-    print (row)
+print (engine)
 
 # df = pd.read_csv("intro_bees.csv")
 #
