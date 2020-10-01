@@ -23,8 +23,11 @@ from sqlalchemy import create_engine
 
 # Import data from postgreSQL using sqlalchemy
 engine = create_engine("postgresql://os.environ['psql_username']:os.environ['psql_pw']@localhost:5431/my_db")
-
 print (engine)
+
+df = pd.read_sql_table("event_count", engine)
+
+df.show(n=50, truncate=False)
 
 # df = pd.read_csv("intro_bees.csv")
 #
