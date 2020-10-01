@@ -15,7 +15,7 @@ import os
 conn = psycopg2.connect(dbname="my_db", user=os.environ['psql_username'],\
  password=os.environ['psql_pw'], host="localhost", port=5431) # connection string
 
-cur = cunn.cursor() # cursor object
+cur = conn.cursor() # cursor object
 
 cur.execute('''SELECT * FROM event_count''')
 
