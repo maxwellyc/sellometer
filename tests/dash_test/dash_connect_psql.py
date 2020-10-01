@@ -33,12 +33,10 @@ g1 = df1.groupby(by="product_id").sum()#.sort_values(by="view_cnt")
 #df1.sort_values(by=["view_cnt"], ascending=False)
 g1.add_suffix('_Count').reset_index()
 g1 = g1.sort_values(by="view_cnt", ascending=False)
-print (type(g1))
-print (list(g1))
-print (g1.head())
 
-df1 = df1.groupby( [ "product_id", "time_period"] ).sum().to_frame(name = 'count').reset_index()
-print (df1.head())
+print (g1.index.get_level_values(0))
+
+
 # # dash Application
 # app = dash.Dash(__name__)
 #
