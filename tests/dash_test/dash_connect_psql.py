@@ -27,7 +27,7 @@ print (engine)
 
 df = pd.read_sql_table("event_count", engine)
 
-df.show(n=50, truncate=False)
+df.head(n=10, truncate=False)
 
 # df = pd.read_csv("intro_bees.csv")
 #
