@@ -87,7 +87,7 @@ def update_graph(option_slctd):
     print(option_slctd)
     print(type(option_slctd))
 
-    container = "The item chosen by user was: {}".format(option_slctd)
+    container = "The item id chosen by user was: {}".format(option_slctd)
 
     dff = df.copy()
     dff = dff[dff["product_id"] == option_slctd]
@@ -101,7 +101,10 @@ def update_graph(option_slctd):
         x = 'time_period',
         y = 'view_cnt',
         color = 'product_id',
+        labels={'view_cnt': 'view counts',
+        'time_period':'time since start (minutes)',
         template='plotly_dark'
+
     )
 
     return container, fig
