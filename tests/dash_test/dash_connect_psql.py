@@ -28,7 +28,7 @@ df = pd.read_sql_table("event_count", engine)
 print (df.head(20))
 
 df1 = df.copy()
-g1 = df1.groupby(by="product_id").sum("view_cnt")#.sort_values(by="view_cnt")
+g1 = df1.groupby(by="product_id").sum()#.sort_values(by="view_cnt")
 #gb = df.groupby(by="product_id").sum()#.apply(lambda _df: _df.sort_values('view_cnt'))
 #df1.sort_values(by=["view_cnt"], ascending=False)
 
