@@ -92,7 +92,7 @@ def update_graph(option_slctd):
         data_frame=dff,
         x = 'time_period',
         y = 'view_cnt',
-        color = 'product_id'
+        color = 'product_id',
         template='plotly_dark'
     )
 
