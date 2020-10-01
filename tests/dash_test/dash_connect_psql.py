@@ -31,8 +31,8 @@ df1 = df.copy()
 g1 = df1.groupby(by="product_id").sum()#.sort_values(by="view_cnt")
 #gb = df.groupby(by="product_id").sum()#.apply(lambda _df: _df.sort_values('view_cnt'))
 #df1.sort_values(by=["view_cnt"], ascending=False)
-
-print (df1.head(20))
+g1.add_suffix('_Count').reset_index()
+print (g1.head(20))
 
 # # dash Application
 # app = dash.Dash(__name__)
