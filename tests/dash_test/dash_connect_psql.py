@@ -24,20 +24,12 @@ from sqlalchemy import create_engine
 # Import data from postgreSQL using sqlalchemy
 engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@localhost:5431/my_db")
 print (engine)
-
-df = pd.read_sql_table("event_count", engine)
-
-print (df.head(10))
-
-# df = pd.read_csv("intro_bees.csv")
-#
-# df = df.groupby(['State', 'ANSI', 'Affected by', 'Year', 'state_code'])[['Pct of Colonies Impacted']].mean()
-# df.reset_index(inplace=True)
-# print(df[:5])
+df = pd.read_sql_table("event_count", engine).sort(["view_cnt"])
+print (df.head(50))
 
 # # dash Application
 # app = dash.Dash(__name__)
-
+#
 # # ------------------------------------------------------------------------------
 # # App layout
 # app.layout = html.Div([
@@ -93,27 +85,9 @@ print (df.head(10))
 #         template='plotly_dark'
 #     )
 #
-#     # Plotly Graph Objects (GO)
-#     # fig = go.Figure(
-#     #     data=[go.Choropleth(
-#     #         locationmode='USA-states',
-#     #         locations=dff['state_code'],
-#     #         z=dff["Pct of Colonies Impacted"].astype(float),
-#     #         colorscale='Reds',
-#     #     )]
-#     # )
-#     #
-#     # fig.update_layout(
-#     #     title_text="Bees Affected by Mites in the USA",
-#     #     title_xanchor="center",
-#     #     title_font=dict(size=24),
-#     #     title_x=0.5,
-#     #     geo=dict(scope='usa'),
-#     # )
-#
 #     return container, fig
-
-
-# ------------------------------------------------------------------------------
+#
+#
+# # ------------------------------------------------------------------------------
 # if __name__ == '__main__':
 #     app.run_server(debug=True, port=8051, host="10.0.0.6")
