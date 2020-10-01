@@ -49,7 +49,9 @@ dff = df.copy()
 dff = dff[dff["product_id"] == min(views_ts.keys())]
 print (dff)
 s = pd.to_numeric(dff['time_period'])
-dff = dff.drop("time_period").merge(s, left_index=True, right_index=True)
+print (s)
+print (dff)
+dff = dff.drop("time_period").merge(s.rename("time_period"), left_index=True, right_index=True)
 print (dff)
 
 # # dash Application
