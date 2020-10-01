@@ -84,7 +84,7 @@ def update_graph(option_slctd):
 
     container = "The item chosen by user was: {}".format(option_slctd)
 
-    dff = df.copy()
+    dff = df.copy().to_numeric()
     # dff = dff[dff["product_id"] == option_slctd]
 
     # Plotly Express
