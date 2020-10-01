@@ -48,7 +48,8 @@ for id in views_ts:
 dff = df.copy()
 dff = dff[dff["product_id"] == min(views_ts.keys())]
 print (dff)
-dff = pd.to_numeric(dff['time_period'])
+s = pd.to_numeric(dff['time_period'])
+dff = dff.drop("time_period").merge(s, left_index=True, right_index=True)
 print (dff)
 
 # # dash Application
