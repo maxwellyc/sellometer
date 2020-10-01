@@ -35,6 +35,7 @@ g1.add_suffix('_Count').reset_index()
 g1 = g1.sort_values(by="view_cnt", ascending=False)
 print (type(g1))
 print (list(g1))
+print (g1.head())
 
 # # dash Application
 # app = dash.Dash(__name__)
