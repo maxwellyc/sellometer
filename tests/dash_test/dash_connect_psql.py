@@ -10,22 +10,28 @@ from dash.dependencies import Input, Output
 import psycopg2
 import os
 
-# dash Application
-app = dash.Dash(__name__)
-
 # ------------------------------------------------------------------------------
 # Import data from postgreSQL database
 conn = psycopg2.connect(dbname="my_db", user=os.environ['psql_username'],\
  password=os.environ['psql_pw'], host="localhost", port=5431) # connection string
 
-print (conn)
+cur = cunn.cursor() # cursor object
 
+cur.execute('''SELECT * FROM event_count''')
+
+# cur.fetchall()
+
+for row in cur.fetchall():
+    print row
 
 # df = pd.read_csv("intro_bees.csv")
 #
 # df = df.groupby(['State', 'ANSI', 'Affected by', 'Year', 'state_code'])[['Pct of Colonies Impacted']].mean()
 # df.reset_index(inplace=True)
 # print(df[:5])
+
+# # dash Application
+# app = dash.Dash(__name__)
 
 # # ------------------------------------------------------------------------------
 # # App layout
