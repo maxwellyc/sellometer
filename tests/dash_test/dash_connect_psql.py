@@ -49,7 +49,7 @@ for id in views_ts:
 
 
 dff = df.copy()
-dff = dff[dff["product_id"] == option_slctd]
+dff = dff[dff["product_id"] == min(views_ts.keys())]
 print (dff)
 dff = pd.to_numeric(dff)
 print (dff)
