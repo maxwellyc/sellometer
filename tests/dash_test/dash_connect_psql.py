@@ -51,7 +51,7 @@ print (dff)
 s = pd.to_numeric(dff['time_period'])
 print (s)
 print (dff)
-dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
+dff = dff.drop("time_period").merge(s.to_frame(), left_index=True, right_index=True)
 print (dff)
 
 # # dash Application
