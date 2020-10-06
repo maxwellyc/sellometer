@@ -76,7 +76,7 @@ def main():
         elif len(ss) == 1:
             return code + '.' + code + '.' + code
 
-    fill_cat = spark.udf.register("fill_cat", fill_cat_udf, StringType())
+    fill_cat = spark.udf.register("fill_cat", fill_cat_udf)
 
     # df = df.select(fill_cat(F.col("category_code")))
 
