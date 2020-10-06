@@ -114,23 +114,22 @@ def main():
     dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
     view_dims, purchase_dims = {}, {}
     # total view counts per dimesion, total sales amount per dimension
-    # for dim in dimensions:
-    #     # total view counts per dimension, if product_id, also compute mean price
-    #     # total $$$ amount sold per dimension, if product_id also compute count and mean
-    #     if dim == 'product_id':
-    #         view_dims[dim] = (view_df.groupby(dim, 'event_time')
-    #                             .agg('count','mean')['price'])
-    #         purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
-    #                             .agg('sum','count','mean')['price'])
-    #     else:
-    #         view_dims[dim] = (view_df.groupby(dim, 'event_time')
-    #                             .agg('count')['price'])
-    #         purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
-    #                             .agg('sum' )['price'])
-    purchase_dims['product_id'] = (purchase_df.groupby('product_id', 'time_period')
-                        .agg(F.sum('price')))
+    for dim in dimensions:
+        # total view counts per dimension, if product_id, also compute mean price
+        # total $$$ amount sold per dimension, if product_id also compute count and mean
+        if dim == 'product_id':
+            view_dims[dim] = (view_df.groupby(dim, 'event_time')
+                                .agg(F.count('price'),F.mean('price')))
+            purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
+                                .agg(F.sum('price'),F.count('price'),F.mean('price')))
+        else:
+            view_dims[dim] = (view_df.groupby(dim, 'event_time')
+                                .agg(F.count('price')))
+            purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
+                                .agg(F.sum('price')))
+
     purchase_dims['product_id'].show()
-    # purchase_dims['brand'].show()
+    purchase_dims['brand'].show()
 
     # write dataframe to postgreSQL
     #
