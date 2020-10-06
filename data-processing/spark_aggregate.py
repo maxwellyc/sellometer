@@ -10,14 +10,6 @@ def timeConverter(timestamp):
 
 def main():
 
-    # define data location on S3 ###################################################
-    region = 'us-east-2'
-    bucket = 'maxwell-insight'
-    # key = '2019-Oct.csv'
-    key = 'sample.csv'
-    s3file = f's3a://{bucket}/{key}'
-    ################################################################################
-
     # initialize spark session and spark context####################################
     conf = SparkConf().setAppName("read_csv").setMaster("local")
     sc = SparkContext(conf=conf)
@@ -29,22 +21,27 @@ def main():
     sql_c = SQLContext(sc)
     ################################################################################
 
-    # other settings ###############################################################
-    # timestep of specific item data to group by, in seconds, for plotting
-    tstep = 60
-    start_time = "2019-11-01 00:00:00 UTC"
-    time_format = '%Y-%m-%d %H:%M:%S %Z'
-    # start time for time series plotting, I'll set this to a specific time for now
-    t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
-    ################################################################################
-
+    # read data from S3 ############################################################
+    # for mini batches need to change this section into dynamical
+    region = 'us-east-2'
+    bucket = 'maxwell-insight'
+    # key = '2019-Oct.csv'
+    key = 'sample.csv'
+    s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
-    #
     # drop unused column
     df = df.drop('_c0')
 
     df.show(n=50, truncate = False)
+    ################################################################################
+
+    # Datetime transformation #######################################################
+    tstep = 60 # unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
+    start_time = "2019-11-01 00:00:00 UTC"
+    time_format = '%Y-%m-%d %H:%M:%S %Z'
+    # start time for time series plotting, I'll set this to a specific time for now
+    # t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
 
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
@@ -52,19 +49,11 @@ def main():
         'timestamp', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss z')
         ).select(['timestamp']+df.columns[:-1]).drop('event_time')
     df.show(n=50, truncate = False)
-    # create new column consisting of product_id + "-" + number of timesteps from
-    # start time t0. Rows belonging to same product_id and within same chunck of timestep
-    # will be aggregated together.
-    # Eg. Views of product_id 1001588 between 00:00:00 to 00:01:00 (tstep = 60)
-    # will have new column value as 1001588-0000000006
 
+    t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
-    df = df.withColumn("time_period", F.lpad(df.time_period,10,'0'))
-
-    df1 = df.groupBy("product_id","time_period","event_type").count().sort("product_id","time_period")
-
-    df2 = df1.withColumn('ccol',F.concat(df1['event_type'],
-    F.lit('_cnt'))).groupby('product_id',"time_period").pivot('ccol').agg(F.first('count')).fillna(0)
+    # 
+    # df1 = df.groupBy("product_id","time_period","event_type").count().sort("product_id","time_period")
 
     df2.show(n=50, truncate=False)
 
