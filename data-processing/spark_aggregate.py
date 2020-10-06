@@ -65,7 +65,7 @@ def main():
     # eg. electronics.smartphones and electronics.video.tv
     # we need to create 3 columns of different levels of categories
     # this function uniforms all category_code into 3 levels category.
-    def fill_category(code):
+    def fill_cat_udf(code):
         code = str(code)
         ss = code.split('.')
         if len(ss) == 3:
@@ -75,7 +75,9 @@ def main():
         elif len(ss) == 1:
             return code + '.' + code + '.' + code
 
-    df = df.select(fill_category("category_code"))
+    fill_cat = spark.udf.register("fill_cat", fill_cat_udf)
+
+    df = df.select(fill_cat(F.col("category_code")))
     split_col = F.split(df['category_code'],'.')
     df = df.withColumn('category_l1', split_col.getItem(0))
     df = df.withColumn('category_l2', split_col.getItem(1))
