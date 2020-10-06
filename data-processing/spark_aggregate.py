@@ -127,10 +127,10 @@ def main():
                                 .agg(F.count('price')))
             purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
                                 .agg(F.sum('price')))
-                                
+
         # sort dataframe for plotting
-        view_dims[dim].orderBy(dim, 'time_period')
-        purchase_dims[dim].orderBy(dim, 'time_period')
+        view_dims[dim] = view_dims[dim].orderBy(dim, 'time_period')
+        purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'time_period')
 
     # write dataframe to postgreSQL
         view_dims[dim].write\
