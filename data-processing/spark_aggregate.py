@@ -2,6 +2,7 @@ from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
 import time, datetime, os
+from pyspark.sql.functions import pandas_udf, PandasUDFType
 
 def timeConverter(timestamp):
     time_tuple = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.000").timetuple()
@@ -75,12 +76,14 @@ def main():
         elif len(ss) == 1:
             return code + '.' + code + '.' + code
 
-    fill_cat = spark.udf.register("fill_cat", fill_cat_udf)
+    fill_cat = spark.udf.register("fill_cat", fill_cat_udf, StringType())
 
-    df = df.select(fill_cat(F.col("category_code")))
+    # df = df.select(fill_cat(F.col("category_code")))
+
+    df = df.withColumn("category_code", fill_cat(F.col("category_code")))
 
     df.show(n=50, truncate = False)
-    
+
     split_col = F.split(df["category_code"],'.')
 
     df = df.withColumn('category_l1', split_col.getItem(0))
