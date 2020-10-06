@@ -82,8 +82,6 @@ def main():
 
     df = df.withColumn("category_code", fill_cat(F.col("category_code")))
 
-    df.show(n=50, truncate = False)
-
     split_col = F.split(df["category_code"],'.')
 
     df = df.withColumn('category_l1', split_col.getItem(0))
@@ -91,7 +89,8 @@ def main():
     df = df.withColumn('category_l3', split_col.getItem(2))
 
     # level 3 category (lowest level) will determine category type, no need for category_id anymore
-    df = df.drop(['category_id', 'category_code'])
+    df = df.drop('category_id')
+    df = df.drop('category_code')
 
     ################################################################################
 
