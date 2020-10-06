@@ -86,7 +86,7 @@ def main():
 
     split_col = F.split(F.col("category_code"),'.')
 
-    split_col.getItem(0).show()
+    split_col.show()
 
     df = df.withColumn('category_l1', split_col.getItem(0))
     df = df.withColumn('category_l2', split_col.getItem(1))
