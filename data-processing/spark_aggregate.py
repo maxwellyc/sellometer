@@ -48,14 +48,50 @@ def main():
     df = df.withColumn(
         'timestamp', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss z')
         ).select(['timestamp']+df.columns[:-1]).drop('event_time')
-    df.show(n=50, truncate = False)
 
     t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
-    # 
-    # df1 = df.groupBy("product_id","time_period","event_type").count().sort("product_id","time_period")
 
-    df2.show(n=50, truncate=False)
+    ################################################################################
+
+    # Data cleaning ################################################################
+
+    # if missing category code, fill with category id.
+    df['category_code'].fillna(df['category_id'], inplace=True)
+    # if missing brand, fill with product id
+    df['brand'].fillna(df['product_id'], inplace=True)
+    # category_code have different layers of category,
+    # eg. electronics.smartphones and electronics.video.tv
+    # we need to create 3 columns of different levels of categories
+    # this function uniforms all category_code into 3 levels category.
+    def fill_category(code):
+        code = str(code)
+        ss = code.split('.')
+        if len(ss) == 3:
+            return code
+        elif len(ss) == 2:
+            return code + '.' + ss[-1]
+        elif len(ss) == 1:
+            return code + '.' + code + '.' + code
+
+    df['category_code'] = df['category_code'].apply(fill_category)
+    df[['category_l1', 'category_l2', 'category_l3' ]] = df['category_code'].str.split('.', expand = True)
+
+    # level 3 category (lowest level) will determine category type, no need for category_id anymore
+    df = df.drop(['category_id', 'category_code'], axis=1)
+
+    ################################################################################
+
+    df.show(n=50, truncate = False)
+
+
+
+
+
+
+
+
+
 
     # write dataframe to postgreSQL
 
