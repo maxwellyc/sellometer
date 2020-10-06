@@ -20,8 +20,8 @@ default_args = {
 def print_time():
  # code that writes our data from source 1 to s3
    print ("calling print_date function!\t\n================================")
-   print (datetime.utcnow())   
-   return 
+   print (datetime.utcnow())
+   return
 def source2_to_hdfs():
  # code that writes our data from source 2 to hdfs
  # kwargs: keyword arguments containing context parameters for the run.
@@ -59,7 +59,7 @@ src3_s3 = PythonOperator(
 
 spark_job = BashOperator(
   task_id='spark_aggregate',
-  bash_command='spark-submit $sparkf ~/eCommerce/MVP/spark_aggregate.py',
+  bash_command='spark-submit $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
   dag = dag)
 
 # setting dependencies
