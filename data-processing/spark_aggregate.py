@@ -129,7 +129,7 @@ def main():
                                 .agg(F.sum('price')))
 
     purchase_dims['product_id'].show()
-    purchase_dims['brand'].show()
+    purchase_dims['brand'].orderBy('brand').show()
 
     # write dataframe to postgreSQL
     #
