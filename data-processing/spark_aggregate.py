@@ -127,7 +127,7 @@ def main():
     #                             .agg('count')['price'])
     #         purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
     #                             .agg('sum' )['price'])
-    purchase_dims[dim] = (purchase_df.groupby('product_id', 'time_period')
+    purchase_dims['product_id'] = (purchase_df.groupby('product_id', 'time_period')
                         .agg(F.sum('price')))
     purchase_dims['product_id'].show()
     # purchase_dims['brand'].show()
