@@ -82,8 +82,6 @@ def main():
 
     df = df.withColumn("category_code", fill_cat(F.col("category_code")))
 
-    df.show(n=50, truncate = False)
-
     split_col = F.split(F.col("category_code"),'[.]')
 
     df = df.withColumn('category_l1', split_col.getItem(0))
@@ -97,7 +95,11 @@ def main():
 
     ################################################################################
 
-    df.show(n=50, truncate = False)
+    purchase_df = df.filter(df['event_type'] == 'purchase')
+    view_df = df.filter(df['event_type'] == 'view')
+
+    purchase_df.show(n=20, truncate = False)
+    view_df.show(n=20, truncate = False)
 
 
 
