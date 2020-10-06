@@ -79,10 +79,14 @@ def main():
     fill_cat = spark.udf.register("fill_cat", fill_cat_udf)
 
     # df = df.select(fill_cat(F.col("category_code")))
+    df.show(n=50, truncate = False)
 
     df = df.withColumn("category_code", fill_cat(F.col("category_code")))
 
     split_col = F.split(df["category_code"],'.')
+
+    print (type(split_col))
+    print (split_col)
 
     df = df.withColumn('category_l1', split_col.getItem(0))
     df = df.withColumn('category_l2', split_col.getItem(1))
@@ -106,18 +110,18 @@ def main():
 
 
     # write dataframe to postgreSQL
-
-    df2.write\
-    .format("jdbc")\
-    .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
-    .option("dbtable","event_count")\
-    .option("user",os.environ['psql_username'])\
-    .option("password",os.environ['psql_pw'])\
-    .option("driver","org.postgresql.Driver")\
-    .mode("overwrite")\
-    .save()
-
-    df2.show(n=30, truncate=False)
+    #
+    # df.write\
+    # .format("jdbc")\
+    # .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
+    # .option("dbtable","event_count")\
+    # .option("user",os.environ['psql_username'])\
+    # .option("password",os.environ['psql_pw'])\
+    # .option("driver","org.postgresql.Driver")\
+    # .mode("overwrite")\
+    # .save()
+    #
+    # df.show(n=30, truncate=False)
 
 
 if __name__ == "__main__":
