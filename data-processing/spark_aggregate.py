@@ -79,14 +79,14 @@ def main():
     fill_cat = spark.udf.register("fill_cat", fill_cat_udf)
 
     # df = df.select(fill_cat(F.col("category_code")))
-    df.show(n=50, truncate = False)
 
     df = df.withColumn("category_code", fill_cat(F.col("category_code")))
 
+    df.show(n=50, truncate = False)
+
     split_col = F.split(df["category_code"],'.')
 
-    print (type(split_col))
-    print (split_col)
+    print (split_col.getItem(0))
 
     df = df.withColumn('category_l1', split_col.getItem(0))
     df = df.withColumn('category_l2', split_col.getItem(1))
