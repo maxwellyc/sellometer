@@ -127,23 +127,30 @@ def main():
                                 .agg(F.count('price')))
             purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
                                 .agg(F.sum('price')))
-
-    purchase_dims['product_id'].show()
-    purchase_dims['brand'].orderBy('brand', 'time_period').show()
+                                
+        # sort dataframe for plotting
+        view_dims[dim].orderBy(dim, 'time_period')
+        purchase_dims[dim].orderBy(dim, 'time_period')
 
     # write dataframe to postgreSQL
-    #
-    # df.write\
-    # .format("jdbc")\
-    # .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
-    # .option("dbtable","event_count")\
-    # .option("user",os.environ['psql_username'])\
-    # .option("password",os.environ['psql_pw'])\
-    # .option("driver","org.postgresql.Driver")\
-    # .mode("overwrite")\
-    # .save()
-    #
-    # df.show(n=30, truncate=False)
+        view_dims[dim].write\
+        .format("jdbc")\
+        .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
+        .option("dbtable","view_" + dim)\
+        .option("user",os.environ['psql_username'])\
+        .option("password",os.environ['psql_pw'])\
+        .option("driver","org.postgresql.Driver")\
+        .mode("overwrite")\
+        .save()
+        purchase_dims[dim].write\
+        .format("jdbc")\
+        .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
+        .option("dbtable","purchase_" + dim)\
+        .option("user",os.environ['psql_username'])\
+        .option("password",os.environ['psql_pw'])\
+        .option("driver","org.postgresql.Driver")\
+        .mode("overwrite")\
+        .save()
 
 
 if __name__ == "__main__":
