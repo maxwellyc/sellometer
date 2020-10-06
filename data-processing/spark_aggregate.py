@@ -33,8 +33,6 @@ def main():
     df = sql_c.read.csv(s3file, header=True)
     # drop unused column
     df = df.drop('_c0')
-
-    df.show(n=50, truncate = False)
     ################################################################################
 
     # Datetime transformation #######################################################
@@ -93,15 +91,22 @@ def main():
     df = df.drop('category_code')
     df = df.drop('timestamp')
 
+    df.show(n=50, truncate = False)
     ################################################################################
+    # create separate dataframe for view and purchase,
+    # data transformation will be different for these two types of events.
 
     purchase_df = df.filter(df['event_type'] == 'purchase')
     view_df = df.filter(df['event_type'] == 'view')
 
     purchase_df.show(n=20, truncate = False)
+    purchase_df.drop('event_type')
     view_df.show(n=20, truncate = False)
+    view_df.drop('event_type')
 
-
+    # if same user session viewed same product_id twice, even at differnt event_time, remove duplicate entry.
+    # same user refreshing the page should not reflect more interest on the same product
+    # view_df = view_df.drop_duplicates(subset=['user_session','product_id'], keep = 'first')
 
 
 
