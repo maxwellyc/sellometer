@@ -46,11 +46,11 @@ def main():
     # reorder column so that timestamp is leftmost
     df = df.withColumn(
         'timestamp', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss z')
-        ).select(['timestamp']+df.columns[:-1]).drop('event_time')
+        ).select(['timestamp']+df.columns).drop('event_time')
 
     t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
-    df.show(n=50, truncate = False)
+
     ################################################################################
 
     # Data cleaning ################################################################
@@ -91,7 +91,6 @@ def main():
     df = df.drop('category_code')
     df = df.drop('timestamp')
 
-    df.show(n=50, truncate = False)
     ################################################################################
     # create separate dataframe for view and purchase,
     # data transformation will be different for these two types of events.
