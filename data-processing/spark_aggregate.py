@@ -84,7 +84,7 @@ def main():
 
     df.show(n=50, truncate = False)
 
-    split_col = F.split(col("category_code"),'.')
+    split_col = F.split(F.col("category_code"),'.')
 
     print (split_col.getItem(0))
 
