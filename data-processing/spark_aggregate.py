@@ -98,11 +98,8 @@ def main():
     purchase_df = df.filter(df['event_type'] == 'purchase')
     view_df = df.filter(df['event_type'] == 'view')
 
-    purchase_df.drop('event_type')
-    view_df.drop('event_type')
-
-    purchase_df.show(n=20, truncate = False)
-    view_df.show(n=20, truncate = False)
+    purchase_df = purchase_df.drop('event_type')
+    view_df = view_df.drop('event_type')
 
     # if same user session viewed same product_id twice, even at differnt event_time, remove duplicate entry.
     # same user refreshing the page should not reflect more interest on the same product
@@ -113,18 +110,20 @@ def main():
         .coalesce(1)
         .dropDuplicates(subset=['user_session','product_id'])
     )
-    view_df.show(100)
 
-    # dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
-    # view_dims, purchase_dims = {}, {}
-    # # total view counts per dimesion, total sales amount per dimension
-    # for dim in dimensions:
-    # #    view_dims[dim] = view_df.groupby(by=[dim, 'event_time']).agg('count')['price']
-    #     purchase_dims[dim] = purchase_df.groupby(by=[dim, 'event_time']).agg(['sum'])['price']
+    dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
+    view_dims, purchase_dims = {}, {}
+    # total view counts per dimesion, total sales amount per dimension
+    for dim in dimensions:
+        # total view counts per dimension, if product_id, also compute mean price
+        view_dims[dim] = view_df.groupby(by=[dim, 'event_time']).agg(
+        ['count'] if dim != 'product_id' else ['count','mean'])['price']
+        # total $$$ amount sold per dimension, if product_id also compute count and mean
+        purchase_dims[dim] = purchase_df.groupby(by=[dim, 'time_period']).agg(
+        ['sum'] if dim != 'product_id' else ['sum','count','mean'])['price']
 
-
-
-
+    purchase_dims['product_id'].show()
+    purchase_dims['brand'].show()
 
 
 
