@@ -118,12 +118,12 @@ def main():
         # total view counts per dimension, if product_id, also compute mean price
         # total $$$ amount sold per dimension, if product_id also compute count and mean
         if dim == 'product_id':
-            view_dims[dim] = (view_df.groupby(dim, 'event_time')
+            view_dims[dim] = (view_df.groupby(dim, 'time_period')
                                 .agg(F.count('price'),F.mean('price')))
             purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
                                 .agg(F.sum('price'),F.count('price'),F.mean('price')))
         else:
-            view_dims[dim] = (view_df.groupby(dim, 'event_time')
+            view_dims[dim] = (view_df.groupby(dim, 'time_period')
                                 .agg(F.count('price')))
             purchase_dims[dim] = (purchase_df.groupby(dim, 'time_period')
                                 .agg(F.sum('price')))
