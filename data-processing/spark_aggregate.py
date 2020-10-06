@@ -75,7 +75,7 @@ def main():
         elif len(ss) == 1:
             return code + '.' + code + '.' + code
 
-    df = df.select(fill_category(F.col("category_code")))
+    df = df.select(fill_category("category_code"))
     split_col = F.split(df['category_code'],'.')
     df = df.withColumn('category_l1', split_col.getItem(0))
     df = df.withColumn('category_l2', split_col.getItem(1))
