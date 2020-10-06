@@ -86,7 +86,7 @@ def main():
 
     split_col = F.split(F.col("category_code"),'.')
 
-    print (split_col.getItem(0))
+    split_col.getItem(0).show()
 
     df = df.withColumn('category_l1', split_col.getItem(0))
     df = df.withColumn('category_l2', split_col.getItem(1))
@@ -95,6 +95,7 @@ def main():
     # level 3 category (lowest level) will determine category type, no need for category_id anymore
     df = df.drop('category_id')
     df = df.drop('category_code')
+    df = df.drop('timestamp')
 
     ################################################################################
 
