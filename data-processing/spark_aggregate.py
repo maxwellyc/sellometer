@@ -57,7 +57,6 @@ def main():
     # Data cleaning ################################################################
 
     # if missing category code, fill with category id.
-    df['category_code'].fillna(df['category_id'], inplace=True)
     df = df.withColumn('category_code', F.coalesce('category_code','category_id'))
     # if missing brand, fill with product id
     df = df.withColumn('brand', F.coalesce('brand','product_id'))
