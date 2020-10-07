@@ -31,7 +31,7 @@ def main():
     t_end = df['event_time'].max()
 
     while t0 < t_end:
-        df_temp = df[t0 : t1]
+        df_temp = df[ (df['event_time'] > t0) & (df['event_time'] < t1 )]
         for i in range(6):
             f_name = t0.strftime("%Y-%m-%d %H:%M") + '-' + str(i) + '.csv'
             df_i = df_temp.iloc[i::6, :]
