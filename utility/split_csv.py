@@ -14,9 +14,19 @@ def main():
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     df = pd.read_csv(s3file)
-    print (df.head(10))
-    # drop unused column
     ################################################################################
+
+    # compress time, 60 second -> 1 second
+    t_step = 60
+    t_min = df['event_time'].min()
+    df['event_time'] = pd.to_datetime(df['event_time'])
+    df['event_time'] = df['event_time'].values.astype(np.int64)  // 10 ** 9
+    df['event_time'] = df['event_time'] - t_min
+    df['event_time'] = df['event_time'] // t_step
+    df['event_time'] = df['event_time'] + t_min
+    df['event_time'] = pd.to_datetime(df['event_time'],unit='s')
+
+    print (df.head(100))
 
 
 if __name__ == "__main__":
