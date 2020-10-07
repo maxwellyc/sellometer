@@ -14,7 +14,7 @@ def main():
     bucket = 'maxwell-insight'
     csv_buffer = StringIO()
     key = '2019-Oct.csv'
-    key = 'sample.csv'
+    #key = 'sample.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     df = pd.read_csv(s3file)
@@ -32,8 +32,6 @@ def main():
     t0 = df['event_time'].min()
     t1 = t0 + pd.Timedelta(seconds=60)
     t_end = df['event_time'].max()
-    df.to_csv('s3://maxwell-insight/test.csv')
-    df.to_csv('s3://maxwell-insight/minicsv/test.csv')
 
     while t0 < t_end:
         df_temp = df[ (df['event_time'] > t0) & (df['event_time'] < t1 )]
