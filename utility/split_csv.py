@@ -29,14 +29,14 @@ def main():
     t0 = df['event_time'].min()
     t1 = t0 + pd.Timedelta(seconds=60)
     t_end = df['event_time'].max()
-    df.to_csv('s3://ecommerce-mini/test.csv')
+    df.to_csv('s3://maxwell-insight/test.csv')
 
     while t0 < t_end:
         df_temp = df[ (df['event_time'] > t0) & (df['event_time'] < t1 )]
         for i in range(6):
             f_name = t0.strftime("%Y-%m-%d-%H-%M-%S") + '-' + str(i) + '.csv'
             df_i = df_temp.iloc[i::6, :]
-            df_i.to_csv("s3://ecommerce-mini/" + f_name)
+            df_i.to_csv("s3://maxwell-insight/minicsv/" + f_name)
         t0 += pd.Timedelta(seconds=60)
         t1  = t0 + pd.Timedelta(seconds=60)
 
