@@ -4,8 +4,8 @@ import numpy as np
 from io import StringIO # python3; python2: BytesIO
 import boto3
 
-def main():
-
+def main(key = '2019-Oct'):
+    key = key + ".csv"
     ################################################################################
 
     # read data from S3 ############################################################
@@ -13,7 +13,7 @@ def main():
     region = 'us-east-2'
     bucket = 'maxwell-insight'
     csv_buffer = StringIO()
-    key = '2019-Oct.csv'
+
     #key = 'sample.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
@@ -46,4 +46,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    for key in ["2019-Oct","2019-Nov","2019-Dec","2020-Jan","2020-Feb","2020-Mar","2020-Apr"]:
+        main(key)
