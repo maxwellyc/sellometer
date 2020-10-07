@@ -9,7 +9,6 @@ def main(key = '2020-Feb'):
     key = 'sample.csv'
     ################################################################################
     # read csv file on s3 into spark dataframe
-    df = pd.read_csv(key)
     region = 'us-east-2'
     bucket = 'maxwell-insight'
     # key = 'sample.csv'
