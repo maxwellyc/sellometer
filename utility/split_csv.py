@@ -11,7 +11,8 @@ def main(key = '2020-Feb'):
     # read csv file on s3 into spark dataframe
     region = 'us-east-2'
     bucket = 'maxwell-insight'
-    s3file = f"s3a://{bucket}/{key}"
+    s3file = "s3a://" + bucket + "/"+ key
+    print (s3file)
     # read csv file on s3 into spark dataframe
     df = pd.read_csv(s3file)
     print (f'{time.asctime( time.localtime(time.time()) )}\n{key} read into pandas dataframe!')
