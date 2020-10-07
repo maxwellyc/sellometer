@@ -6,27 +6,26 @@ import boto3
 
 def main(key = '2020-Feb'):
     key = key + ".csv"
-    key = 'sample.csv'
+    # key = 'sample.csv'
     ################################################################################
     # read csv file on s3 into spark dataframe
     region = 'us-east-2'
     bucket = 'maxwell-insight'
-    # key = 'sample.csv'
     s3file = f"s3a://{bucket}/{key}"
     # read csv file on s3 into spark dataframe
     df = pd.read_csv(s3file)
-
+    print (f'{time.asctime( time.localtime(time.time()) )}\n{key} read into pandas dataframe!')
     ################################################################################
 
     # compress time, 60 second -> 1 second
     t_step = 30 # unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     df['event_time'] = ((pd.to_datetime(df['event_time']) - pd.Timestamp("1970-01-01", tz='utc') )  / pd.Timedelta('1s'))
-    t_min = pd.Timestamp("2019-10-01", tz='utc')
+    t_min = pd.Timestamp("2019-10-01", tz='utc').value // 10**9
     df['event_time'] = df['event_time'] - t_min
     df['event_time'] = df['event_time'] // t_step
     df['event_time'] = (df['event_time'] + t_min).astype(np.int64)
     df['event_time'] = pd.to_datetime(df['event_time'], unit='s')#.dt.strftime("%Y-%m-%d %H:%M:%S")
-
+    print (f'{time.asctime( time.localtime(time.time()) )}\nTime transformation complete\n')
     t0 = df['event_time'].min()
     t1 = t0 + pd.Timedelta(seconds=60)
     t_end = df['event_time'].max()
