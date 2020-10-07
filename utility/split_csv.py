@@ -29,7 +29,7 @@ def main():
     t0 = df['event_time'].min()
     t1 = t0 + pd.Timedelta(seconds=60)
     t_end = df['event_time'].max()
-    df.to_csv('s3://maxwell-insight/mini_csv/test.csv')
+    df.to_csv('s3://maxwell-insight/test.csv')
 
     while t0 < t_end:
         df_temp = df[ (df['event_time'] > t0) & (df['event_time'] < t1 )]
