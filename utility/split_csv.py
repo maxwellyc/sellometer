@@ -1,5 +1,6 @@
 import pandas as pd
 import time, datetime, os
+import np
 
 def main():
 
@@ -20,11 +21,11 @@ def main():
     t_step = 60
     t_min = df['event_time'].min()
     df['event_time'] = pd.to_datetime(df['event_time'])
-    df['event_time'] = df['event_time'].values.astype(np.int64)  // 10 ** 9
-    df['event_time'] = df['event_time'] - t_min
-    df['event_time'] = df['event_time'] // t_step
-    df['event_time'] = df['event_time'] + t_min
-    df['event_time'] = pd.to_datetime(df['event_time'],unit='s')
+    # df['event_time'] = df['event_time'].values.astype(int)  // 10 ** 9
+    # df['event_time'] = df['event_time'] - t_min
+    # df['event_time'] = df['event_time'] // t_step
+    # df['event_time'] = df['event_time'] + t_min
+    # df['event_time'] = pd.to_datetime(df['event_time'],unit='s', origin='unix')
 
     print (df.head(100))
 
