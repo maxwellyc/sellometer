@@ -12,10 +12,8 @@ def main(key = '2019-Oct'):
     # for mini batches need to change this section into dynamical
     region = 'us-east-2'
     bucket = 'maxwell-insight'
-    csv_buffer = StringIO()
-
-    #key = 'sample.csv'
-    s3file = f's3a://{bucket}/{key}'
+    key = 'sample.csv'
+    s3file = f"s3a://{bucket}/{key}"
     # read csv file on s3 into spark dataframe
     df = pd.read_csv(s3file)
     ################################################################################
@@ -38,6 +36,7 @@ def main(key = '2019-Oct'):
         for i in range(6):
             f_name = t0.strftime("%Y-%m-%d-%H-%M-%S") + '-' + str(i) + '.csv'
             df_i = df_temp.iloc[i::6, :]
+            csv_buffer = StringIO()
             df_i.to_csv(csv_buffer)
             s3_resource = boto3.resource('s3')
             s3_resource.Object(bucket, "minicsv/" + f_name).put(Body=csv_buffer.getvalue())
