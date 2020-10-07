@@ -1,6 +1,8 @@
 import pandas as pd
 import time, datetime, os
 import numpy as np
+from io import StringIO # python3; python2: BytesIO
+import boto3
 
 def main():
 
@@ -10,6 +12,7 @@ def main():
     # for mini batches need to change this section into dynamical
     region = 'us-east-2'
     bucket = 'maxwell-insight'
+    csv_buffer = StringIO()
     key = '2019-Oct.csv'
     key = 'sample.csv'
     s3file = f's3a://{bucket}/{key}'
@@ -37,7 +40,9 @@ def main():
         for i in range(6):
             f_name = t0.strftime("%Y-%m-%d-%H-%M-%S") + '-' + str(i) + '.csv'
             df_i = df_temp.iloc[i::6, :]
-            df_i.to_csv("s3://maxwell-insight/minicsv/" + f_name)
+            df_i.to_csv(csv_buffer)
+            s3_resource = boto3.resource('s3')
+            s3_resource.Object(bucket, "minicsv/" + f_name).put(Body=csv_buffer.getvalue())
         t0 += pd.Timedelta(seconds=60)
         t1  = t0 + pd.Timedelta(seconds=60)
 
