@@ -1,5 +1,8 @@
 import boto3
-s3_resource = boto3.resource(‘s3’)
+s3 = boto3.resource('s3')
 
-s3_resource.Object("maxwell-insight", "spark-processed/").copy_from(
- CopySource='serverpool/*')
+src = s3.Bucket('maxwell-insight/serverpool/')
+dst = s3.Bucket('maxwell-insight/spark-processed/')
+
+for k in src.objects.all():
+    print(k)
