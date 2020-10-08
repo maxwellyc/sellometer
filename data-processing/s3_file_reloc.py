@@ -8,5 +8,5 @@ for bucket in s3.buckets.all():
 src = s3.Bucket('maxwell-insight/serverpool/')
 dst = s3.Bucket('maxwell-insight/spark-processed/')
 
-# for k in src.objects.all():
-#     print(k)
+for file in src.objects.all():
+    print(file.key)
