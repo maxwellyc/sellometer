@@ -4,15 +4,10 @@ from pyspark.sql import functions as F
 import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 
-def timeConverter(timestamp):
-    time_tuple = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S.000").timetuple()
-    timevalue = int(time.mktime(time_tuple)) # convert to int here
-    return timevalue
-
 def main():
 
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("read_csv").setMaster("local")
+    conf = SparkConf().setAppName("spark_live_process")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     # spark_session = spark.builder\
@@ -26,8 +21,7 @@ def main():
     # for mini batches need to change this section into dynamical
     region = 'us-east-2'
     bucket = 'maxwell-insight'
-    # key = '2019-Oct.csv'
-    key = 'sample.csv'
+    key = 'serverpool/*'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
@@ -140,7 +134,7 @@ def main():
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
-        .mode("overwrite")\
+        .mode("append")\
         .save()
         purchase_dims[dim].write\
         .format("jdbc")\
@@ -149,7 +143,7 @@ def main():
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
-        .mode("overwrite")\
+        .mode("append")\
         .save()
 
 
