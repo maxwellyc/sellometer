@@ -45,7 +45,6 @@ def main():
     t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
 
-    df.show(n=50)
     ################################################################################
 
     # Data cleaning ################################################################
@@ -86,6 +85,7 @@ def main():
     df = df.drop('category_code')
     df = df.drop('timestamp')
 
+    # df.show(n=50)
     ################################################################################
     # create separate dataframe for view and purchase,
     # data transformation will be different for these two types of events.
