@@ -51,6 +51,12 @@ dag = DAG(
 #         f_name = o.key.split(src_dir)[-1]
 #         print(f_name)
 
+# print_found_files = PythonOperator(task_id='print_found_files',
+#     provide_context=True,
+#     python_callable=print_new_files_s3,
+#     op_kwargs={"bucket":bucket, "src_dir":src_dir},
+#     dag=dag)
+
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
     poke_interval= 1, # (seconds); checking file every half an hour
@@ -69,12 +75,6 @@ move_processed_csv =  BashOperator(
   task_id='move_processed_csv',
   bash_command=f's3cmd mv s3://{bucket}/{src_dir}* s3://{bucket}/{dst_dir}',
   dag = dag)
-
-print_found_files = PythonOperator(task_id='print_found_files',
-    provide_context=True,
-    python_callable=print_new_files_s3,
-    op_kwargs={"bucket":bucket, "src_dir":src_dir},
-    dag=dag)
 
 print_new_csv_files = BashOperator(
   task_id='print_new_csv_files',
