@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from airflow.models import DAG
-from airflow.operators.s3_key_sensor import S3KeySensor
+from airflow.operators.sensors import S3KeySensor
 from airflow.operators.python_operator import PythonOperator
 from airflow.utils.dates import days_ago
 import boto3
