@@ -1,11 +1,5 @@
-import boto
+import boto3
+s3_resource = boto3.resource(‘s3’)
 
-c = boto.connect_s3()
-src = c.get_bucket('maxwell-insight/serverpool')
-dst = c.get_bucket('maxwell-insight/spark-processed')
-
-for k in src.list():
-    # copy stuff to your destination here
-    dst.copy_key(k.key.name, src.name, k.key.name)
-    # then delete the source key
-    k.delete()
+s3_resource.Object("maxwell-insight", "spark-processed/").copy_from(
+ CopySource='serverpool/*')
