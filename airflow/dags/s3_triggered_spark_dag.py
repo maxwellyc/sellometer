@@ -45,10 +45,10 @@ file_sensor = S3KeySensor(
     wildcard_match=True,
     dag=dag)
 
-# spark_live_process = BashOperator(
-#   task_id='spark_live_process',
-#   bash_command='spark-submit $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
-#   dag = dag)
+spark_live_process = BashOperator(
+  task_id='spark_live_process',
+  bash_command='spark-submit $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
+  dag = dag)
 
 move_processed_csv = PythonOperator(task_id='move_processed_csv',
     provide_context=True,
@@ -56,5 +56,4 @@ move_processed_csv = PythonOperator(task_id='move_processed_csv',
     op_kwargs={"bucket":bucket, "src_dir":src_dir, "dst_dir":dst_dir},
     dag=dag)
 
-file_sensor >>  move_processed_csv
-#spark_live_process
+file_sensor >>  spark_live_process >> move_processed_csv
