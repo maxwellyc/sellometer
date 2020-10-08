@@ -36,6 +36,13 @@ def move_s3_file_after_spark_process(bucket, src_dir, dst_dir, **kwargs):
         s3.Object(bucket, dst_dir + f_name ).copy_from(CopySource= bucket + "/" + o.key)
         s3.Object(bucket, o.key).delete()
 
+def print_new_files_s3(bucket, src_dir, **kwargs):
+    s3 = boto3.resource('s3')
+    my_bucket = s3.Bucket(bucket)
+    for o in my_bucket.objects.filter(Prefix=src_dir):
+        f_name = o.key.split(src_dir)[-1]
+        print(f_name)
+
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
     poke_interval= 1, # (seconds); checking file every half an hour
@@ -56,4 +63,12 @@ move_processed_csv = PythonOperator(task_id='move_processed_csv',
     op_kwargs={"bucket":bucket, "src_dir":src_dir, "dst_dir":dst_dir},
     dag=dag)
 
-file_sensor >>  spark_live_process >> move_processed_csv
+print_found_files = PythonOperator(task_id='print_found_files',
+    provide_context=True,
+    python_callable=print_new_files_s3,
+    op_kwargs={"bucket":bucket, "src_dir":src_dir},
+    dag=dag)
+
+
+
+file_sensor >>  print_found_files >> spark_live_process >> move_processed_csv
