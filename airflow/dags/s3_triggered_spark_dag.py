@@ -20,7 +20,7 @@ args = {
 
 dag = DAG(
     dag_id='s3_key_trigger',
-    schedule_interval=,
+    schedule_interval=schedule,
     default_args=args
     )
 
