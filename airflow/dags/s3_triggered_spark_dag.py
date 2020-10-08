@@ -26,6 +26,7 @@ dag = DAG(
     )
 
 # def move_s3_file_after_spark_process(bucket, src_dir, dst_dir, **kwargs):
+#  Turns out deleting is a bad idea, can just use s3cmd command to move
 #     s3 = boto3.resource('s3')
 #     my_bucket = s3.Bucket(bucket)
 #
@@ -36,12 +37,19 @@ dag = DAG(
 #         s3.Object(bucket, dst_dir + f_name ).copy_from(CopySource= bucket + "/" + o.key)
 #         s3.Object(bucket, o.key).delete()
 
-def print_new_files_s3(bucket, src_dir, **kwargs):
-    s3 = boto3.resource('s3')
-    my_bucket = s3.Bucket(bucket)
-    for o in my_bucket.objects.filter(Prefix=src_dir):
-        f_name = o.key.split(src_dir)[-1]
-        print(f_name)
+# move_processed_csv = PythonOperator(task_id='move_processed_csv',
+#     provide_context=True,
+#     python_callable=move_s3_file_after_spark_process,
+#     op_kwargs={"bucket":bucket, "src_dir":src_dir, "dst_dir":dst_dir},
+#     dag=dag)
+
+
+# def print_new_files_s3(bucket, src_dir, **kwargs):
+#     s3 = boto3.resource('s3')
+#     my_bucket = s3.Bucket(bucket)
+#     for o in my_bucket.objects.filter(Prefix=src_dir):
+#         f_name = o.key.split(src_dir)[-1]
+#         print(f_name)
 
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
@@ -52,16 +60,10 @@ file_sensor = S3KeySensor(
     wildcard_match=True,
     dag=dag)
 
-# spark_live_process = BashOperator(
-#   task_id='spark_live_process',
-#   bash_command='spark-submit $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
-#   dag = dag)
-
-# move_processed_csv = PythonOperator(task_id='move_processed_csv',
-#     provide_context=True,
-#     python_callable=move_s3_file_after_spark_process,
-#     op_kwargs={"bucket":bucket, "src_dir":src_dir, "dst_dir":dst_dir},
-#     dag=dag)
+spark_live_process = BashOperator(
+  task_id='spark_live_process',
+  bash_command='spark-submit $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
+  dag = dag)
 
 move_processed_csv =  BashOperator(
   task_id='move_processed_csv',
@@ -74,7 +76,10 @@ print_found_files = PythonOperator(task_id='print_found_files',
     op_kwargs={"bucket":bucket, "src_dir":src_dir},
     dag=dag)
 
+print_new_csv_files = BashOperator(
+  task_id='print_new_csv_files',
+  bash_command=f's3cmd ls s3://{bucket}/{src_dir}',
+  dag = dag)
 
 
-file_sensor >>  print_found_files  >> move_processed_csv
-#>> spark_live_process
+file_sensor >>  print_new_csv_files >> spark_live_process  >> move_processed_csv
