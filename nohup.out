@@ -63,3 +63,639 @@ Error: Already running on PID 19436 (or pid file '/home/ubuntu/airflow/airflow-w
 [2020-10-08 04:19:26,947] {__init__.py:50} INFO - Using executor SequentialExecutor
 [2020-10-08 04:19:26,948] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
 Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:00:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:34:04,907] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:01:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:06,363] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:34:06,363] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:01:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:34:11,816] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:00:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:34:11,821] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:01:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:34:14,860] {scheduler_job.py:963} INFO - 15 tasks up for execution:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:03:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:04:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:05:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:06:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:07:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:08:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:09:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:10:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:11:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:12:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:13:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:14:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:02:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:15:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:01:00+00:00 [scheduled]>
+[2020-10-08 04:34:14,867] {scheduler_job.py:997} INFO - Figuring out tasks to run in Pool(name=default_pool) with 128 open slots and 15 task instances ready to be queued
+[2020-10-08 04:34:14,869] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 0/16 running and queued tasks
+[2020-10-08 04:34:14,869] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 1/16 running and queued tasks
+[2020-10-08 04:34:14,870] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 2/16 running and queued tasks
+[2020-10-08 04:34:14,870] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 3/16 running and queued tasks
+[2020-10-08 04:34:14,870] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 4/16 running and queued tasks
+[2020-10-08 04:34:14,871] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 5/16 running and queued tasks
+[2020-10-08 04:34:14,871] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 6/16 running and queued tasks
+[2020-10-08 04:34:14,871] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 7/16 running and queued tasks
+[2020-10-08 04:34:14,871] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 8/16 running and queued tasks
+[2020-10-08 04:34:14,872] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 9/16 running and queued tasks
+[2020-10-08 04:34:14,872] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 10/16 running and queued tasks
+[2020-10-08 04:34:14,872] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 11/16 running and queued tasks
+[2020-10-08 04:34:14,872] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 12/16 running and queued tasks
+[2020-10-08 04:34:14,873] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 13/16 running and queued tasks
+[2020-10-08 04:34:14,873] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 14/16 running and queued tasks
+[2020-10-08 04:34:14,878] {scheduler_job.py:1085} INFO - Setting the following tasks to queued state:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:02:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:03:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:04:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:05:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:06:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:07:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:08:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:09:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:10:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:11:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:12:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:13:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:14:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:15:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:01:00+00:00 [scheduled]>
+[2020-10-08 04:34:14,903] {scheduler_job.py:1159} INFO - Setting the following 15 tasks to queued state:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:03:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:04:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:05:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:06:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:07:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:08:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:09:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:10:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:11:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:12:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:13:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:14:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:02:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:15:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:01:00+00:00 [queued]>
+[2020-10-08 04:34:14,904] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 3, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,904] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:03:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,905] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 4, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,905] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:04:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,905] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 5, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,906] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:05:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,906] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 6, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,906] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:06:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,906] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 7, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,907] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:07:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,907] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 8, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,907] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:08:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,907] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 9, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,908] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:09:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,908] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 10, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,908] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:10:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,908] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 11, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,908] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:11:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,909] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 12, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,909] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:12:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,909] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 13, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,909] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:13:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,910] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 14, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,910] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:14:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,917] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 2, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,918] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:02:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,926] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 15, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:34:14,927] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:15:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,927] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 1, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:34:14,927] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:01:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:14,928] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:03:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:16,842] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:34:16,843] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:03:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:34:22,550] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:04:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:24,528] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:34:24,529] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:04:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:34:30,223] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:05:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:32,212] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:34:32,213] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:05:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:34:37,836] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:06:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:39,776] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:34:39,777] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:06:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:34:45,403] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:07:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:47,402] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:34:47,403] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:07:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:34:53,020] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:08:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:34:54,901] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:34:54,903] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:08:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:00,543] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:09:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:02,540] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:02,541] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:09:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:08,187] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:10:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:10,099] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:10,101] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:10:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:15,643] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:11:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:17,076] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:17,077] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:11:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:22,546] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:12:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:24,019] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:24,019] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:12:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:29,486] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:13:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:30,928] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:30,928] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:13:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:36,387] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:14:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:37,821] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:37,822] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:14:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:43,310] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:02:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:44,754] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:44,755] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:02:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:50,207] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:15:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:51,656] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:51,657] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:15:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:35:57,106] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:01:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:35:58,538] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:35:58,539] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:01:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:37:59,351] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:03:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,356] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:04:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,359] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:05:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,362] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:06:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,364] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:07:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,367] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:08:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,370] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:09:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,372] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:10:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,375] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:11:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,377] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:12:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,380] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:13:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,382] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:14:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,385] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:02:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,387] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:15:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:37:59,389] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:01:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:38:00,442] {scheduler_job.py:963} INFO - 9 tasks up for execution:
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:03:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:06:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:16:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:04:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:08:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:10:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:05:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:07:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:09:00+00:00 [scheduled]>
+[2020-10-08 04:38:00,450] {scheduler_job.py:997} INFO - Figuring out tasks to run in Pool(name=default_pool) with 128 open slots and 9 task instances ready to be queued
+[2020-10-08 04:38:00,450] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 0/16 running and queued tasks
+[2020-10-08 04:38:00,451] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 1/16 running and queued tasks
+[2020-10-08 04:38:00,451] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 2/16 running and queued tasks
+[2020-10-08 04:38:00,451] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 3/16 running and queued tasks
+[2020-10-08 04:38:00,452] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 4/16 running and queued tasks
+[2020-10-08 04:38:00,452] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 5/16 running and queued tasks
+[2020-10-08 04:38:00,452] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 6/16 running and queued tasks
+[2020-10-08 04:38:00,452] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 7/16 running and queued tasks
+[2020-10-08 04:38:00,453] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 8/16 running and queued tasks
+[2020-10-08 04:38:00,477] {scheduler_job.py:1085} INFO - Setting the following tasks to queued state:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:16:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:03:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:04:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:05:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:06:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:07:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:08:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:09:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:10:00+00:00 [scheduled]>
+[2020-10-08 04:38:00,508] {scheduler_job.py:1159} INFO - Setting the following 9 tasks to queued state:
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:03:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:06:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:16:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:04:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:08:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:10:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:05:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:07:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:09:00+00:00 [queued]>
+[2020-10-08 04:38:00,509] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 3, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:38:00,509] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:03:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,510] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 6, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:38:00,510] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:06:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,510] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 16, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:38:00,511] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:16:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,511] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 4, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:38:00,511] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:04:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,512] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 8, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:38:00,512] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:08:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,512] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 10, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:38:00,513] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:10:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,513] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 5, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:38:00,513] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:05:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,514] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 7, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:38:00,514] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:07:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,514] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 9, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:38:00,515] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:09:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:00,516] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:16:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:02,413] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:38:02,415] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:16:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:38:08,164] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:03:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:38:09,959] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:38:09,960] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:03:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:39:15,738] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:06:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:39:17,179] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:39:17,179] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:06:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:40:12,817] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:04:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:40:14,246] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:40:14,246] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:04:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:09,884] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:08:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:11,336] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:41:11,337] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:08:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:11,823] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:10:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:13,330] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:41:13,331] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:10:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:13,813] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:05:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:15,307] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:41:15,307] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:05:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:15,789] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:07:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:17,263] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:41:17,264] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:07:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:17,749] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:09:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:19,216] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:41:19,217] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:09:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:19,679] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:16:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,683] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:19,684] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:03:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,687] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:19,687] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:06:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,689] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:19,689] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:04:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,691] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:19,691] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:08:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,694] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:19,694] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:10:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,696] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:19,697] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:05:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,699] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:19,699] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:07:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,702] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:19,702] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:09:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:19,704] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:41:34,744] {scheduler_job.py:963} INFO - 2 tasks up for execution:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:00:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:01:00+00:00 [scheduled]>
+[2020-10-08 04:41:34,749] {scheduler_job.py:997} INFO - Figuring out tasks to run in Pool(name=default_pool) with 128 open slots and 2 task instances ready to be queued
+[2020-10-08 04:41:34,750] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 0/16 running and queued tasks
+[2020-10-08 04:41:34,750] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 1/16 running and queued tasks
+[2020-10-08 04:41:34,754] {scheduler_job.py:1085} INFO - Setting the following tasks to queued state:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:00:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:01:00+00:00 [scheduled]>
+[2020-10-08 04:41:34,760] {scheduler_job.py:1159} INFO - Setting the following 2 tasks to queued state:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:00:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:01:00+00:00 [queued]>
+[2020-10-08 04:41:34,761] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 0, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:34,761] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:00:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:34,761] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 1, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:34,761] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:01:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:34,762] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:00:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:36,666] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:41:36,667] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:00:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:42,244] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:01:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:44,130] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:41:44,132] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:01:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:49,777] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:00:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:49,783] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:01:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:41:50,818] {scheduler_job.py:963} INFO - 15 tasks up for execution:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:10:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:14:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:11:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:12:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:01:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:13:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:02:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:03:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:04:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:05:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:00:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:06:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:07:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:08:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:09:00+00:00 [scheduled]>
+[2020-10-08 04:41:50,822] {scheduler_job.py:997} INFO - Figuring out tasks to run in Pool(name=default_pool) with 128 open slots and 15 task instances ready to be queued
+[2020-10-08 04:41:50,823] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 0/16 running and queued tasks
+[2020-10-08 04:41:50,823] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 1/16 running and queued tasks
+[2020-10-08 04:41:50,823] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 2/16 running and queued tasks
+[2020-10-08 04:41:50,823] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 3/16 running and queued tasks
+[2020-10-08 04:41:50,823] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 4/16 running and queued tasks
+[2020-10-08 04:41:50,824] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 5/16 running and queued tasks
+[2020-10-08 04:41:50,824] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 6/16 running and queued tasks
+[2020-10-08 04:41:50,824] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 7/16 running and queued tasks
+[2020-10-08 04:41:50,824] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 8/16 running and queued tasks
+[2020-10-08 04:41:50,824] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 9/16 running and queued tasks
+[2020-10-08 04:41:50,824] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 10/16 running and queued tasks
+[2020-10-08 04:41:50,825] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 11/16 running and queued tasks
+[2020-10-08 04:41:50,825] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 12/16 running and queued tasks
+[2020-10-08 04:41:50,825] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 13/16 running and queued tasks
+[2020-10-08 04:41:50,825] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 14/16 running and queued tasks
+[2020-10-08 04:41:50,829] {scheduler_job.py:1085} INFO - Setting the following tasks to queued state:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:02:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:03:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:04:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:05:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:06:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:07:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:08:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:09:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:10:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:11:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:12:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:13:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:14:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:00:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:01:00+00:00 [scheduled]>
+[2020-10-08 04:41:50,846] {scheduler_job.py:1159} INFO - Setting the following 15 tasks to queued state:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:10:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:14:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:11:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:12:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:01:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:13:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:02:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:03:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:04:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:05:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:00:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:06:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:07:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:08:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:09:00+00:00 [queued]>
+[2020-10-08 04:41:50,847] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 10, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,847] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:10:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,847] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 14, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,847] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:14:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,847] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 11, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,847] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:11:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,848] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 12, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,848] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:12:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,848] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 1, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:41:50,848] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:01:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,848] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 13, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,849] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:13:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,849] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 2, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,849] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:02:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,849] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 3, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,849] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:03:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,849] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 4, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,850] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:04:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,850] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 5, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,850] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:05:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,850] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 0, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:41:50,850] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:00:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,851] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 6, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,851] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:06:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,851] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 7, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,851] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:07:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,851] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 8, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,851] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:08:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,852] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 9, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:41:50,852] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:09:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:50,852] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:10:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:41:52,822] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:41:52,823] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:10:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:41:58,380] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:14:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:42:00,299] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:42:00,301] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:14:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:42:05,955] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:11:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:42:07,786] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:42:07,787] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:11:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:42:13,407] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:12:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:42:15,317] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:42:15,319] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:12:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:42:20,981] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:13:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:42:22,852] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:42:22,853] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:13:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:42:28,471] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:02:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:42:30,318] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:42:30,319] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:02:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:42:35,970] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:03:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:42:37,798] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:42:37,799] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:03:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:42:43,420] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:04:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:42:45,404] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:42:45,405] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:04:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:42:51,035] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:05:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:42:52,922] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:42:52,924] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:05:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:42:58,543] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:06:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:43:00,355] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:43:00,356] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:06:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:43:06,012] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:07:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:43:07,905] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:43:07,906] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:07:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:43:13,526] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:08:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:43:15,411] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:43:15,413] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:08:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:43:20,949] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:09:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:43:22,400] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:43:22,401] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:09:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:43:27,868] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:01:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:43:29,307] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:43:29,308] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:01:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:44:24,959] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:00:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:44:26,451] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:44:26,452] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:00:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:45:32,147] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:10:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,151] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:14:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,154] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:11:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,156] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:12:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,158] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:13:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,161] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:02:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,163] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:03:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,166] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:04:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,168] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:05:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,171] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:06:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,173] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:07:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,176] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:08:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,178] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:09:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,181] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:01:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:32,184] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:00:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:45:33,237] {scheduler_job.py:963} INFO - 13 tasks up for execution:
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:10:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:14:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:15:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:11:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:12:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:13:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:02:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:03:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:04:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:05:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:06:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:07:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:08:00+00:00 [scheduled]>
+[2020-10-08 04:45:33,251] {scheduler_job.py:997} INFO - Figuring out tasks to run in Pool(name=default_pool) with 128 open slots and 13 task instances ready to be queued
+[2020-10-08 04:45:33,251] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 0/16 running and queued tasks
+[2020-10-08 04:45:33,252] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 1/16 running and queued tasks
+[2020-10-08 04:45:33,252] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 2/16 running and queued tasks
+[2020-10-08 04:45:33,252] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 3/16 running and queued tasks
+[2020-10-08 04:45:33,252] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 4/16 running and queued tasks
+[2020-10-08 04:45:33,253] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 5/16 running and queued tasks
+[2020-10-08 04:45:33,253] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 6/16 running and queued tasks
+[2020-10-08 04:45:33,253] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 7/16 running and queued tasks
+[2020-10-08 04:45:33,253] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 8/16 running and queued tasks
+[2020-10-08 04:45:33,254] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 9/16 running and queued tasks
+[2020-10-08 04:45:33,254] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 10/16 running and queued tasks
+[2020-10-08 04:45:33,254] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 11/16 running and queued tasks
+[2020-10-08 04:45:33,255] {scheduler_job.py:1025} INFO - DAG s3_key_trigger has 12/16 running and queued tasks
+[2020-10-08 04:45:33,274] {scheduler_job.py:1085} INFO - Setting the following tasks to queued state:
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:15:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:02:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:03:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:04:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:05:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:06:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:07:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:08:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:10:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:11:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:12:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:13:00+00:00 [scheduled]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:14:00+00:00 [scheduled]>
+[2020-10-08 04:45:33,305] {scheduler_job.py:1159} INFO - Setting the following 13 tasks to queued state:
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:10:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:14:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07 00:15:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:11:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:12:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:13:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:02:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:03:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:04:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:05:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:06:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:07:00+00:00 [queued]>
+	<TaskInstance: s3_key_trigger.spark_live_process 2020-10-07 00:08:00+00:00 [queued]>
+[2020-10-08 04:45:33,306] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 10, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,306] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:10:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,306] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 14, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,306] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:14:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,307] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'new_csv_sensor', datetime.datetime(2020, 10, 7, 0, 15, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 3 and queue default
+[2020-10-08 04:45:33,307] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:15:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,307] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 11, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,308] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:11:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,308] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 12, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,308] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:12:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,308] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 13, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,309] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:13:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,309] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 2, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,309] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:02:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,309] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 3, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,310] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:03:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,310] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 4, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,310] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:04:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,310] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 5, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,311] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:05:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,311] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 6, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,311] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:06:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,312] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 7, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,312] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:07:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,312] {scheduler_job.py:1195} INFO - Sending ('s3_key_trigger', 'spark_live_process', datetime.datetime(2020, 10, 7, 0, 8, tzinfo=<TimezoneInfo [UTC, GMT, +00:00:00, STD]>), 1) to executor with priority 2 and queue default
+[2020-10-08 04:45:33,313] {base_executor.py:58} INFO - Adding to queue: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:08:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:33,313] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'new_csv_sensor', '2020-10-07T00:15:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:35,202] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:45:35,203] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.new_csv_sensor 2020-10-07T00:15:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:45:40,922] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:10:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:45:42,735] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:45:42,736] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:10:00+00:00 [queued]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:46:49,180] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:14:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:46:50,819] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:46:50,820] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:14:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:46:51,416] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:11:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:46:52,985] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:46:52,986] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:11:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:46:53,588] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:12:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:46:55,303] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:46:55,309] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:12:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:46:55,782] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:13:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:46:57,518] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:46:57,519] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:13:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:46:57,991] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:02:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:46:59,711] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:46:59,712] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:02:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:47:00,261] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:03:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:47:01,916] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:47:01,917] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:03:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:47:02,520] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:04:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:47:04,136] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:47:04,137] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:04:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:47:04,746] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:05:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:47:06,487] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:47:06,487] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:05:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:47:06,952] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:06:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:47:08,694] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:47:08,695] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:06:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:47:09,158] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:07:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:47:10,866] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:47:10,867] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:07:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:47:11,428] {sequential_executor.py:54} INFO - Executing command: ['airflow', 'run', 's3_key_trigger', 'spark_live_process', '2020-10-07T00:08:00+00:00', '--local', '--pool', 'default_pool', '-sd', '/home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py']
+[2020-10-08 04:47:13,041] {__init__.py:50} INFO - Using executor SequentialExecutor
+[2020-10-08 04:47:13,042] {dagbag.py:417} INFO - Filling up the DagBag from /home/ubuntu/eCommerce/airflow/dags/s3_triggered_spark_dag.py
+Running %s on host %s <TaskInstance: s3_key_trigger.spark_live_process 2020-10-07T00:08:00+00:00 [None]> ip-10-0-0-6.us-east-2.compute.internal
+[2020-10-08 04:47:13,637] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.new_csv_sensor execution_date=2020-10-07 00:15:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,641] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:10:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,644] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:14:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,647] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:11:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,649] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:12:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,652] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:13:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,655] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:02:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,657] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:47:13,658] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:03:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,660] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:47:13,661] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:04:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,663] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:47:13,664] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:05:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,666] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:47:13,667] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:06:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,669] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:47:13,669] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:07:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,672] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database
+[2020-10-08 04:47:13,672] {scheduler_job.py:1334} INFO - Executor reports execution of s3_key_trigger.spark_live_process execution_date=2020-10-07 00:08:00+00:00 exited with status success for try_number 1
+[2020-10-08 04:47:13,674] {scheduler_job.py:1342} WARNING - TaskInstance None went missing from the database

@@ -129,7 +129,7 @@ def main():
     # write dataframe to postgreSQL
         view_dims[dim].write\
         .format("jdbc")\
-        .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
+        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
         .option("dbtable","view_" + dim)\
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
@@ -138,7 +138,7 @@ def main():
         .save()
         purchase_dims[dim].write\
         .format("jdbc")\
-        .option("url", "jdbc:postgresql://10.0.0.6:5431/my_db")\
+        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
         .option("dbtable","purchase_" + dim)\
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
