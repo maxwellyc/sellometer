@@ -44,8 +44,8 @@ def main():
 
     t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
-    
-    print (df.head(20))
+
+    df.show(n=50)
     ################################################################################
 
     # Data cleaning ################################################################
