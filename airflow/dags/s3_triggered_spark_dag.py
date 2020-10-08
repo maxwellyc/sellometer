@@ -49,7 +49,7 @@ file_sensor = S3KeySensor(
     timeout=60 * 60, # timeout in 1 hours
     bucket_key=f"s3://{bucket}/{src_dir}",
     bucket_name=None,
-    wildcard_match=True,
+    wildcard_match=False,
     dag=dag)
 
 spark_live_process = BashOperator(
