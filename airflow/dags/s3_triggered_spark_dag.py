@@ -9,7 +9,7 @@ import boto3
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
 dst_dir = 'spark-processed/'
-schedule = timedelta(seconds=60)
+schedule = None #timedelta(seconds=60)
 
 args = {
     'owner': 'airflow',
