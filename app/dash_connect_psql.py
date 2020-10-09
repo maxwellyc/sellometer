@@ -11,6 +11,7 @@ import psycopg2
 import os
 from sqlalchemy import create_engine
 
+dropdown_op, hot_list, time_series_by_id = [], [], {}
 
 def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
     df = pd.read_sql_table(table_name, engine)
