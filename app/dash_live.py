@@ -35,13 +35,16 @@ def id_time_series(hot_list, df, id_name = 'product_id'):
         dropdown_op.append({"label":f"{id_name}: {id}", "value": id})
     return df_by_id, dropdown_op
 
+def update_df():
+    engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
+    df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
+    df_hour, df_gb_hour = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
+    hot_list = rank_by_id(df_gb_hour, rank_metric = "count(price)", n = 10)
+    df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
+    return df_by_id, dropdown_op, df
 
-engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
-df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
-hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
-df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
+df_by_id, dropdown_op, df = update_df()
 
-input_types = ['']
 # # dash Application
 app = dash.Dash(__name__)
 
@@ -75,11 +78,8 @@ app.layout = html.Div([
               ]
 )
 def update_graph_scatter(n, p_id):
-    df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
-    hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
-    df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
-
-    plot_df = df_by_id[p_id]
+    df_by_id, dropdown_op, df = update_df()
+    df = df[df['product_id'].isin([id for id, m in hot_list])].astype({"product_id":str})
 
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
@@ -92,7 +92,7 @@ def update_graph_scatter(n, p_id):
     )
 
     barchart = px.bar(
-        data_frame=df[df['product_id'].isin([id for id, m in hot_list])],
+        data_frame= df[df['product_id'].isin([id for id, m in hot_list])],
         x = "product_id",
         y = "count(price)",
         orientation = "h",
