@@ -80,9 +80,8 @@ def update_graph_scatter(n, option_slctd):
 
     # Plotly Express
     trace = plotly.graph_objs.Scatter(
-        data_frame=plot_df,
-        x = 'event_time',
-        y = 'sum(price)',
+        x = plot_df['event_time'],
+        y = plot_df['sum(price)'],
         name='Scatter',
         mode='lines+markers'
     )
