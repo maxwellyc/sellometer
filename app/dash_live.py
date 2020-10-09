@@ -85,7 +85,7 @@ def update_graph_scatter(n, p_id):
     hot_list.sort(key=lambda x: x[1])
     data = {'Product-ID' : [str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
     dff = pd.DataFrame.from_dict(data)
-    #print (df.head(50))
+    print (dff.head(50))
     plot_df = df_by_id[p_id]
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
@@ -98,10 +98,10 @@ def update_graph_scatter(n, p_id):
     )
 
     barchart = px.bar(
-        #data_frame = dff,
-        x = data['Product-ID'],
-        y = data["Quantity-Sold"],
-        orientation = "v",
+        data_frame = dff,
+        x = 'Product-ID',
+        y = "Quantity-Sold",
+        orientation = "h",
         barmode='relative',
         labels={"product_id":"Product Id",
         "count(price)":"Quantity sold in past hour"},
