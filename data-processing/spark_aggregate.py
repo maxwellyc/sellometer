@@ -43,8 +43,8 @@ def main():
         ).select(['timestamp']+df.columns).drop('event_time')
 
     # t0 = df.agg({"timestamp": "min"}).collect()[0][0]
-    df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
-    df = df.withColumn("time_period", (df.time_period + t0)).cast('integer'))
+    df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer') + t0)
+    # df = df.withColumn("time_period", (df.time_period + t0)).cast('integer'))
 
     print (t0)
     df.show(50)
