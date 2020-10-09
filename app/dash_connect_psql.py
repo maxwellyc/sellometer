@@ -80,7 +80,7 @@ def update_graph(option_slctd):
     # dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
 
     # Plotly Express
-    fig = px.scatter(
+    fig = px.line(
         data_frame=plot_df,
         x = 'event_time',
         y = 'sum(price)',
