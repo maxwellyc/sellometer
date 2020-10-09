@@ -9,7 +9,7 @@ import os, subprocess
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
 dst_dir = 'spark-processed/'
-schedule = timedelta(seconds=60)
+schedule = timedelta(seconds=90)
 
 args = {
     'owner': 'airflow',
@@ -53,11 +53,6 @@ move_processed_csv =  BashOperator(
   task_id='move_processed_csv',
   bash_command=f's3cmd mv s3://{bucket}/{src_dir}* s3://{bucket}/{dst_dir}',
   dag = dag)
-
-# print_new_csv_files = BashOperator(
-#   task_id='print_new_csv_files',
-#   bash_command=f's3cmd ls s3://{bucket}/{src_dir}',
-#   dag = dag)
 
 
 file_sensor >> spark_live_process  >> move_processed_csv
