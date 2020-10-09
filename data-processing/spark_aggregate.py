@@ -35,7 +35,6 @@ def main():
     time_format = '%Y-%m-%d %H:%M:%S'
     # start time for time series plotting, I'll set this to a specific time for now
     t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
-
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
     df = df.withColumn(
@@ -44,7 +43,7 @@ def main():
 
     # t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("timestamp", ((df.timestamp - t0) / tstep).cast('integer') + t0)
-    df = df.withColumn("date_time", F.from_utc_timestamp(df.timestamp, 'UTC')) 
+    df = df.withColumn("date_time", F.from_utc_timestamp(df.timestamp, 'UTC').cast(TimestampType))
     # df = df.withColumn("time_period", (df.time_period + t0)).cast('integer'))
 
     print (t0)
