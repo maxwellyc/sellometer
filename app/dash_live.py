@@ -46,7 +46,7 @@ def update_df():
 
 df_by_id, hot_list = update_df()
 hot_list.sort(key=lambda x: x[1])
-data = {'Product-ID' : [str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
+data = {'Product-ID' : ['pid-'+str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
 dff = pd.DataFrame.from_dict(data)
 # # dash Application
 app = dash.Dash(__name__)
@@ -83,7 +83,7 @@ app.layout = html.Div([
 def update_graph_scatter(n, p_id):
     df_by_id, hot_list = update_df()
     hot_list.sort(key=lambda x: x[1])
-    data = {'Product-ID' : [str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
+    data = {'Product-ID' : ['pid-'+str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
     dff = pd.DataFrame.from_dict(data)
     print (dff.head(50))
     plot_df = df_by_id[p_id]
