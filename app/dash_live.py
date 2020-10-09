@@ -35,11 +35,6 @@ def id_time_series(hot_list, df, id_name = 'product_id'):
         dropdown_op.append({"label":f"{id_name}: {id}", "value": id})
     return df_by_id, dropdown_op
 
-engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
-df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
-hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
-df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
-
 # # dash Application
 app = dash.Dash(__name__)
 
@@ -70,6 +65,10 @@ app.layout = html.Div([
 )
 def update_graph_scatter(n, option_slctd):
     print(option_slctd)
+    engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
+    df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
+    hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
+    df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
 
     container = "The item id you selected was: {}".format(option_slctd)
 
