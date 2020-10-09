@@ -18,13 +18,14 @@ from sqlalchemy import create_engine
 def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
     df = pd.read_sql_table(table_name, engine)
     df_gb = df.groupby(by=[id_name]).sum()
-    print (df_gb.head(20))
     return df, df_gb
 
-def rank_by_id(df_gb, rank_metric = "count(price)", n = 100):
-    df_gb = df_gb.sort_values(by=rank_metric, ascending=False)
-    hot_id_list = list(df_gb.index.get_level_values(0))
+def rank_by_id(df_gb, rank_metric = "count(price)", n = 20):
+    df_gb = df_gb.sort_values(by=rank_metric, ascending=True)
+    print (df_gb.head(20))
+    hot_id_list = list(df_gb.index.get_level_values(0))[:n]
     hot_list = [ (id, df_gb.loc[id, rank_metric]) for id in hot_id_list]
+    print (hot_list)
     return hot_list
 
 def id_time_series(hot_list, df, id_name = 'product_id'):
@@ -63,7 +64,7 @@ app.layout = html.Div([
     type="number",
     placeholder="Enter Product Id",
     debounce=True,
-    value=hot_list[0][0]
+    value=hot_list[-1][0]
     ),
     html.Br(),
     dcc.Graph(id='live-graph', animate=True),
@@ -87,7 +88,6 @@ def update_graph_scatter(n, p_id):
     dff = pd.DataFrame.from_dict(data)
 
     plot_df = df_by_id[p_id]
-    print (list(df_by_id.keys()))
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
         x = plot_df['event_time'],
