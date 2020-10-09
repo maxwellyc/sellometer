@@ -4,8 +4,8 @@ import sched, time
 
 # s3 parameters
 bucket = 'maxwell-insight'
-src_dir = 'serverpool/'
-dst_dir = 'spark-processed/'
+src_dir = 'minicsv/'
+dst_dir = 'serverpool/'
 
 # send file parameters
 num_servers = 4
