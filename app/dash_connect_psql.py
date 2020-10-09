@@ -11,9 +11,6 @@ import psycopg2
 import os
 from sqlalchemy import create_engine
 
-global hot_list
-global dropdown_op
-global time_series_by_id
 
 def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
     df = pd.read_sql_table(table_name, engine)
@@ -21,12 +18,15 @@ def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'pro
     return df, df_gb
 
 def rank_by_id(df_gb, rank_metric = "count(price)", n = 10):
+    global hot_list
     df_gb = df_gb.sort_values(by=rank_metric, ascending=False)
     hot_id_list = list(df_gb.index.get_level_values(0))[:n]
     hot_list = [ (id, df_gb.loc[id, rank_metric]) for id in hot_id_list]
     return hot_list
 
 def id_time_series(hot_list, df, id_name = 'product_id'):
+    global dropdown_op
+    global time_series_by_id
     time_series_by_id, dropdown_op = {}, []
     for id, metric in hot_list:
         time_series_by_id[id] = df[ df[id_name] == id ].set_index('event_time')
