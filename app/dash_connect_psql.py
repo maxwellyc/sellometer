@@ -19,7 +19,7 @@ def read_sql_to_gb(engine, table_name="purchase_product_id_hour", id_name = 'pro
 def rank_by_id(gb, rank_metric = "count(price)", n = 10):
     gb = gb.sort_values(by=rank_metric, ascending=False)
     hot_id_list = list(gb.index.get_level_values(0))[:n]
-    print (gb[hot_id_list[0]])
+    print (gb.get_group(hot_id_list[0]))
     #hot_list = [ [hot_id_list, gb[ hot_id_list ][rank_metric] ] for id in hot_id_list]
     #return hot_list
 
