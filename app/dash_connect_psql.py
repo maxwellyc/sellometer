@@ -48,7 +48,7 @@ app.layout = html.Div([
     dcc.Dropdown(id="slct_item",
                  options=dropdown_op,
                  multi=False,
-                 value=hot_list[0],
+                 value=hot_list[0][0],
                  style={'width': "40%"}
                  ),
 
@@ -81,7 +81,7 @@ def update_graph(option_slctd):
 
     # Plotly Express
     fig = px.scatter(
-        data_frame=dff,
+        data_frame=plot_df,
         x = 'event_time',
         y = 'sum(price)',
         color = 'product_id',
