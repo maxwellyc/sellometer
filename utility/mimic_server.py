@@ -11,7 +11,7 @@ dst_dir = 'serverpool/'
 num_servers = 4
 t_start = dt.datetime(2019,10,1,0,0,0)
 t_freq = dt.timedelta(minutes=1)
-send_time_gap = 60 #seconds
+send_time_gap = 2 #seconds
 t_format = "%Y-%m-%d-%H-%M-%S"
 
 # scheduler
