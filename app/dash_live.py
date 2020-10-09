@@ -101,7 +101,7 @@ def update_graph_scatter(n, p_id):
         data_frame = dff,
         x = 'Product-ID',
         y = "Quantity-Sold",
-        orientation = "h",
+        # orientation = "h",
         barmode='relative',
         labels={"product_id":"Product Id",
         "count(price)":"Quantity sold in past hour"},
