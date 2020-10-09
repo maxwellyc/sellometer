@@ -11,7 +11,9 @@ import psycopg2
 import os
 from sqlalchemy import create_engine
 
-global hot_list, dropdown_op, time_series_by_id
+global hot_list
+global dropdown_op
+global time_series_by_id
 
 def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
     df = pd.read_sql_table(table_name, engine)
@@ -96,4 +98,4 @@ if __name__ == '__main__':
     df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
     hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
     id_time_series(hot_list, df, id_name = 'product_id')
-    # app.run_server(debug=True, port=8051, host="10.0.0.12")
+    app.run_server(debug=True, port=8051, host="10.0.0.12")
