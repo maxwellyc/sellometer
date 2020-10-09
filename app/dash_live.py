@@ -85,9 +85,9 @@ def update_graph_scatter(n, p_id):
     trace = plotly.graph_objs.Scatter(
         x = plot_df['event_time'],
         y = plot_df['sum(price)'],
-        name='Scatter',
-        labels={'sum(price)': 'GMV ($)',
-        'time_period':'Time'},
+        name='Sales over time',
+        # labels={'sum(price)': 'GMV ($)',
+        # 'time_period':'Time'},
         mode='lines+markers'
     )
 
