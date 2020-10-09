@@ -45,6 +45,9 @@ def update_df():
     return df_by_id, hot_list
 
 df_by_id, hot_list = update_df()
+hot_list.sort(key=lambda x: x[1])
+data = {'Product-ID' : [str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
+dff = pd.DataFrame.from_dict(data)
 # # dash Application
 app = dash.Dash(__name__)
 
@@ -81,7 +84,7 @@ def update_graph_scatter(n, p_id):
     df_by_id, hot_list = update_df()
     hot_list.sort(key=lambda x: x[1])
     data = {'Product-ID' : [str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
-    df = pd.DataFrame.from_dict(data)
+    dff = pd.DataFrame.from_dict(data)
     #print (df.head(50))
     plot_df = df_by_id[p_id]
     # Plotly Go
@@ -95,7 +98,7 @@ def update_graph_scatter(n, p_id):
     )
 
     barchart = px.bar(
-        data_frame = df,
+        data_frame = dff,
         x = 'Product-ID',
         y = "Quantity-Sold",
         orientation = "h",
