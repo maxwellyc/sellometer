@@ -27,12 +27,13 @@ dag = DAG(
     default_args=args
     )
 
-def read_file_size(**kwargs):
+def max_core_decision(**context):
     p = subprocess.Popen([f's3cmd du $s3/{src_dir}'], stdout=subprocess.PIPE, stderr=subprocess.IGNORE)
     text = p.stdout.read()
     tot_size = float(text.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
     max_cores = 12 if totsize > 10 else 6
-    kwargs['ti'].xcom_push(key='max_cores', value = max_cores)
+    context['ti'].xcom_push(key='max_cores', value = max_cores)
+    print (max_cores)
 
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
@@ -45,18 +46,27 @@ file_sensor = S3KeySensor(
 
 spark_live_process = BashOperator(
   task_id='spark_live_process',
-  bash_command='spark-submit --conf spark.cores.max="{{ti.xcom_pull("max_cores")}}" $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
+  bash_command='spark-submit --conf spark.cores.max=' +\
+  '"{{ti.xcom_pull("max_cores")}}"'+\
+  '$sparkf ~/eCommerce/data-processing/spark_aggregate.py',
   dag = dag)
+
+max_core_decision = PythonOperator(
+  task_id='max_core_decision',
+  python_callable=max_core_decision,
+  provide_context=True,
+  dag=dag
+)
 
 move_processed_csv =  BashOperator(
   task_id='move_processed_csv',
   bash_command=f's3cmd mv s3://{bucket}/{src_dir}* s3://{bucket}/{dst_dir}',
   dag = dag)
 
-print_new_csv_files = BashOperator(
-  task_id='print_new_csv_files',
-  bash_command=f's3cmd ls s3://{bucket}/{src_dir}',
-  dag = dag)
+# print_new_csv_files = BashOperator(
+#   task_id='print_new_csv_files',
+#   bash_command=f's3cmd ls s3://{bucket}/{src_dir}',
+#   dag = dag)
 
 
-file_sensor >>  print_new_csv_files >> spark_live_process  >> move_processed_csv
+file_sensor >>  max_core_decision >> spark_live_process  >> move_processed_csv
