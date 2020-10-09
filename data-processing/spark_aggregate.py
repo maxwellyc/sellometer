@@ -34,7 +34,7 @@ def main():
     start_time = "2019-10-01 00:00:00"
     time_format = '%Y-%m-%d %H:%M:%S'
     # start time for time series plotting, I'll set this to a specific time for now
-    # t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
+    t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
 
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
@@ -42,7 +42,7 @@ def main():
         'timestamp', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
         ).select(['timestamp']+df.columns).drop('event_time')
 
-    t0 = df.agg({"timestamp": "min"}).collect()[0][0]
+    # t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
 
     ################################################################################
