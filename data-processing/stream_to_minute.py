@@ -90,7 +90,7 @@ def split_by_event(df):
 
     return view_df, purchase_df
 
-def group_by_dimensions(view_df, purchase_df, dimensions=['product_id']):
+def group_by_dimensions(view_df, purchase_df, dimensions):
 
     view_dims, purchase_dims = {}, {}
     # total view counts per dimesion, total sales amount per dimension
@@ -145,7 +145,7 @@ def read_s3_to_df(sql_c, spark):
     return df
     ################################################################################
 
-def write_to_psql(view_dims, purchase_dims,dimensions, mode, timescale="minute"):
+def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"):
 # write dataframe to postgreSQL
     for dim in dimensions:
         view_dims[dim].write\
@@ -170,11 +170,12 @@ def write_to_psql(view_dims, purchase_dims,dimensions, mode, timescale="minute")
 
 
 if __name__ == "__main__":
-    # dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
+    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     sql_c, spark = spark_init()
-    df = read_s3_to_df(sql_c, spark).cache()
-    df = compress_time(df)
-    df = clean_data(df)
-    view_df, purchase_df = split_by_event(df)
+    df0 = read_s3_to_df(sql_c, spark).cache()
+    df1 = compress_time(df0)
+    df2 = compress_time(df1)
+    clean_df1 = clean_data(df1)
+    view_df, purchase_df = split_by_event(clean_df1)
     view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
     write_to_psql(view_dim, purchase_dim, dimensions, mode = "append")
