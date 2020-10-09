@@ -84,7 +84,7 @@ app.layout = html.Div([
     ),
 ])
 @app.callback([Output('live-ranks', 'figure'),
-               [Output('live-graph1', 'figure'),
+               Output('live-graph1', 'figure'),
                Output('live-graph2', 'figure'),
                Output('live-graph3', 'figure'),
                Output('live-graph4', 'figure'),
@@ -93,7 +93,7 @@ app.layout = html.Div([
                Output('live-graph7', 'figure'),
                Output('live-graph8', 'figure'),
                Output('live-graph9', 'figure'),
-               Output('live-graph10', 'figure')]
+               Output('live-graph10', 'figure')
               ],
               [Input('graph-update', 'n_intervals'),
               Input('p_id','value')
