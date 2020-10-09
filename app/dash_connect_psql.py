@@ -31,14 +31,14 @@ g1 = df1.groupby(by="product_id").sum()#.sort_values(by="view_cnt")
 #gb = df.groupby(by="product_id").sum()#.apply(lambda _df: _df.sort_values('view_cnt'))
 
 g1.add_suffix('_Count').reset_index()
-g1 = g1.sort_values(by="view_cnt", ascending=False)
+g1 = g1.sort_values(by="count(price)", ascending=False)
 
 top_ids = list(g1.index.get_level_values(0))[:10]
 
 views_ts = {}
 for id in top_ids:
     views_ts[id] = [list((df.loc[df['product_id'] == id])['time_period']),
-    list((df.loc[df['product_id'] == id])['view_cnt'])]
+    list((df.loc[df['product_id'] == id])['sum(price)'])]
 
 dropdown_op = []
 
@@ -101,7 +101,7 @@ def update_graph(option_slctd):
         x = 'time_period',
         y = 'sum(price)',
         color = 'product_id',
-        labels={'view_cnt': 'view counts',
+        labels={'sum(price)': 'GMV ($)',
         'time_period':'time since start (minutes)'},
         template='plotly_dark'
     )
