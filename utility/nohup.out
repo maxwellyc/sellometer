@@ -1,8 +1,0 @@
-  File "split_csv.py", line 18
-    s3file = f's3a://{bucket}/{key}'
-                                   ^
-SyntaxError: invalid syntax
-  File "split_csv.py", line 18
-    s3file = f's3a://{bucket}/{key}'
-                                   ^
-SyntaxError: invalid syntax
