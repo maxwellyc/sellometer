@@ -22,9 +22,9 @@ from sqlalchemy import create_engine
 #     print (row)
 
 # Import data from postgreSQL using sqlalchemy
-engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/my_db")
+engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
 
-df = pd.read_sql_table("event_count", engine)
+df = pd.read_sql_table("purchase_product_id", engine)
 
 df1 = df.copy()
 g1 = df1.groupby(by="product_id").sum()#.sort_values(by="view_cnt")
