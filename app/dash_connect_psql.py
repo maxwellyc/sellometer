@@ -14,6 +14,7 @@ from sqlalchemy import create_engine
 def read_sql_to_gb(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
     df = pd.read_sql_table(table_name, engine)
     gb = df.groupby(by=id_name).sum()
+    print (type(gb))
     return gb
 
 def rank_by_id(gb, rank_metric = "count(price)", n = 10):
