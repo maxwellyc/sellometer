@@ -7,6 +7,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, Event
 from collections import deque
+import random
 
 
 import psycopg2
@@ -38,6 +39,11 @@ df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_n
 hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
 df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
 
+X = deque(maxlen=20)
+Y = deque(maxlen=20)
+X.append(1)
+Y.append(1)
+
 # # dash Application
 app = dash.Dash(__name__)
 
@@ -52,48 +58,33 @@ app.layout = html.Div([
                  multi=False,
                  value=hot_list[0][0],
                  style={'width': "40%"}
-                 ),
-
-    html.Div(id='output_container', children=[]),
+    ),
     html.Br(),
-
-    dcc.Graph(id='sale_timeseries', figure={})
-
+    dcc.Graph( id='live_graph', animate=True ),
+    dcc.Interval(
+        id='graph-update',
+        interval = 1000, # update frequency in milliseconds
+    )
 ])
-
 
 # ------------------------------------------------------------------------------
 # Connect the Plotly graphs with Dash Components
-@app.callback(
-    [Output(component_id='output_container', component_property='children'),
-     Output(component_id='sale_timeseries', component_property='figure')],
-    [Input(component_id='slct_item', component_property='value')]
-)
+@app.callback(Output('live_graph', 'figure'),
+                event = [Event('graph-update', 'interval')])
 
-def update_graph(option_slctd):
-    print(option_slctd)
-    print(type(option_slctd))
-
-    container = "The item id you selected was: {}".format(option_slctd)
-
-    plot_df = df_by_id[option_slctd]
-    # s = pd.to_numeric(dff['time_period'])
-    # dff = dff.drop(columns=['time_period'])
-    # dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
-
-    # Plotly Express
-    fig = px.line(
-        data_frame=plot_df,
-        x = 'event_time',
-        y = 'sum(price)',
-        color = 'product_id',
-        labels={'sum(price)': 'GMV ($)',
-        'time_period':'Time'},
-        template='plotly_dark'
+def update_graph():
+    global X
+    global Y
+    X.append(X[-1]+1)
+    Y.append(Y[-1]+Y[-1]*random.uniform(-0.1, 0.1))
+    data = go.Scatter(
+    x = list(X),
+    y = list(Y),
+    name = 'Scatter',
+    mode = 'lines+markers'
     )
-
-    return container, fig
-
+    return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X),max(X)]),
+                                               yaxis = dict(range=[min(Y),max(Y)]))}
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
