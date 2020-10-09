@@ -31,7 +31,7 @@ dag = DAG(
 def read_file_size(**kwargs):
     p = subprocess.Popen([f's3cmd du $s3/{src_dir}'], stdout=subprocess.PIPE, stderr=subprocess.IGNORE)
     text = p.stdout.read()
-    tot_size = float(text.split(" ")[0] / 1024 / 1024 # total file size in Mbytes
+    tot_size = float(text.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
     max_cores = 12 if totsize > 10 else 6
     kwargs['ti'].xcom_push(key='max_cores', value = max_cores)
 
