@@ -24,7 +24,7 @@ t_curr = t_start
 def move_s3_file(sc, t_curr, t_start, t_end):
     t_str = t_curr.strftime(t_format)
     for i in range(num_servers):
-        print (f'Sending file: {t_str}-{i}.csv')
+        # print (f'Sending file: {t_str}-{i}.csv')
         os.system(f's3cmd cp s3://{bucket}/{src_dir}{t_str}-{i}.csv s3://{bucket}/{dst_dir}')
     t_curr += dt.timedelta(minutes=1)
     if t_curr > t_end: t_curr = t_start
