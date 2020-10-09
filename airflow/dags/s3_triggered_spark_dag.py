@@ -27,12 +27,13 @@ dag = DAG(
     default_args=args
     )
 
-def find_max_cores():
+def spark_live_process():
     response = subprocess.check_output(f's3cmd du $s3/{src_dir}', shell=True).decode('ascii')
     file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
     max_cores = 12 if file_size > 10 else 6
-    os.environ['max_cores'] = str(max_cores)
-    print ("max_cores = ", max_cores)
+    print(max_cores,'spark cores executing')
+    os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
+    '$sparkf ~/eCommerce/data-processing/spark_aggregate.py')
 
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
@@ -43,17 +44,10 @@ file_sensor = S3KeySensor(
     wildcard_match=True,
     dag=dag)
 
-spark_live_process = BashOperator(
+spark_live_process = PythonOperator(
   task_id='spark_live_process',
-  bash_command='spark-submit --conf spark.cores.max=$max_cores' +\
-  '$sparkf ~/eCommerce/data-processing/spark_aggregate.py',
+  python_callable=spark_live_process,
   dag = dag)
-
-find_max_cores = PythonOperator(
-  task_id='find_max_cores',
-  python_callable=find_max_cores,
-  dag=dag
-)
 
 move_processed_csv =  BashOperator(
   task_id='move_processed_csv',
@@ -66,4 +60,4 @@ move_processed_csv =  BashOperator(
 #   dag = dag)
 
 
-file_sensor >>  find_max_cores >> spark_live_process  >> move_processed_csv
+file_sensor >> spark_live_process  >> move_processed_csv
