@@ -111,4 +111,4 @@ def update_graph(option_slctd):
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8051, host="10.0.0.6")
+    app.run_server(debug=True, port=8051, host="10.0.0.12")
