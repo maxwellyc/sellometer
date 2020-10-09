@@ -43,9 +43,9 @@ def update_df():
     df_hour, df_gb_hour = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
     hot_list = rank_by_id(df_gb_hour, rank_metric = "count(price)", n = 20)
     df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
-    return df_gb, df_by_id, hot_list
+    return df_by_id, hot_list, dropdown_op
 
-df_gb, df_by_id, hot_list = update_df()
+df_by_id, hot_list, dropdown_op = update_df()
 hot_list.sort(key=lambda x: x[1])
 data = {'Product-ID' : ['pid-'+str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
 dff = pd.DataFrame.from_dict(data)
@@ -60,14 +60,23 @@ app.layout = html.Div([
     dcc.Graph(id='live-ranks',animate=True),
     html.Br(),
     html.Br(),
-    dcc.Input(id="p_id",
-    type="number",
-    placeholder="Enter Product Id",
-    debounce=True,
-    value=hot_list[-1][0]
-    ),
+    # dcc.Input(id="p_id",
+    # type="number",
+    # placeholder="Enter Product Id",
+    # debounce=True,
+    # value=hot_list[-1][0]
+    # ),
     html.Br(),
-    dcc.Graph(id='live-graph', animate=True),
+    dcc.Graph(id='live-graph1', animate=True),
+    dcc.Graph(id='live-graph2', animate=True),
+    dcc.Graph(id='live-graph3', animate=True),
+    dcc.Graph(id='live-graph4', animate=True),
+    dcc.Graph(id='live-graph5', animate=True),
+    dcc.Graph(id='live-graph6', animate=True),
+    dcc.Graph(id='live-graph7', animate=True),
+    dcc.Graph(id='live-graph8', animate=True),
+    dcc.Graph(id='live-graph9', animate=True),
+    dcc.Graph(id='live-graph10', animate=True),
     dcc.Interval(
         id='graph-update',
         interval=60*1000,
@@ -75,21 +84,30 @@ app.layout = html.Div([
     ),
 ])
 @app.callback([Output('live-ranks', 'figure'),
-               Output('live-graph', 'figure')
+               [Output('live-graph1', 'figure'),
+               Output('live-graph2', 'figure'),
+               Output('live-graph3', 'figure'),
+               Output('live-graph4', 'figure'),
+               Output('live-graph5', 'figure'),
+               Output('live-graph6', 'figure'),
+               Output('live-graph7', 'figure'),
+               Output('live-graph8', 'figure'),
+               Output('live-graph9', 'figure'),
+               Output('live-graph10', 'figure')]
               ],
               [Input('graph-update', 'n_intervals'),
               Input('p_id','value')
               ]
 )
 def update_graph_scatter(n, p_id):
-    df_gb, df_by_id, hot_list = update_df()
+    df_by_id, hot_list, dropdown_op = update_df()
     hot_list.sort(key=lambda x: x[1])
     data = {'Product-ID' : ['pid-'+str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
     dff = pd.DataFrame.from_dict(data)
     plot_df = df_by_id[str(p_id)]
 
     # Plotly Go
-    trace = plotly.graph_objs.Scatter(
+    trace = {p_id: plotly.graph_objs.Scatter(
         x = plot_df['event_time'],
         y = plot_df['sum(price)'],
         name='Sales over time',
@@ -97,6 +115,8 @@ def update_graph_scatter(n, p_id):
         # 'time_period':'Time'},
         mode='lines+markers'
     )
+    for p_id, m in hot_list
+    }
 
     barchart = px.bar(
         data_frame = dff,
@@ -109,11 +129,11 @@ def update_graph_scatter(n, p_id):
 
     )
 
-    return barchart, {'data': [trace],
+    return barchart, [{'data': [trace[p_id]],
             'layout': go.Layout(
                 xaxis=dict(range=[plot_df['event_time'].min(), plot_df['event_time'].max()]),
                 yaxis=dict(range=[0, plot_df['sum(price)'].max()*1.3]))
-            }
+            } for p_id, m in hot_list ]
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     app.run_server(debug=False, port=8051, host="10.0.0.12")
