@@ -5,7 +5,9 @@ import plotly.graph_objects as go
 import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, Event
+from collections import deque
+
 
 import psycopg2
 import os
