@@ -93,7 +93,7 @@ def update_graph_scatter(n, p_id):
     )
 
     barchart = px.bar(
-        data_frame= df[df['product_id'].isin([id for id, m in hot_list])],
+        data_frame = df,
         x = "product_id",
         y = "count(price)",
         orientation = "h",
