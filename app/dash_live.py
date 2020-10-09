@@ -88,6 +88,7 @@ def update_graph_scatter(n, p_id):
     dff = pd.DataFrame.from_dict(data)
 
     plot_df = df_by_id[p_id]
+    print (list(df_by_id.keys()))
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
         x = plot_df['event_time'],
