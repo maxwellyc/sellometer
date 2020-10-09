@@ -21,7 +21,7 @@ def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'pro
     print (df_gb.head(20))
     return df, df_gb
 
-def rank_by_id(df_gb, rank_metric = "count(price)", n = 10):
+def rank_by_id(df_gb, rank_metric = "count(price)", n = 100):
     df_gb = df_gb.sort_values(by=rank_metric, ascending=False)
     hot_id_list = list(df_gb.index.get_level_values(0))[:n]
     hot_list = [ (id, df_gb.loc[id, rank_metric]) for id in hot_id_list]
@@ -85,8 +85,8 @@ def update_graph_scatter(n, p_id):
     hot_list.sort(key=lambda x: x[1])
     data = {'Product-ID' : ['pid-'+str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
     dff = pd.DataFrame.from_dict(data)
-    print (df_gb.head(50))
-    plot_df = df_gb.loc[p_id]
+
+    plot_df = df_by_id[p_id]
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
         x = plot_df['event_time'],
