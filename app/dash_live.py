@@ -66,7 +66,7 @@ app.layout = html.Div([
                Output('live-graph', 'figure')
               ],
               [Input('graph-update', 'n_intervals'),
-              Input('p_id')
+              Input('p_id','value')
               ]
 )
 def update_graph_scatter(n, p_id):
