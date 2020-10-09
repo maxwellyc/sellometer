@@ -13,7 +13,7 @@ import psycopg2
 import os
 from sqlalchemy import create_engine
 
-def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
+def read_sql_to_df(engine, table_name, id_name = 'product_id'):
     df = pd.read_sql_table(table_name, engine)
     df_gb = df.groupby(by=[id_name]).sum()
     return df, df_gb
@@ -33,10 +33,20 @@ def id_time_series(hot_list, df, id_name = 'product_id'):
         dropdown_op.append({"label":f"{id_name}: {id}", "value": id})
     return df_by_id, dropdown_op
 
-engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
-df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
-hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
-df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
+def update_from_sql():
+    engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
+
+    # dataframe updates minute data
+    df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
+
+    # use hourly sales data to rank hot items
+    df_hour, df_gb_hour = read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id')
+    hot_list = rank_by_id(df_gb_hour, rank_metric = "count(price)", n = 10)
+
+    df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
+    return df_by_id, dropdown_op, hot_list
+
+df_by_id, dropdown_op, hot_list = update_from_sql()
 
 # # dash Application
 app = dash.Dash(__name__)
@@ -72,7 +82,7 @@ app.layout = html.Div([
 
 def update_graph(option_slctd):
     print(option_slctd)
-    print(type(option_slctd))
+    df_by_id, dropdown_op, hot_list = update_from_sql()
 
     container = "The item id you selected was: {}".format(option_slctd)
 
