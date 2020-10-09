@@ -70,7 +70,7 @@ file_sensor = S3KeySensor(
 
 spark_live_process = BashOperator(
   task_id='spark_live_process',
-  bash_command='spark-submit --num_executors 4 $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
+  bash_command='spark-submit --num-executors 4 $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
   dag = dag)
 
 move_processed_csv =  BashOperator(
