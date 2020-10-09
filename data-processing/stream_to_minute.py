@@ -171,11 +171,19 @@ def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"
 
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
+    # initialize spark
     sql_c, spark = spark_init()
+    # read csv from s3
     df_0 = read_s3_to_df(sql_c, spark).cache()
-    df = compress_time(df_0, tstep = 60)
-    df_hour = compress_time(df_0, tstep = 3600 )
-    df = clean_data(df)
-    view_df, purchase_df = split_by_event(df)
+    # clean data
+    df_0 = clean_data(df_0)
+    # compress time into minute granularity
+    df_minute = compress_time(df_0, tstep = 60)
+    # compress time into hour granularity
+    df_hourly = compress_time(df_0, tstep = 3600 )
+    # split by event type: view and purchase
+    view_df, purchase_df = split_by_event(df_minute)
+    # groupby different product dimensions
     view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
+    # write to postgresql database
     write_to_psql(view_dim, purchase_dim, dimensions, mode = "append")
