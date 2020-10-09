@@ -22,7 +22,7 @@ from sqlalchemy import create_engine
 #     print (row)
 
 # Import data from postgreSQL using sqlalchemy
-engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@localhost:5431/my_db")
+engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/my_db")
 
 df = pd.read_sql_table("event_count", engine)
 
