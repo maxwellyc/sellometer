@@ -101,7 +101,7 @@ def id_time_series(hot_list, df, id_name = 'product_id'):
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
-    df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id')
+    df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
     hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
     id_time_series(hot_list, df, id_name = 'product_id')
     # app.run_server(debug=True, port=8051, host="10.0.0.12")
