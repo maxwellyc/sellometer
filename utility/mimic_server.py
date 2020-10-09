@@ -10,8 +10,9 @@ dst_dir = 'serverpool/'
 # send file parameters
 num_servers = 4
 t_start = dt.datetime(2019,10,1,0,0,0)
+t_end = dt.datetime(2019,10,8,2,23,0)
 t_freq = dt.timedelta(minutes=1)
-send_time_gap = 2 #seconds
+send_time_gap = 60 #seconds
 t_format = "%Y-%m-%d-%H-%M-%S"
 
 # scheduler
@@ -20,14 +21,15 @@ s = sched.scheduler(time.time, time.sleep)
 # initialize time
 t_curr = t_start
 
-def move_s3_file(sc, t_curr):
+def move_s3_file(sc, t_curr, t_start, t_end):
     t_str = t_curr.strftime(t_format)
     for i in range(num_servers):
         print (f'Sending file: {t_str}-{i}.csv')
         os.system(f's3cmd cp s3://{bucket}/{src_dir}{t_str}-{i}.csv s3://{bucket}/{dst_dir}')
     t_curr += dt.timedelta(minutes=1)
-    s.enter(send_time_gap, 1, move_s3_file, (sc,t_curr,))
+    if t_curr > t_end: t_curr = t_start
+    s.enter(send_time_gap, 1, move_s3_file, (sc,t_curr,t_start,t_end,))
 
 if __name__ == "__main__":
-    s.enter(send_time_gap, 1, move_s3_file, (s,t_start,))
+    s.enter(send_time_gap, 1, move_s3_file, (s,t_start,t_start,t_end,))
     s.run()
