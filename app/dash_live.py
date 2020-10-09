@@ -59,7 +59,7 @@ app.layout = html.Div([
     dcc.Graph(id='live-graph', animate=True),
     dcc.Interval(
         id='graph-update',
-        interval=1*1000,
+        interval=60*1000,
         n_intervals=0
     ),
 ])
@@ -92,9 +92,6 @@ def update_graph_scatter(n, option_slctd):
                 xaxis=dict(range=[plot_df['event_time'].min(), plot_df['event_time'].max()]),
                 yaxis=dict(range=[0, plot_df['sum(price)'].max()*1.3]))
             }
-
-
-
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     app.run_server(debug=True, port=8051, host="10.0.0.12")
