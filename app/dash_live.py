@@ -44,7 +44,7 @@ def update_df():
     return df_by_id, hot_list, df
 
 df_by_id, hot_list, df = update_df()
-
+df = df[df['product_id'].isin([id for id, m in hot_list])].astype({"product_id":str})
 # # dash Application
 app = dash.Dash(__name__)
 
