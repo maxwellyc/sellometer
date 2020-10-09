@@ -96,7 +96,7 @@ def update_graph(option_slctd):
     dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
 
     # Plotly Express
-    fig = px.line(
+    fig = px.scatter(
         data_frame=dff,
         x = 'time_period',
         y = 'sum(price)',
