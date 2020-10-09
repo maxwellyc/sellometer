@@ -137,7 +137,7 @@ def read_s3_to_df(sql_c, spark):
     return df
     ################################################################################
 
-def write_to_psql(view_dims, purchase_dims,dimensions):
+def write_to_psql(view_dims, purchase_dims,dimensions, mode):
 # write dataframe to postgreSQL
     for dim in dimensions:
         view_dims[dim].write\
@@ -147,8 +147,9 @@ def write_to_psql(view_dims, purchase_dims,dimensions):
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
-        .mode("append")\
+        .mode(mode)\
         .save()
+        
         purchase_dims[dim].write\
         .format("jdbc")\
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
@@ -156,7 +157,7 @@ def write_to_psql(view_dims, purchase_dims,dimensions):
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
-        .mode("append")\
+        .mode(mode)\
         .save()
 
 
@@ -165,4 +166,4 @@ if __name__ == "__main__":
     sql_c, spark = spark_init()
     df = read_s3_to_df(sql_c, spark)
     view_dim, purchase_dim = aggregate(df, dimensions)
-#    write_to_psql(view_dim, purchase_dim, dimensions)
+    write_to_psql(view_dim, purchase_dim, dimensions, mode = "append")
