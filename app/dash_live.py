@@ -61,13 +61,7 @@ app.layout = html.Div([
                  style={'width': "40%"}
     ),
     html.Br(),
-    dcc.Graph(id='live-graph',
-              animate=True,
-              figure={'data': [initial_trace],
-                      'layout': go.Layout(
-                          xaxis=dict(range=[min(X), max(X)]),
-                          yaxis=dict(range=[min(Y), max(Y)]))
-                      }),
+    dcc.Graph(id='live-graph', animate=True),
     dcc.Interval(
         id='graph-update',
         interval=1*1000,
