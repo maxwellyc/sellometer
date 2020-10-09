@@ -63,14 +63,14 @@ app.layout = html.Div([
     dcc.Graph( id='live_graph', animate=True ),
     dcc.Interval(
         id='graph-update',
-        interval = 1000, # update frequency in milliseconds
+        interval = 1*1000, # update frequency in milliseconds
     )
 ])
 
 # ------------------------------------------------------------------------------
 # Connect the Plotly graphs with Dash Components
 @app.callback(Output('live_graph', 'figure'),
-                event = [Event('graph-update', 'interval')])
+                [Input ('graph-update', 'interval')])
 
 def update_graph():
     global X
