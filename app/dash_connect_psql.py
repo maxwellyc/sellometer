@@ -29,7 +29,7 @@ def id_time_series(hot_list, df, id_name = 'product_id'):
     for id, metric in hot_list:
         time_series_by_id[id] = df[ df[id_name] == id ].set_index('event_time')
         time_series_by_id[id].sort_index(inplace=True)
-        print (id, "\n" , time_series_by_id[id])
+        # print (id, "\n" , time_series_by_id[id])
         dropdown_op.append({"label":f"{id_name}: {id}", "value": id})
 
 
