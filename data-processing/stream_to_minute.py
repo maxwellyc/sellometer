@@ -4,9 +4,9 @@ from pyspark.sql import functions as F
 import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 
-def compress_time(df):
+def compress_time(df, tstep = 60):
     # Datetime transformation #######################################################
-    tstep = 60 # unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
+    # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01 00:00:00"
     time_format = '%Y-%m-%d %H:%M:%S'
     # start time for time series plotting, I'll set this to a specific time for now
@@ -172,10 +172,10 @@ def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     sql_c, spark = spark_init()
-    df0 = read_s3_to_df(sql_c, spark).cache()
-    df1 = compress_time(df0)
-    df2 = compress_time(df1)
-    clean_df1 = clean_data(df1)
-    view_df, purchase_df = split_by_event(clean_df1)
+    df_0 = read_s3_to_df(sql_c, spark).cache()
+    df = compress_time(df_0, tstep = 60)
+    df_hour = compress_time(df_0, tstep = 3600 )
+    df = clean_data(df)
+    view_df, purchase_df = split_by_event(df)
     view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
     write_to_psql(view_dim, purchase_dim, dimensions, mode = "append")
