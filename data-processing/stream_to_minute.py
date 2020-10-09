@@ -19,7 +19,7 @@ def compress_time(df, tstep = 60):
     # t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
     df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
-    # df = df.withColumn("date_time", (df.date_time + t0)).cast('integer'))
+    # df = df.withColumn("event_time", (df.event_time + t0)).cast('integer'))
 
     print (t0)
     df.show(50)
@@ -98,19 +98,19 @@ def group_by_dimensions(view_df, purchase_df, dimensions):
         # total view counts per dimension, if product_id, also compute mean price
         # total $$$ amount sold per dimension, if product_id also compute count and mean
         if dim == 'product_id':
-            view_dims[dim] = (view_df.groupby(dim, 'date_time')
+            view_dims[dim] = (view_df.groupby(dim, 'event_time')
                                 .agg(F.count('price'),F.mean('price')))
-            purchase_dims[dim] = (purchase_df.groupby(dim, 'date_time')
+            purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
                                 .agg(F.sum('price'),F.count('price'),F.mean('price')))
         else:
-            view_dims[dim] = (view_df.groupby(dim, 'date_time')
+            view_dims[dim] = (view_df.groupby(dim, 'event_time')
                                 .agg(F.count('price')))
-            purchase_dims[dim] = (purchase_df.groupby(dim, 'date_time')
+            purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
                                 .agg(F.sum('price')))
 
         # sort dataframe for plotting
-        view_dims[dim] = view_dims[dim].orderBy(dim, 'date_time')
-        purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'date_time')
+        view_dims[dim] = view_dims[dim].orderBy(dim, 'event_time')
+        purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'event_time')
 
         view_dims[dim].cache()
         purchase_dims[dim].cache()
