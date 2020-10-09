@@ -4,7 +4,7 @@ from pyspark.sql import functions as F
 import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 
-def compress_time(df, dimensions, suffix='minute'):
+def compress_time(df):
     # Datetime transformation #######################################################
     tstep = 60 # unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01 00:00:00"
@@ -89,6 +89,10 @@ def split_by_event(df):
         .dropDuplicates(subset=['user_session','product_id'])
     )
 
+    return view_df, purchase_df
+
+def group_by_dimensions(view_df, purchase_df, dimensions=['product_id']):
+
     view_dims, purchase_dims = {}, {}
     # total view counts per dimesion, total sales amount per dimension
     for dim in dimensions:
@@ -111,6 +115,7 @@ def split_by_event(df):
 
         view_dims[dim].cache()
         purchase_dims[dim].cache()
+
     return view_dims, purchase_dims
 
 def spark_init():
@@ -166,10 +171,11 @@ def write_to_psql(view_dims, purchase_dims,dimensions, mode, timescale="minute")
 
 
 if __name__ == "__main__":
-    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
+    # dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
     sql_c, spark = spark_init()
     df = read_s3_to_df(sql_c, spark).cache()
     df = compress_time(df)
     df = clean_data(df)
-    view_dim, purchase_dim = split_by_event(df, dimensions)
+    view_df, purchase_df = split_by_event(df)
+    view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
     write_to_psql(view_dim, purchase_dim, dimensions, mode = "append")
