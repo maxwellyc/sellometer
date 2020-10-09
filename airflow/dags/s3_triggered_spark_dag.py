@@ -46,7 +46,7 @@ file_sensor = S3KeySensor(
 
 spark_live_process = BashOperator(
   task_id='spark_live_process',
-  bash_command='spark-submit --conf spark.cores.max={{ti.xcom_pull("max_cores")}} $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
+  bash_command='spark-submit --conf spark.cores.max=4 $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
   dag = dag)
 
 move_processed_csv =  BashOperator(
