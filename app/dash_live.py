@@ -40,11 +40,6 @@ df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_n
 hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
 df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
 
-X = deque(maxlen=20)
-Y = deque(maxlen=20)
-X.append(1)
-Y.append(1)
-
 # # dash Application
 app = dash.Dash(__name__)
 
@@ -69,22 +64,33 @@ app.layout = html.Div([
     ),
 ])
 @app.callback(Output('live-graph', 'figure'),
-              [Input('graph-update', 'n_intervals')])
-def update_graph_scatter(n):
-    X.append(X[-1]+1)
-    Y.append(Y[-1]+2)
+              [Input('graph-update', 'n_intervals'),
+              Input('slct_item', 'value')
+              ]
+)
+def update_graph_scatter(n, option_slctd):
+    print(option_slctd)
 
+    container = "The item id you selected was: {}".format(option_slctd)
+
+    plot_df = df_by_id[option_slctd]
+    # s = pd.to_numeric(dff['time_period'])
+    # dff = dff.drop(columns=['time_period'])
+    # dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
+
+    # Plotly Express
     trace = plotly.graph_objs.Scatter(
-        x=list(X),
-        y=list(Y),
+        data_frame=plot_df,
+        x = 'event_time',
+        y = 'sum(price)',
         name='Scatter',
         mode='lines+markers'
     )
 
     return {'data': [trace],
             'layout': go.Layout(
-                xaxis=dict(range=[min(X), max(X)]),
-                yaxis=dict(range=[min(Y), max(Y)]))
+                xaxis=dict(range=[plot_df['event_time'].min(), plot_df['event_time'].max()]),
+                yaxis=dict(range=[0, plot_df['sum(price)'].max()*1.3]))
             }
 
 
