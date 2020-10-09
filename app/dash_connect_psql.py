@@ -19,7 +19,7 @@ def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'pro
 def rank_by_id(df, rank_metric = "count(price)", n = 10):
     df = df.sort_values(by=rank_metric, ascending=False)
     hot_id_list = list(df.index.get_level_values(0))[:n]
-    print (df.loc[hot_id_list[0], rank_metric)
+    print (df.loc[hot_id_list[0], rank_metric])
     print (hot_id_list)
     #hot_list = [ [hot_id_list, gb[ hot_id_list ][rank_metric] ] for id in hot_id_list]
     #return hot_list
