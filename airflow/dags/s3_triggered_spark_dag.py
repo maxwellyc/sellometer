@@ -30,7 +30,8 @@ dag = DAG(
 def spark_live_process():
     response = subprocess.check_output(f's3cmd du $s3/{src_dir}', shell=True).decode('ascii')
     file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
-    max_cores = 12 if file_size > 10 else 6
+    # use extra processors when file size greater than 9 Mb
+    max_cores = 12 if file_size > 9 else 6
     print(max_cores,'spark cores executing')
     os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/spark_aggregate.py')
