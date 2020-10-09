@@ -108,8 +108,8 @@ def update_graph_scatter(n, p_id):
 
     # Plotly Go
     trace = {p_id: plotly.graph_objs.Scatter(
-        x = plot_df['event_time'],
-        y = plot_df['sum(price)'],
+        x = df_by_id[str(p_id)]['event_time'],
+        y = df_by_id[str(p_id)]['sum(price)'],
         name='Sales over time',
         # labels={'sum(price)': 'GMV ($)',
         # 'time_period':'Time'},
@@ -133,7 +133,7 @@ def update_graph_scatter(n, p_id):
             'layout': go.Layout(
                 xaxis=dict(range=[plot_df['event_time'].min(), plot_df['event_time'].max()]),
                 yaxis=dict(range=[0, plot_df['sum(price)'].max()*1.3]))
-            } for p_id, m in hot_list ]
+            } for p_id, m in hot_list]
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     app.run_server(debug=False, port=8051, host="10.0.0.12")
