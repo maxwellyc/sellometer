@@ -55,7 +55,7 @@ app.layout = html.Div([
     html.Div(id='output_container', children=[]),
     html.Br(),
 
-    dcc.Graph(id='sale_timeseries', style="margin: 0 auto; width:855px;", figure={})
+    dcc.Graph(id='sale_timeseries', figure={})
 
 ])
 
