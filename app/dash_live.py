@@ -42,7 +42,7 @@ def update_df():
     df_hour, df_gb_hour = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
     hot_list = rank_by_id(df_gb_hour, rank_metric = "count(price)", n = 10)
     df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
-    return df, df_by_id, hot_list
+    return df_gb, df_by_id, hot_list
 
 df_gb, df_by_id, hot_list = update_df()
 hot_list.sort(key=lambda x: x[1])
@@ -81,11 +81,11 @@ app.layout = html.Div([
               ]
 )
 def update_graph_scatter(n, p_id):
-    df, df_by_id, hot_list = update_df()
+    df_gb, df_by_id, hot_list = update_df()
     hot_list.sort(key=lambda x: x[1])
     data = {'Product-ID' : ['pid-'+str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
     dff = pd.DataFrame.from_dict(data)
-    print (dff.head(50))
+    print (df_gb.head(50))
     plot_df = df_gb.loc[p_id]
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
