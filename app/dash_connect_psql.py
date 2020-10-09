@@ -11,16 +11,16 @@ import psycopg2
 import os
 from sqlalchemy import create_engine
 
-def read_sql_to_gb(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
+def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
     df = pd.read_sql_table(table_name, engine)
-    gb = df.groupby(by=id_name).sum()
-    print (type(gb))
-    return gb
+    df = df.groupby(by=id_name).sum()
+    return df
 
 def rank_by_id(gb, rank_metric = "count(price)", n = 10):
-    gb = gb.sort_values(by=rank_metric, ascending=False)
-    hot_id_list = list(gb.index.get_level_values(0))[:n]
-    print (gb.get_group(hot_id_list[0]))
+    df = df.sort_values(by=rank_metric, ascending=False)
+    hot_id_list = list(df.index.get_level_values(0))[:n]
+    print (gb.head(50))
+    print (hot_id_list)
     #hot_list = [ [hot_id_list, gb[ hot_id_list ][rank_metric] ] for id in hot_id_list]
     #return hot_list
 
@@ -102,6 +102,6 @@ def id_time_series(hot_list, df, id_name = 'product_id'):
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
-    gb = read_sql_to_gb(engine, table_name="purchase_product_id_hour", id_name = 'product_id')
-    rank_by_id(gb, rank_metric = "count(price)", n = 10)
+    df = read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id')
+    rank_by_id(df, rank_metric = "count(price)", n = 10)
     # app.run_server(debug=True, port=8051, host="10.0.0.12")
