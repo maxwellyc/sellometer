@@ -17,7 +17,7 @@ def compress_time(df):
         'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
         )
     # t0 = df.agg({"timestamp": "min"}).collect()[0][0]
-    df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') + t0)
+    df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
     df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
     # df = df.withColumn("date_time", (df.date_time + t0)).cast('integer'))
 
