@@ -66,17 +66,15 @@ app.layout = html.Div([
                Output('live-graph', 'figure')
               ],
               [Input('graph-update', 'n_intervals'),
+              Input('p_id')
               ]
 )
-def update_graph_scatter(n):
-    print(option_slctd)
+def update_graph_scatter(n, p_id):
     df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
     hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
     df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
 
-    container = "The item id you selected was: {}".format(option_slctd)
-
-    plot_df = df_by_id[option_slctd]
+    plot_df = df_by_id[p_id]
 
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
@@ -89,7 +87,7 @@ def update_graph_scatter(n):
     )
 
     barchart = px.bar(
-        data_frame=df[df['product_id'].isin([id for id, m in hot_list])]
+        data_frame=df[df['product_id'].isin([id for id, m in hot_list])],
         x = "product_id",
         y = "count(price)",
         orientation = "h",
