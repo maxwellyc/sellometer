@@ -70,13 +70,6 @@ app.layout = html.Div([
     dcc.Graph(id='live-graph1', animate=True),
     dcc.Graph(id='live-graph2', animate=True),
     dcc.Graph(id='live-graph3', animate=True),
-    dcc.Graph(id='live-graph4', animate=True),
-    dcc.Graph(id='live-graph5', animate=True),
-    dcc.Graph(id='live-graph6', animate=True),
-    dcc.Graph(id='live-graph7', animate=True),
-    dcc.Graph(id='live-graph8', animate=True),
-    dcc.Graph(id='live-graph9', animate=True),
-    dcc.Graph(id='live-graph10', animate=True),
     dcc.Interval(
         id='graph-update',
         interval=60*1000,
@@ -87,19 +80,11 @@ app.layout = html.Div([
                Output('live-graph1', 'figure'),
                Output('live-graph2', 'figure'),
                Output('live-graph3', 'figure'),
-               Output('live-graph4', 'figure'),
-               Output('live-graph5', 'figure'),
-               Output('live-graph6', 'figure'),
-               Output('live-graph7', 'figure'),
-               Output('live-graph8', 'figure'),
-               Output('live-graph9', 'figure'),
-               Output('live-graph10', 'figure')
               ],
-              [Input('graph-update', 'n_intervals'),
-              Input('p_id','value')
+              [Input('graph-update', 'n_intervals')
               ]
 )
-def update_graph_scatter(n, p_id):
+def update_graph_scatter(n):
     df_by_id, hot_list, dropdown_op = update_df()
     hot_list.sort(key=lambda x: x[1])
     data = {'Product-ID' : ['pid-'+str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
@@ -107,16 +92,32 @@ def update_graph_scatter(n, p_id):
     plot_df = df_by_id[str(p_id)]
 
     # Plotly Go
-    trace = {p_id: plotly.graph_objs.Scatter(
-        x = df_by_id[str(p_id)]['event_time'],
-        y = df_by_id[str(p_id)]['sum(price)'],
+    trace1 = plotly.graph_objs.Scatter(
+        x = df_by_id[str(hot_list[-1][0])]['event_time'],
+        y = df_by_id[str(hot_list[-1][0])]['sum(price)'],
         name='Sales over time',
         # labels={'sum(price)': 'GMV ($)',
         # 'time_period':'Time'},
         mode='lines+markers'
     )
-    for p_id, m in hot_list
-    }
+
+    trace2 = plotly.graph_objs.Scatter(
+        x = df_by_id[str(hot_list[-2][0])]['event_time'],
+        y = df_by_id[str(hot_list[-2][0])]['sum(price)'],
+        name='Sales over time',
+        # labels={'sum(price)': 'GMV ($)',
+        # 'time_period':'Time'},
+        mode='lines+markers'
+    )
+
+    trace3 = plotly.graph_objs.Scatter(
+        x = df_by_id[str(hot_list[-3][0])]['event_time'],
+        y = df_by_id[str(hot_list[-3][0])]['sum(price)'],
+        name='Sales over time',
+        # labels={'sum(price)': 'GMV ($)',
+        # 'time_period':'Time'},
+        mode='lines+markers'
+    )
 
     barchart = px.bar(
         data_frame = dff,
@@ -129,11 +130,19 @@ def update_graph_scatter(n, p_id):
 
     )
 
-    return barchart, [{'data': [trace[p_id]],
+    return barchart, {'data': [trace1],
             'layout': go.Layout(
-                xaxis=dict(range=[plot_df['event_time'].min(), plot_df['event_time'].max()]),
-                yaxis=dict(range=[0, plot_df['sum(price)'].max()*1.3]))
-            } for p_id, m in hot_list]
+                xaxis=dict(range=[df_by_id[str(hot_list[-1][0])]['event_time'].min(), df_by_id[str(hot_list[-1][0])]['event_time'].max()]),
+                yaxis=dict(range=[0, df_by_id[str(hot_list[-1][0])]['sum(price)'].max()*1.3]))
+            }, {'data': [trace2],
+                    'layout': go.Layout(
+                        xaxis=dict(range=[df_by_id[str(hot_list[-2][0])]['event_time'].min(), df_by_id[str(hot_list[-2][0])]['event_time'].max()]),
+                        yaxis=dict(range=[0, df_by_id[str(hot_list[-2][0])]['sum(price)'].max()*1.3]))
+            }, {'data': [trace3],
+                    'layout': go.Layout(
+                        xaxis=dict(range=[df_by_id[str(hot_list[-3][0])]['event_time'].min(), df_by_id[str(hot_list[-3][0])]['event_time'].max()]),
+                        yaxis=dict(range=[0, df_by_id[str(hot_list[-3][0])]['sum(price)'].max()*1.3]))
+            }
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
     app.run_server(debug=False, port=8051, host="10.0.0.12")
