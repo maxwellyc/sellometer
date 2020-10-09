@@ -2,6 +2,7 @@ import pandas as pd
 import plotly.express as px  # (version 4.7.0)
 import plotly.graph_objects as go
 
+import plotly
 import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -60,27 +61,37 @@ app.layout = html.Div([
                  style={'width': "40%"}
     ),
     html.Br(),
-    dcc.Graph( id='live_graph', animate=True ),
+    dcc.Graph(id='live-graph',
+              animate=True,
+              figure={'data': [initial_trace],
+                      'layout': go.Layout(
+                          xaxis=dict(range=[min(X), max(X)]),
+                          yaxis=dict(range=[min(Y), max(Y)]))
+                      }),
     dcc.Interval(
         id='graph-update',
-        interval = 1*1000, # update frequency in milliseconds
+        interval=1*1000
     )
 ])
 @app.callback(Output('live-graph', 'figure'),
               [Input('graph-update', 'n_intervals')])
-def update_graph_scatter(input_data):
+def update_graph_scatter(n):
     X.append(X[-1]+1)
-    Y.append(Y[-1]+Y[-1]*random.uniform(-0.1,0.1))
+    Y.append(Y[-1]+2)
 
-    data = plotly.graph_objs.Scatter(
-            x=list(X),
-            y=list(Y),
-            name='Scatter',
-            mode= 'lines+markers'
-            )
+    trace = plotly.graph_objs.Scatter(
+        x=list(X),
+        y=list(Y),
+        name='Scatter',
+        mode='lines+markers'
+    )
 
-    return {'data': [data],'layout' : go.Layout(xaxis=dict(range=[min(X),max(X)]),
-                                                yaxis=dict(range=[min(Y),max(Y)]),)}
+    return {'data': [trace],
+            'layout': go.Layout(
+                xaxis=dict(range=[min(X), max(X)]),
+                yaxis=dict(range=[min(Y), max(Y)]))
+            }
+
 
 
 # ------------------------------------------------------------------------------
