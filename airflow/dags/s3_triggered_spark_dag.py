@@ -4,7 +4,7 @@ from airflow.operators.sensors import S3KeySensor
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.utils.dates import days_ago
-import subprocess
+import os
 
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
@@ -27,13 +27,12 @@ dag = DAG(
     default_args=args
     )
 
-def max_core_decision(**context):
-    p = subprocess.Popen([f's3cmd du $s3/{src_dir}'], stdout=subprocess.PIPE, stderr=subprocess.IGNORE)
-    text = p.stdout.read()
-    tot_size = float(text.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
-    max_cores = 12 if totsize > 10 else 6
-    context['ti'].xcom_push(key='max_cores', value = max_cores)
-    print (max_cores)
+def find_max_cores():
+    os.system('export file_size=$(s3cmd du $s3/serverpool/)')
+    file_size = os.environ['file_size'].split(" ")[0] / 1024 / 1024 # total file size in Mbytes
+    max_cores = 12 if file_size > 10 else 6
+    os.system(f'export max_cores={max_cores}')
+    print ("max_cores = ", max_cores)
 
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
@@ -46,15 +45,13 @@ file_sensor = S3KeySensor(
 
 spark_live_process = BashOperator(
   task_id='spark_live_process',
-  bash_command='spark-submit --conf spark.cores.max=' +\
-  '"{{ti.xcom_pull("max_cores")}}"'+\
+  bash_command='spark-submit --conf spark.cores.max=$max_cores' +\
   '$sparkf ~/eCommerce/data-processing/spark_aggregate.py',
   dag = dag)
 
-max_core_decision = PythonOperator(
-  task_id='max_core_decision',
-  python_callable=max_core_decision,
-  provide_context=True,
+find_max_cores = PythonOperator(
+  task_id='find_max_cores',
+  python_callable=find_max_cores,
   dag=dag
 )
 
@@ -69,4 +66,4 @@ move_processed_csv =  BashOperator(
 #   dag = dag)
 
 
-file_sensor >>  max_core_decision >> spark_live_process  >> move_processed_csv
+file_sensor >>  find_max_cores >> spark_live_process  >> move_processed_csv
