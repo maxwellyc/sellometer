@@ -12,7 +12,7 @@ num_servers = 4
 t_start = dt.datetime(2019,10,1,0,0,0)
 t_end = dt.datetime(2019,10,8,2,23,0)
 t_freq = dt.timedelta(minutes=1)
-t_gap = 60 #seconds
+t_gap = 1 #seconds
 t_format = "%Y-%m-%d-%H-%M-%S"
 
 # scheduler
