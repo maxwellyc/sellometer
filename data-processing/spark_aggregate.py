@@ -45,6 +45,8 @@ def main():
     # t0 = df.agg({"timestamp": "min"}).collect()[0][0]
     df = df.withColumn("time_period", ((df.timestamp - t0) / tstep).cast('integer'))
 
+    print (t0)
+    df.show(50)
     ################################################################################
 
     # Data cleaning ################################################################
@@ -106,7 +108,7 @@ def main():
         .dropDuplicates(subset=['user_session','product_id'])
     )
 
-    dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
+    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     view_dims, purchase_dims = {}, {}
     # total view counts per dimesion, total sales amount per dimension
     for dim in dimensions:
