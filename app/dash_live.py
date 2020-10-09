@@ -18,6 +18,7 @@ from sqlalchemy import create_engine
 def read_sql_to_df(engine, table_name="purchase_product_id_hour", id_name = 'product_id'):
     df = pd.read_sql_table(table_name, engine)
     df_gb = df.groupby(by=[id_name]).sum()
+    print (df_gb.head(20))
     return df, df_gb
 
 def rank_by_id(df_gb, rank_metric = "count(price)", n = 10):
@@ -80,7 +81,7 @@ app.layout = html.Div([
 def update_graph_scatter(n, p_id):
     df_by_id, hot_list, df_gb_hour = update_df()
 
-    print (df.head(50))
+    #print (df.head(50))
     plot_df = df_by_id[p_id]
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
