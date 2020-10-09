@@ -53,7 +53,12 @@ app.layout = html.Div([
     dcc.Graph(id='live-ranks',animate=True),
     html.Br(),
     html.Br(),
-    dcc.Input(id="p_id", type="number", placeholder="Enter Product Id", debounce=True),
+    dcc.Input(id="p_id",
+    type="number",
+    placeholder="Enter Product Id",
+    debounce=True,
+    value=hot_list[0][0]
+    ),
     html.Br(),
     dcc.Graph(id='live-graph', animate=True),
     dcc.Interval(
