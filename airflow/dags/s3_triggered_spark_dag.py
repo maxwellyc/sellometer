@@ -4,7 +4,7 @@ from airflow.operators.sensors import S3KeySensor
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash_operator import BashOperator
 from airflow.utils.dates import days_ago
-import os
+import os, subprocess
 
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
@@ -28,10 +28,10 @@ dag = DAG(
     )
 
 def find_max_cores():
-    os.system('export file_size=$(s3cmd du $s3/serverpool/)')
-    file_size = os.environ['file_size'].split(" ")[0] / 1024 / 1024 # total file size in Mbytes
+    response = subprocess.check_output(f's3cmd du $s3/{src_dir}', shell=True).decode('ascii')
+    file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
     max_cores = 12 if file_size > 10 else 6
-    os.system(f'export max_cores={max_cores}')
+    os.environ['max_cores'] = str(max_cores)
     print ("max_cores = ", max_cores)
 
 file_sensor = S3KeySensor(
