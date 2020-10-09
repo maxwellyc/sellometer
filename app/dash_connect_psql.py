@@ -23,18 +23,18 @@ def rank_by_id(df_gb, rank_metric = "count(price)", n = 10):
     return hot_list
 
 def id_time_series(hot_list, df, id_name = 'product_id'):
-    time_series_by_id, dropdown_op = {}, []
+    df_by_id, dropdown_op = {}, []
     for id, metric in hot_list:
-        time_series_by_id[id] = df[ df[id_name] == id ].set_index('event_time')
-        time_series_by_id[id].sort_index(inplace=True)
-        # print (id, "\n" , time_series_by_id[id])
+        df_by_id[id] = df[ df[id_name] == id ]
+        df_by_id[id].sort_values(by='event_time', inplace=True)
+        # print (id, "\n" , df_by_id[id])
         dropdown_op.append({"label":f"{id_name}: {id}", "value": id})
-    return time_series_by_id, dropdown_op
+    return df_by_id, dropdown_op
 
 engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
 df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
 hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
-time_series_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
+df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
 
 # # dash Application
 app = dash.Dash(__name__)
@@ -74,7 +74,7 @@ def update_graph(option_slctd):
 
     container = "The item id you selected was: {}".format(option_slctd)
 
-    plot_df = time_series_by_id[option_slctd]
+    plot_df = df_by_id[option_slctd]
     # s = pd.to_numeric(dff['time_period'])
     # dff = dff.drop(columns=['time_period'])
     # dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
