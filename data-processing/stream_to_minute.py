@@ -4,7 +4,7 @@ from pyspark.sql import functions as F
 import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 
-def aggregate(df, dimensions):
+def compress_time(df, dimensions, suffix='minute'):
     # Datetime transformation #######################################################
     tstep = 60 # unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01 00:00:00"
@@ -14,18 +14,20 @@ def aggregate(df, dimensions):
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
     df = df.withColumn(
-        'timestamp', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
-        ).select(['timestamp']+df.columns).drop('event_time')
+        'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
+        ).select(['event_time']+df.columns).drop('event_time')
 
     # t0 = df.agg({"timestamp": "min"}).collect()[0][0]
-    df = df.withColumn("timestamp", ((df.timestamp - t0) / tstep).cast('integer') + t0)
-    df = df.withColumn("date_time", F.from_utc_timestamp(F.to_timestamp(df.timestamp), 'UTC'))
+    df = df.withColumn("event_time", ((df.timestamp - t0) / tstep).cast('integer') + t0)
+    df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
     # df = df.withColumn("date_time", (df.date_time + t0)).cast('integer'))
 
     print (t0)
     df.show(50)
+    return df
     ################################################################################
 
+def clean_data(df):
     # Data cleaning ################################################################
 
     # if missing category code, fill with category id.
@@ -62,12 +64,14 @@ def aggregate(df, dimensions):
     # level 3 category (lowest level) will determine category type, no need for category_id anymore
     df = df.drop('category_id')
     df = df.drop('category_code')
-    df = df.drop('timestamp')
 
     # df.show(n=50)
     ################################################################################
     # create separate dataframe for view and purchase,
     # data transformation will be different for these two types of events.
+    return df
+
+def split_by_event(df):
 
     purchase_df = df.filter(df['event_type'] == 'purchase')
     view_df = df.filter(df['event_type'] == 'view')
@@ -80,7 +84,7 @@ def aggregate(df, dimensions):
     # need to be careful here as user can buy a product twice within the same session,
     # we should not remove duplicate on purchase_df
     view_df = (view_df
-        .orderBy('date_time')
+        .orderBy('event_time')
         .coalesce(1)
         .dropDuplicates(subset=['user_session','product_id'])
     )
@@ -137,23 +141,23 @@ def read_s3_to_df(sql_c, spark):
     return df
     ################################################################################
 
-def write_to_psql(view_dims, purchase_dims,dimensions, mode):
+def write_to_psql(view_dims, purchase_dims,dimensions, mode, timescale="minute"):
 # write dataframe to postgreSQL
     for dim in dimensions:
         view_dims[dim].write\
         .format("jdbc")\
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-        .option("dbtable","view_" + dim)\
+        .option("dbtable","view_" + dim + f"_{timescale}")\
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
         .mode(mode)\
         .save()
-        
+
         purchase_dims[dim].write\
         .format("jdbc")\
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-        .option("dbtable","purchase_" + dim)\
+        .option("dbtable","purchase_" + dim + f"_{timescale}")\
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
@@ -164,6 +168,8 @@ def write_to_psql(view_dims, purchase_dims,dimensions, mode):
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     sql_c, spark = spark_init()
-    df = read_s3_to_df(sql_c, spark)
-    view_dim, purchase_dim = aggregate(df, dimensions)
+    df = read_s3_to_df(sql_c, spark).cache()
+    df = compress_time(df)
+    df = clean_data(df)
+    view_dim, purchase_dim = split_by_event(df, dimensions)
     write_to_psql(view_dim, purchase_dim, dimensions, mode = "append")
