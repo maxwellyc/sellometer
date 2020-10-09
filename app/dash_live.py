@@ -41,10 +41,10 @@ def update_df():
     df_hour, df_gb_hour = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
     hot_list = rank_by_id(df_gb_hour, rank_metric = "count(price)", n = 10)
     df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
-    return df_by_id, hot_list, df
+    df_gb_hour = df_gb_hour[df_gb_hour['product_id'].isin([id for id, m in hot_list])].astype({"product_id":str})
+    return df_by_id, hot_list, df_gb_hour
 
-df_by_id, hot_list, df = update_df()
-df = df[df['product_id'].isin([id for id, m in hot_list])].astype({"product_id":str})
+df_by_id, hot_list, df_gb_hour = update_df()
 # # dash Application
 app = dash.Dash(__name__)
 
@@ -78,8 +78,8 @@ app.layout = html.Div([
               ]
 )
 def update_graph_scatter(n, p_id):
-    df_by_id, hot_list, df = update_df()
-    df = df[df['product_id'].isin([id for id, m in hot_list])].astype({"product_id":str})
+    df_by_id, hot_list, df_gb_hour = update_df()
+
     print (df.head(50))
     plot_df = df_by_id[p_id]
     # Plotly Go
@@ -93,7 +93,7 @@ def update_graph_scatter(n, p_id):
     )
 
     barchart = px.bar(
-        data_frame = df,
+        data_frame = df_gb_hour,
         x = "product_id",
         y = "count(price)",
         orientation = "h",
