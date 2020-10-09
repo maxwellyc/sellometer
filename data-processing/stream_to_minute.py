@@ -20,9 +20,9 @@ def compress_time(df, tstep = 60):
     df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
     df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
     # df = df.withColumn("event_time", (df.event_time + t0)).cast('integer'))
-
-    print (t0)
-    df.show(50)
+    #
+    # print (t0)
+    # df.show(50)
     return df
     ################################################################################
 
@@ -109,8 +109,8 @@ def group_by_dimensions(view_df, purchase_df, dimensions):
                                 .agg(F.sum('price')))
 
         # sort dataframe for plotting
-        view_dims[dim] = view_dims[dim].orderBy(dim, 'event_time')
-        purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'event_time')
+        # view_dims[dim] = view_dims[dim].orderBy(dim, 'event_time')
+        # purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'event_time')
 
         view_dims[dim].cache()
         purchase_dims[dim].cache()
@@ -180,10 +180,20 @@ if __name__ == "__main__":
     # compress time into minute granularity
     df_minute = compress_time(df_0, tstep = 60)
     # compress time into hour granularity
-    df_hourly = compress_time(df_0, tstep = 3600 )
+    df_hour = compress_time(df_0, tstep = 3600 )
+
+    # minute time scale: used for plotting
+
     # split by event type: view and purchase
     view_df, purchase_df = split_by_event(df_minute)
     # groupby different product dimensions
     view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
     # write to postgresql database
-    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite") # "append"
+    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="minute") # "append"
+
+    # hourly time scale: used for ranking
+    view_df, purchase_df = split_by_event(df_hour)
+    # groupby different product dimensions
+    view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
+    # write to postgresql database
+    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="hour") # "append"
