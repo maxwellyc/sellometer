@@ -99,7 +99,7 @@ def update_graph(option_slctd):
     fig = px.line(
         data_frame=dff,
         x = 'time_period',
-        y = 'view_cnt',
+        y = 'sum(price)',
         color = 'product_id',
         labels={'view_cnt': 'view counts',
         'time_period':'time since start (minutes)'},
