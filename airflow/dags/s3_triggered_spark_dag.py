@@ -9,19 +9,21 @@ import boto3
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
 dst_dir = 'spark-processed/'
-schedule = None #timedelta(seconds=60)
+schedule = timedelta(seconds=60)
 
 args = {
     'owner': 'airflow',
     'retries': 1,
     'start_date': days_ago(1),
-    'depends_on_past': False,
+    'depends_on_past': True,
+    'wait_for_downstream'=True,
     'retry_delay': timedelta(seconds=5),
     }
 
 dag = DAG(
     dag_id='s3_key_trigger',
     schedule_interval=schedule,
+    max_active_runs=1,
     default_args=args
     )
 
@@ -68,7 +70,7 @@ file_sensor = S3KeySensor(
 
 spark_live_process = BashOperator(
   task_id='spark_live_process',
-  bash_command='spark-submit $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
+  bash_command='spark-submit --num_executors 4 $sparkf ~/eCommerce/data-processing/spark_aggregate.py',
   dag = dag)
 
 move_processed_csv =  BashOperator(
