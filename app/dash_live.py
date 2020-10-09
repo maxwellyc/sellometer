@@ -81,7 +81,7 @@ def update_graph_scatter(n, p_id):
     df_by_id, hot_list, df = update_df()
     df = df[df['product_id'].isin([id for id, m in hot_list])].astype({"product_id":str})
     print (df.head(50))
-    plot_df = df_by_id[pid]
+    plot_df = df_by_id[p_id]
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
         x = plot_df['event_time'],
