@@ -98,10 +98,10 @@ def update_graph_scatter(n, p_id):
     )
 
     barchart = px.bar(
-        data_frame = dff,
-        x = 'Product-ID',
-        y = "Quantity-Sold",
-        orientation = "h",
+        #data_frame = dff,
+        x = data['Product-ID'],
+        y = data["Quantity-Sold"],
+        orientation = "v",
         barmode='relative',
         labels={"product_id":"Product Id",
         "count(price)":"Quantity sold in past hour"},
