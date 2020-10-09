@@ -20,83 +20,74 @@ def rank_by_id(df_gb, rank_metric = "count(price)", n = 10):
     df_gb = df_gb.sort_values(by=rank_metric, ascending=False)
     hot_id_list = list(df_gb.index.get_level_values(0))[:n]
     hot_list = [ (id, df_gb.loc[id, rank_metric]) for id in hot_id_list]
+    global hot_list
+
     return hot_list
 
 def id_time_series(hot_list, df, id_name = 'product_id'):
-    time_series_by_id = {}
+    time_series_by_id, dropdown_op = {}, []
     for id, metric in hot_list:
         time_series_by_id[id] = df[ df[id_name] == id ].set_index('event_time')
         time_series_by_id[id].sort_index(inplace=True)
         print (id, "\n" , time_series_by_id[id])
+        dropdown_op.append({"label":f"{id_name}: {id}", "value": id})
 
 
-    dropdown_op = []
+# # dash Application
+app = dash.Dash(__name__)
 
-    for id in hot_list:
-        dropdown_op.append({"label":str(id), "value": id})
+# ------------------------------------------------------------------------------
+# App layout
+app.layout = html.Div([
 
-    # dff = df.copy()
-    # dff = dff[dff["product_id"] == min(views_ts.keys())]
+    html.H1("Sellometer", style={'text-align': 'center'}),
+
+    dcc.Dropdown(id="slct_item",
+                 options=dropdown_op,
+                 multi=False,
+                 value=hot_list[0],
+                 style={'width': "40%"}
+                 ),
+
+    html.Div(id='output_container', children=[]),
+    html.Br(),
+
+    dcc.Graph(id='views_timeseries', figure={})
+
+])
+
+
+# ------------------------------------------------------------------------------
+# Connect the Plotly graphs with Dash Components
+@app.callback(
+    [Output(component_id='output_container', component_property='children'),
+     Output(component_id='sale_timeseries', component_property='figure')],
+    [Input(component_id='slct_item', component_property='value')]
+)
+
+def update_graph(option_slctd):
+    print(option_slctd)
+    print(type(option_slctd))
+
+    container = "The item id you selected was: {}".format(option_slctd)
+
+    plot_df = time_series_by_id[option_slctd]
     # s = pd.to_numeric(dff['time_period'])
     # dff = dff.drop(columns=['time_period'])
     # dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
-    # print (dff)
 
-# # dash Application
-# app = dash.Dash(__name__)
-#
-# # ------------------------------------------------------------------------------
-# # App layout
-# app.layout = html.Div([
-#
-#     html.H1("Web Application Dashboards with Dash", style={'text-align': 'center'}),
-#
-#     dcc.Dropdown(id="slct_item",
-#                  options=dropdown_op,
-#                  multi=False,
-#                  value=min(views_ts.keys()),
-#                  style={'width': "40%"}
-#                  ),
-#
-#     html.Div(id='output_container', children=[]),
-#     html.Br(),
-#
-#     dcc.Graph(id='views_timeseries', figure={})
-#
-# ])
-#
-#
-# # ------------------------------------------------------------------------------
-# # Connect the Plotly graphs with Dash Components
-# @app.callback(
-#     [Output(component_id='output_container', component_property='children'),
-#      Output(component_id='views_timeseries', component_property='figure')],
-#     [Input(component_id='slct_item', component_property='value')]
-# )
-# def update_graph(option_slctd):
-#     print(option_slctd)
-#     print(type(option_slctd))
-#
-#     container = "The item id chosen by user was: {}".format(option_slctd)
-#
-#     dff = df.copy()
-#     dff = dff[dff["product_id"] == option_slctd]
-#     s = pd.to_numeric(dff['time_period'])
-#     dff = dff.drop(columns=['time_period'])
-#     dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
-#
-#     # Plotly Express
-#     fig = px.scatter(
-#         data_frame=dff,
-#         x = 'time_period',
-#         y = 'sum(price)',
-#         color = 'product_id',
-#         labels={'sum(price)': 'GMV ($)',
-#         'time_period':'time since start (minutes)'},
-#         template='plotly_dark'
-#     )
-#
-#     return container, fig
+    # Plotly Express
+    fig = px.scatter(
+        data_frame=dff,
+        x = 'event_time',
+        y = 'sum(price)',
+        color = 'product_id',
+        labels={'sum(price)': 'GMV ($)',
+        'time_period':'Time'},
+        template='plotly_dark'
+    )
+
+    return container, fig
 
 
 # ------------------------------------------------------------------------------
