@@ -87,7 +87,7 @@ def update_graph_scatter(n, p_id):
     data = {'Product-ID' : ['pid-'+str(id) for id, m in hot_list], "Quantity-Sold":[m for id, m in hot_list] }
     dff = pd.DataFrame.from_dict(data)
 
-    plot_df = df_by_id[p_id]
+    plot_df = df_by_id[str(p_id)]
     print (list(df_by_id.keys()))
     # Plotly Go
     trace = plotly.graph_objs.Scatter(
