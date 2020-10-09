@@ -117,4 +117,4 @@ def update_graph_scatter(n, p_id):
             }
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8051, host="10.0.0.12")
+    app.run_server(debug=False, port=8051, host="10.0.0.12")
