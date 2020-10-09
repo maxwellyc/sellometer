@@ -4,31 +4,7 @@ from pyspark.sql import functions as F
 import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 
-def main():
-
-    # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("spark_live_process")
-    sc = SparkContext(conf=conf)
-    spark = SparkSession(sc)
-    # spark_session = spark.builder\
-    # .appName("read_csv")\
-    # .config("spark.driver.extraClassPath", "/usr/share/java/postgresql/postgresql-42.2.16.jre7.jar")\
-    # .getOrCreate()
-    sql_c = SQLContext(sc)
-    ################################################################################
-
-    # read data from S3 ############################################################
-    # for mini batches need to change this section into dynamical
-    region = 'us-east-2'
-    bucket = 'maxwell-insight'
-    key = 'serverpool/*'
-    s3file = f's3a://{bucket}/{key}'
-    # read csv file on s3 into spark dataframe
-    df = sql_c.read.csv(s3file, header=True)
-    # drop unused column
-    df = df.drop('_c0')
-    ################################################################################
-
+def aggregate(df, dimensions):
     # Datetime transformation #######################################################
     tstep = 60 # unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01 00:00:00"
@@ -109,7 +85,6 @@ def main():
         .dropDuplicates(subset=['user_session','product_id'])
     )
 
-    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     view_dims, purchase_dims = {}, {}
     # total view counts per dimesion, total sales amount per dimension
     for dim in dimensions:
@@ -130,7 +105,41 @@ def main():
         view_dims[dim] = view_dims[dim].orderBy(dim, 'date_time')
         purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'date_time')
 
-    # write dataframe to postgreSQL
+        view_dims[dim].cache()
+        purchase_dims[dim].cache()
+    return view_dims, purchase_dims
+
+def spark_init():
+    # initialize spark session and spark context####################################
+    conf = SparkConf().setAppName("spark_live_process")
+    sc = SparkContext(conf=conf)
+    spark = SparkSession(sc)
+    # spark_session = spark.builder\
+    # .appName("read_csv")\
+    # .config("spark.driver.extraClassPath", "/usr/share/java/postgresql/postgresql-42.2.16.jre7.jar")\
+    # .getOrCreate()
+    sql_c = SQLContext(sc)
+    return sql_c, spark
+
+
+def read_s3_to_df(sql_c, spark):
+    ################################################################################
+    # read data from S3 ############################################################
+    # for mini batches need to change this section into dynamical
+    region = 'us-east-2'
+    bucket = 'maxwell-insight'
+    key = 'serverpool/*'
+    s3file = f's3a://{bucket}/{key}'
+    # read csv file on s3 into spark dataframe
+    df = sql_c.read.csv(s3file, header=True)
+    # drop unused column
+    df = df.drop('_c0')
+    return df
+    ################################################################################
+
+def write_to_psql(view_dims, purchase_dims,dimensions):
+# write dataframe to postgreSQL
+    for dim in dimensions:
         view_dims[dim].write\
         .format("jdbc")\
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
@@ -152,4 +161,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
+    sql_c, spark = spark_init()
+    df = read_s3_to_df(sql_c, spark)
+    view_dim, purchase_dim = aggregate(df, dimensions)
+#    write_to_psql(view_dim, purchase_dim, dimensions)

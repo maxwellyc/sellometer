@@ -34,7 +34,7 @@ def spark_live_process():
     max_cores = 12 if file_size > 9 else 6
     print(max_cores,'spark cores executing')
     os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
-    '$sparkf ~/eCommerce/data-processing/spark_aggregate.py')
+    '$sparkf ~/eCommerce/data-processing/stream_to_minute.py')
 
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
