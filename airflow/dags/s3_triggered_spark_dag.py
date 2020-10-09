@@ -9,7 +9,7 @@ import os, subprocess
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
 dst_dir = 'spark-processed/'
-schedule = timedelta(seconds=90)
+schedule = timedelta(seconds=60)
 
 args = {
     'owner': 'airflow',

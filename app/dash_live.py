@@ -41,6 +41,7 @@ df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_n
 hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
 df_by_id, dropdown_op = id_time_series(hot_list, df, id_name = 'product_id')
 
+input_types = ['']
 # # dash Application
 app = dash.Dash(__name__)
 
@@ -49,13 +50,10 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
 
     html.H1("Sellometer", style={'text-align': 'center'}),
-
-    dcc.Dropdown(id="slct_item",
-                 options=dropdown_op,
-                 multi=False,
-                 value=hot_list[0][0],
-                 style={'width': "40%"}
-    ),
+    dcc.Graph(id='live-ranks',animate=True),
+    html.Br(),
+    html.Br(),
+    dcc.Input(id="p_id", type="number", placeholder="Enter Product Id", debounce=True),
     html.Br(),
     dcc.Graph(id='live-graph', animate=True),
     dcc.Interval(
@@ -64,12 +62,13 @@ app.layout = html.Div([
         n_intervals=0
     ),
 ])
-@app.callback(Output('live-graph', 'figure'),
+@app.callback([Output('live-ranks', 'figure'),
+               Output('live-graph', 'figure')
+              ],
               [Input('graph-update', 'n_intervals'),
-              Input('slct_item', 'value')
               ]
 )
-def update_graph_scatter(n, option_slctd):
+def update_graph_scatter(n):
     print(option_slctd)
     df, df_gb = read_sql_to_df(engine, table_name="purchase_product_id_minute", id_name = 'product_id')
     hot_list = rank_by_id(df_gb, rank_metric = "count(price)", n = 10)
@@ -78,19 +77,29 @@ def update_graph_scatter(n, option_slctd):
     container = "The item id you selected was: {}".format(option_slctd)
 
     plot_df = df_by_id[option_slctd]
-    # s = pd.to_numeric(dff['time_period'])
-    # dff = dff.drop(columns=['time_period'])
-    # dff = dff.merge(s.to_frame(), left_index=True, right_index=True)
 
-    # Plotly Express
+    # Plotly Go
     trace = plotly.graph_objs.Scatter(
         x = plot_df['event_time'],
         y = plot_df['sum(price)'],
         name='Scatter',
+        labels={'sum(price)': 'GMV ($)',
+        'time_period':'Time'},
         mode='lines+markers'
     )
 
-    return {'data': [trace],
+    barchart = px.bar(
+        data_frame=df[df['product_id'].isin([id for id, m in hot_list])]
+        x = "product_id",
+        y = "count(price)",
+        orientation = "h",
+        barmode='relative',
+        labels={"product_id":"Product Id",
+        "count(price)":"Quantity sold in past hour"},
+
+    )
+
+    return barchart, {'data': [trace],
             'layout': go.Layout(
                 xaxis=dict(range=[plot_df['event_time'].min(), plot_df['event_time'].max()]),
                 yaxis=dict(range=[0, plot_df['sum(price)'].max()*1.3]))
