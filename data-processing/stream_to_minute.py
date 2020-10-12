@@ -242,7 +242,7 @@ if __name__ == "__main__":
     # groupby different product dimensions
     view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
     # write to postgresql database
-    write_to_psql(view_dim, purchase_dim, dimensions, mode = "append", timescale="minute") # "append"
+    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="minute") # "append"
 
     # # hourly time scale: used for ranking
 
