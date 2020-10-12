@@ -1,6 +1,6 @@
-# Project-Title
+# Sellometer
 
-One line description.
+A data pipeline that transforms real-time online events of retailer for sales metrics and abnormality monitoring.
 
 [Link](#) to your presentation.
 
