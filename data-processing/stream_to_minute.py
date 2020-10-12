@@ -31,8 +31,8 @@ def get_next_time_tick_from_log(next=True):
     def_tick = "2019-10-01-00-00-00"
     time_fn = "last_tick.txt"
     f_dir = "logs"
-    f = open(f"{f_dir}/{time_fn}",'r')
     if time_fn in os.listdir(f_dir):
+        f = open(f"{f_dir}/{time_fn}",'r')
         time_tick = f.readlines()[0].strip("\n")
     else:
         time_tick = def_tick
