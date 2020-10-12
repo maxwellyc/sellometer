@@ -5,11 +5,9 @@ import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 from boto3 import client
 
-def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
-    dir += "/"
-    conn = client('s3')
-    list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
-    return list_of_files
+import psycopg2
+import os
+from sqlalchemy import create_engine
 
 def spark_init():
     # initialize spark session and spark context####################################
@@ -19,67 +17,15 @@ def spark_init():
     sql_c = SQLContext(sc)
     return sql_c, spark
 
-def f_name_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
-    return datetime.datetime.strptime(f_name, time_format)
-
-def datetime_to_f_name(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
-    return dt_obj.strftime(time_format)
-
-def get_next_time_tick_from_log(next=True):
-    # reads previous processed time in logs/last_tick.txt and returns next time tick
-    # default file names and locations
-    def_tick = "2019-10-01-00-00-00"
-    time_fn = "last_tick.txt"
-    f_dir = "logs"
-    f = open(f"{f_dir}/{time_fn}",'r')
-    if time_fn in os.listdir(f_dir):
-        time_tick = f.readlines()[0].strip("\n")
-    else:
-        time_tick = def_tick
-    time_tick = f_name_to_datetime(time_tick)
-    if next:
-        time_tick += datetime.timedelta(minutes=1)
-    time_tick = datetime_to_f_name(time_tick)
-    return time_tick
-
-def remove_server_num(f_name):
-    # remove server # from file name
-    # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
-    return '-'.join(f_name.strip(".csv").split('-')[:-1])
-
-def check_backlogs():
-    lof = list_s3_files()
-    curr_time_tick = get_next_time_tick_from_log(next=False)
-    backlogs_list = []
-    backlogs = open("logs/backlogs.txt","w")
-    for f_name in lof:
-        if ".csv" in f_name:
-            tt_dt = f_name_to_datetime(remove_server_num(f_name))
-            if tt_dt <= curr_time_tick:
-                backlogs_list.append(datetime_to_f_name(tt_dt))
-    backlogs.write("\n".join(backlogs_list))
-    backlogs.close()
-    return
-
-def write_time_tick_to_log(time_tick):
-    # writes current processed time tick in logs/last_tick.txt for bookkeeping
-    # default file names and locations
-    time_fn = "last_tick.txt"
-    f_dir = "logs"
-    output = open(f"{f_dir}/{time_tick_fn}",'w')
-    output.write(time_tick)
-    output.close()
-    return
-
-def read_s3_to_df(sql_c, spark, time_tick=None):
+def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/' ,read_time_tick = True):
     ################################################################################
     # read data from S3 ############################################################
-    # for mini batches need to change this section into dynamical
-    if not time_tick:
+    if read_time_tick:
         time_tick = get_next_time_tick_from_log()
+    else:
+        time_tick = ""
     print (f"Spark Cluster processing {time_tick} file batch")
-    bucket = 'maxwell-insight'
-    key = f'serverpool/{time_tick}-*.csv'
+    key = f'{src_dir}{time_tick}-*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
@@ -188,12 +134,8 @@ def group_by_dimensions(view_df, purchase_df, dimensions):
             purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
                                 .agg(F.sum('price')))
 
-        # sort dataframe for plotting
-        # view_dims[dim] = view_dims[dim].orderBy(dim, 'event_time')
-        # purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'event_time')
-
-        view_dims[dim].cache()
-        purchase_dims[dim].cache()
+        view_dims[dim]
+        purchase_dims[dim]
 
     return view_dims, purchase_dims
 
@@ -220,34 +162,82 @@ def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"
         .mode(mode)\
         .save()
 
+def read_sql_to_df(engine, event='purchase', dimension='product_id',
+time_gran='minute', group=False):
+    table_name = "_".join([event, dimension, time_gran])
+    df = pd.read_sql_table(table_name, engine)
+    if not group:
+        return df
+    else:
+        df_gb = df.groupby(by=[dimension]).sum()
+        return df, df_gb
 
-if __name__ == "__main__":
-
-    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
+def spark_process(dimensions=['product_id'], src_dir='serverpool/',
+read_time_tick=True, backlog_mode = False):
+    #dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
-    df_0 = read_s3_to_df(sql_c, spark).cache()
+    df_0 = read_s3_to_df(sql_c, spark, src_dir, read_time_tick)
     # clean data
     df_0 = clean_data(df_0)
     # compress time into minute granularity
-    df_minute = compress_time(df_0, tstep = 60)
-    # # compress time into hour granularity
-    # df_hour = compress_time(df_0, tstep = 3600 )
-
-    # minute time scale: used for plotting
+    df = compress_time(df_0, tstep = 60)
 
     # split by event type: view and purchase
-    view_df, purchase_df = split_by_event(df_minute)
+    view_df, purchase_df = split_by_event(df)
     # groupby different product dimensions
     view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
-    # write to postgresql database
-    write_to_psql(view_dim, purchase_dim, dimensions, mode = "append", timescale="minute") # "append"
 
-    # # hourly time scale: used for ranking
+    return view_dim, purchase_dim
 
-    # view_df, purchase_df = split_by_event(df_hour)
-    # # groupby different product dimensions
-    # view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
-    # # write to postgresql database
-    # write_to_psql(view_dim, purchase_dim, dimensions, mode = "append", timescale="hour") # "append"
+    # write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="minute") # "append"
+
+def merge_view(df, event, dim):
+    # when performing union on backlog dataframe and main dataframe
+    # need to recalculate average values
+
+    if dim == 'product_id':
+        if event == 'view':
+        # view_dims[dim] = (view_df.groupby(dim, 'event_time')
+        #                     .agg(F.count('price'),F.mean('price')))
+            df = df.withColumn('total_price', F.col('count(price)') * F.col('mean(price)'))
+            df = df.groupby(dim, 'event_time').agg(F.count('count(price)'), F.sum('total_price'))
+            df = df.withColumnRenamed('count(count(price))','count(price)')
+            df = df.withColumn('mean(price)', F.col('sum(total_price)') / F.col('count(price)'))
+            df.drop('sum(total_price)')
+            df.show(10)
+        elif event == 'purchase':
+            # purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
+            #                 .agg(F.sum('price'),F.count('price'),F.mean('price')))
+            df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'), F.sum('count(price)'))
+            df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
+            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
+            df = df.withColumn('mean(price)', F.col('sum(price)') / F.col('conut(price)'))
+            df.show(10)
+    else:
+        if event == 'view':
+            df = df.groupby(dim, 'event_time').agg(F.sum('count(price)'))
+            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
+            df.show(10)
+        elif event == 'purchase':
+            df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'))
+            df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
+
+    return df
+
+if __name__ == "__main__":
+    dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
+    engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
+    new_df, main_df = {}, {'view':{}, 'purchase':{}}
+    new_df['view'], new_df['purchase'] = spark_process(src_dir='backlogs/',read_time_tick=False)
+    for evt in df:
+        for dim in dimesions:
+            main_df[evt][dim] = read_sql_to_df(engine, event=evt, dimension=dim,
+             time_gran='minute', group=False)
+            main_df[evt][dim] = main_df[evt][dim].union(new_df[evt][dim])
+            main_df[evt][dim] = merge_df(main_df[evt][dim], evt, dim)
+
+
+
+    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="minute")

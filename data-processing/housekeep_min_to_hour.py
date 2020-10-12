@@ -3,32 +3,18 @@ from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
 import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
-from boto3 import client
-
-def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
-    dir += "/"
-    conn = client('s3')
-    list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
-    return list_of_files
 
 def spark_init():
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("spark_check_backlog")
+    conf = SparkConf().setAppName("spark_min_to_hour")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
     return sql_c, spark
 
-def f_name_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
-    return datetime.datetime.strptime(f_name, time_format)
-
-def datetime_to_f_name(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
-    return dt_obj.strftime(time_format)
-
-def get_next_time_tick_from_log(next=True):
+def get_next_time_tick_from_log( def_tick = "2019-10-01-00-00-00", time_format = '%Y-%m-%d-%H-%M-%S'):
     # reads previous processed time in logs/last_tick.txt and returns next time tick
     # default file names and locations
-    def_tick = "2019-10-01-00-00-00"
     time_fn = "last_tick.txt"
     f_dir = "logs"
     f = open(f"{f_dir}/{time_fn}",'r')
@@ -36,30 +22,10 @@ def get_next_time_tick_from_log(next=True):
         time_tick = f.readlines()[0].strip("\n")
     else:
         time_tick = def_tick
-    time_tick = f_name_to_datetime(time_tick)
-    if next:
-        time_tick += datetime.timedelta(minutes=1)
-    time_tick = datetime_to_f_name(time_tick)
+    time_tick = datetime.datetime.strptime(time_tick, time_format)
+    time_tick += datetime.timedelta(minutes=1)
+    time_tick = time_tick.strftime(time_format)
     return time_tick
-
-def remove_server_num(f_name):
-    # remove server # from file name
-    # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
-    return '-'.join(f_name.strip(".csv").split('-')[:-1])
-
-def check_backlogs():
-    lof = list_s3_files()
-    curr_time_tick = get_next_time_tick_from_log(next=False)
-    backlogs_list = []
-    backlogs = open("logs/backlogs.txt","w")
-    for f_name in lof:
-        if ".csv" in f_name:
-            tt_dt = f_name_to_datetime(remove_server_num(f_name))
-            if tt_dt <= curr_time_tick:
-                backlogs_list.append(datetime_to_f_name(tt_dt))
-    backlogs.write("\n".join(backlogs_list))
-    backlogs.close()
-    return
 
 def write_time_tick_to_log(time_tick):
     # writes current processed time tick in logs/last_tick.txt for bookkeeping
@@ -71,12 +37,11 @@ def write_time_tick_to_log(time_tick):
     output.close()
     return
 
-def read_s3_to_df(sql_c, spark, time_tick=None):
+def read_s3_to_df(sql_c, spark):
     ################################################################################
     # read data from S3 ############################################################
     # for mini batches need to change this section into dynamical
-    if not time_tick:
-        time_tick = get_next_time_tick_from_log()
+    time_tick = get_next_time_tick_from_log()
     print (f"Spark Cluster processing {time_tick} file batch")
     bucket = 'maxwell-insight'
     key = f'serverpool/{time_tick}-*.csv'
@@ -232,8 +197,8 @@ if __name__ == "__main__":
     df_0 = clean_data(df_0)
     # compress time into minute granularity
     df_minute = compress_time(df_0, tstep = 60)
-    # # compress time into hour granularity
-    # df_hour = compress_time(df_0, tstep = 3600 )
+    # compress time into hour granularity
+    df_hour = compress_time(df_0, tstep = 3600 )
 
     # minute time scale: used for plotting
 
@@ -244,10 +209,9 @@ if __name__ == "__main__":
     # write to postgresql database
     write_to_psql(view_dim, purchase_dim, dimensions, mode = "append", timescale="minute") # "append"
 
-    # # hourly time scale: used for ranking
-
-    # view_df, purchase_df = split_by_event(df_hour)
-    # # groupby different product dimensions
-    # view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
-    # # write to postgresql database
-    # write_to_psql(view_dim, purchase_dim, dimensions, mode = "append", timescale="hour") # "append"
+    # hourly time scale: used for ranking
+    view_df, purchase_df = split_by_event(df_hour)
+    # groupby different product dimensions
+    view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
+    # write to postgresql database
+    write_to_psql(view_dim, purchase_dim, dimensions, mode = "append", timescale="hour") # "append"
