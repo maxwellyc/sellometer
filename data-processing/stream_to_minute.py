@@ -19,28 +19,38 @@ def spark_init():
     sql_c = SQLContext(sc)
     return sql_c, spark
 
-def f_name_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
+def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
     return datetime.datetime.strptime(f_name, time_format)
 
-def datetime_to_f_name(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
+def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
 def get_next_time_tick_from_log(next=True):
-    # reads previous processed time in logs/last_tick.txt and returns next time tick
+    # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
     def_tick = "2019-10-01-00-00-00"
-    time_fn = "last_tick.txt"
+    time_fn = "min_tick.txt"
     f_dir = "logs"
     if time_fn in os.listdir(f_dir):
         f = open(f"{f_dir}/{time_fn}",'r')
         time_tick = f.readlines()[0].strip("\n")
     else:
         time_tick = def_tick
-    time_tick = f_name_to_datetime(time_tick)
+    time_tick = str_to_datetime(time_tick)
     if next:
         time_tick += datetime.timedelta(minutes=1)
-    time_tick = datetime_to_f_name(time_tick)
+    time_tick = datetime_to_str(time_tick)
     return time_tick
+
+def write_time_tick_to_log(time_tick):
+    # writes current processed time tick in logs/min_tick.txt for bookkeeping
+    # default file names and locations
+    time_fn = "min_tick.txt"
+    f_dir = "logs"
+    output = open(f"{f_dir}/{time_tick_fn}",'w')
+    output.write(time_tick)
+    output.close()
+    return
 
 def remove_server_num(f_name):
     # remove server # from file name
@@ -54,21 +64,11 @@ def check_backlogs():
     backlogs = open("logs/backlogs.txt","w")
     for f_name in lof:
         if ".csv" in f_name:
-            tt_dt = f_name_to_datetime(remove_server_num(f_name))
+            tt_dt = str_to_datetime(remove_server_num(f_name))
             if tt_dt <= curr_time_tick:
-                backlogs_list.append(datetime_to_f_name(tt_dt))
+                backlogs_list.append(datetime_to_str(tt_dt))
     backlogs.write("\n".join(backlogs_list))
     backlogs.close()
-    return
-
-def write_time_tick_to_log(time_tick):
-    # writes current processed time tick in logs/last_tick.txt for bookkeeping
-    # default file names and locations
-    time_fn = "last_tick.txt"
-    f_dir = "logs"
-    output = open(f"{f_dir}/{time_tick_fn}",'w')
-    output.write(time_tick)
-    output.close()
     return
 
 def read_s3_to_df(sql_c, spark, time_tick=None):
@@ -76,7 +76,7 @@ def read_s3_to_df(sql_c, spark, time_tick=None):
     # read data from S3 ############################################################
     # for mini batches need to change this section into dynamical
     if not time_tick:
-        time_tick = get_next_time_tick_from_log()
+        time_tick = get_next_time_tick_from_log(next=True)
     print (f"Spark Cluster processing {time_tick} file batch")
     bucket = 'maxwell-insight'
     key = f'serverpool/{time_tick}-*.csv'
@@ -85,10 +85,13 @@ def read_s3_to_df(sql_c, spark, time_tick=None):
     df = sql_c.read.csv(s3file, header=True)
     # drop unused column
     df = df.drop('_c0')
+
+    write_time_tick_to_log(time_tick)
+
     return df
     ################################################################################
 
-def compress_time(df, tstep = 60):
+def compress_time(df, tstep = 60, from_csv = True):
     # Datetime transformation #######################################################
     # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01 00:00:00"
@@ -97,12 +100,14 @@ def compress_time(df, tstep = 60):
     t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
-    df = df.withColumn(
-        'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
-        )
+    if from_csv:
+        df = df.withColumn(
+            'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
+            )
     df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
     df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
-    t_max = df.agg({"event_time": "max"}).collect()[0][0]
+    # t_max = df.agg({"event_time": "max"}).collect()[0][0]
+
     return df
     ################################################################################
 

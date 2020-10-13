@@ -34,7 +34,7 @@ def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/
     return df
     ################################################################################
 
-def compress_time(df, tstep = 60):
+def compress_time(df, tstep = 60, from_csv = True):
     # Datetime transformation #######################################################
     # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01 00:00:00"
@@ -43,9 +43,10 @@ def compress_time(df, tstep = 60):
     t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
-    df = df.withColumn(
-        'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
-        )
+    if from_csv:
+        df = df.withColumn(
+            'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
+            )
     df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
     df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
     t_max = df.agg({"event_time": "max"}).collect()[0][0]
@@ -231,7 +232,7 @@ if __name__ == "__main__":
     engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
     new_df, main_df = {}, {'view':{}, 'purchase':{}}
     new_df['view'], new_df['purchase'] = spark_process(src_dir='backlogs/',read_time_tick=False)
-    for evt in df:
+    for evt in main_df:
         for dim in dimesions:
             main_df[evt][dim] = read_sql_to_df(engine, event=evt, dimension=dim,
              time_gran='minute', group=False)
