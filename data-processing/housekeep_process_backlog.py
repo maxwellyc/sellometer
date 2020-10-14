@@ -17,6 +17,13 @@ def spark_init():
     sql_c = SQLContext(sc)
     return sql_c, spark
 
+def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
+    return datetime.datetime.strptime(f_name, time_format)
+
+def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
+    return dt_obj.strftime(time_format)
+
+
 def get_next_time_tick_from_log(next=True, debug=False):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
@@ -160,13 +167,13 @@ def group_by_dimensions(view_df, purchase_df, dimensions):
 
     return view_dims, purchase_dims
 
-def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"):
+def write_to_psql(view_dims, purchase_dims, dimensions, mode, suffix="minute"):
 # write dataframe to postgreSQL
     for dim in dimensions:
         view_dims[dim].write\
         .format("jdbc")\
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-        .option("dbtable","view_" + dim + f"_{timescale}")\
+        .option("dbtable","view_" + dim + f"_{suffix}")\
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
@@ -176,7 +183,7 @@ def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"
         purchase_dims[dim].write\
         .format("jdbc")\
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-        .option("dbtable","purchase_" + dim + f"_{timescale}")\
+        .option("dbtable","purchase_" + dim + f"_{suffix}")\
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
@@ -212,7 +219,7 @@ read_time_tick=True, backlog_mode = False):
 
     return view_dim, purchase_dim
 
-    # write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="minute") # "append"
+    # write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", suffix="minute") # "append"
 
 def merge_df(df, event, dim):
     # when performing union on backlog dataframe and main dataframe
@@ -247,8 +254,7 @@ def merge_df(df, event, dim):
 
     return df
 
-if __name__ == "__main__":
-    dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
+def process_backlog(events, dimensions):
     engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
     new_df, main_df = {}, {'view':{}, 'purchase':{}}
     new_df['view'], new_df['purchase'] = spark_process(src_dir='backlogs/',read_time_tick=False)
@@ -258,7 +264,7 @@ if __name__ == "__main__":
              time_gran='minute', group=False)
             main_df[evt][dim] = main_df[evt][dim].union(new_df[evt][dim])
             main_df[evt][dim] = merge_df(main_df[evt][dim], evt, dim)
+    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", suffix="minute_bl")
 
-
-
-    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="minute")
+if __name__ == "__main__":
+    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
