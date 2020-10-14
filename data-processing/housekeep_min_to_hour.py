@@ -66,6 +66,10 @@ def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
     dir += "/"
     conn = client('s3')
     list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
+    tmp = []
+    for f in list_of_files:
+        if '/' in f or not f: continue
+        tmp.append(f)
     return list_of_files
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
