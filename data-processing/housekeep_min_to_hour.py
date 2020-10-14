@@ -230,11 +230,10 @@ def compress_csv():
                                  'csv-bookkeeping/temp/', f_name=f)
             except:
                 continue
-                
+
     df = read_s3_to_df_bk(sql_c, spark)
     comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv"
-    df.sortBy("product_id", "event_time").write\
-    .partitionBy("product_id")\
+    df.orderby("event_time").write\
     .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
 
 
