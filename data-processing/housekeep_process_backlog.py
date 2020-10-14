@@ -48,6 +48,7 @@ def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/
     ################################################################################
     # read data from S3 ############################################################
     s3file = f's3a://{bucket}/{src_dir}*.csv'
+    print (s3file)
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
     # drop unused column
