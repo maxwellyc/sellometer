@@ -273,7 +273,7 @@ def process_backlog(events, dimensions):
             df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
             df = df.union(new_df[evt][dim])
             df = merge_df(df, evt, dim)
-            write_to_psql(df, evt, dim, mode="overwrite", suffix='minute')
+            write_to_psql(df, evt, dim, mode="overwrite", suffix='minute_bl')
 
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
