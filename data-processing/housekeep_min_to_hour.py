@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 
 def spark_init():
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("DT_tier_transfer").set("spark.sql.sources.partitionOverwriteMode","dynamic")
+    conf = SparkConf().setAppName("DT_tier_transfer")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
@@ -109,6 +109,7 @@ def merge_df(df, event, dim):
 def write_to_psql(df, event, dim, mode, suffix):
     # write dataframe to postgreSQL
     # suffix can be 'hour', 'minute', 'rank', this is used to name datatables
+    print (f"{mode} table {event}_{dim}_{suffix}")
     df.write\
     .format("jdbc")\
     .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
