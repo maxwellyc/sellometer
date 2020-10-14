@@ -143,13 +143,13 @@ def group_by_dimensions(view_df, purchase_df, dimensions):
     view_dims, purchase_dims = {}, {}
     # total view counts per dimesion, total sales amount per dimension
     for dim in dimensions:
-        # total view counts per dimension, if product_id, also compute mean price
-        # total $$$ amount sold per dimension, if product_id also compute count and mean
+        # total view counts per dimension, if product_id, also compute avg price
+        # total $$$ amount sold per dimension, if product_id also compute count and avg
         if dim == 'product_id':
             view_dims[dim] = (view_df.groupby(dim, 'event_time')
-                                .agg(F.count('price'),F.mean('price')))
+                                .agg(F.count('price'),F.avg('price')))
             purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
-                                .agg(F.sum('price'),F.count('price'),F.mean('price')))
+                                .agg(F.sum('price'),F.count('price'),F.avg('price')))
         else:
             view_dims[dim] = (view_df.groupby(dim, 'event_time')
                                 .agg(F.count('price')))
@@ -223,20 +223,20 @@ def merge_df(df, event, dim):
     if dim == 'product_id':
         if event == 'view':
         # view_dims[dim] = (view_df.groupby(dim, 'event_time')
-        #                     .agg(F.count('price'),F.mean('price')))
-            df = df.withColumn('total_price', F.col('count(price)') * F.col('mean(price)'))
+        #                     .agg(F.count('price'),F.avg('price')))
+            df = df.withColumn('total_price', F.col('count(price)') * F.col('avg(price)'))
             df = df.groupby(dim, 'event_time').agg(F.count('count(price)'), F.sum('total_price'))
             df = df.withColumnRenamed('count(count(price))','count(price)')
-            df = df.withColumn('mean(price)', F.col('sum(total_price)') / F.col('count(price)'))
+            df = df.withColumn('avg(price)', F.col('sum(total_price)') / F.col('count(price)'))
             df.drop('sum(total_price)')
             df.show(10)
         elif event == 'purchase':
             # purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
-            #                 .agg(F.sum('price'),F.count('price'),F.mean('price')))
+            #                 .agg(F.sum('price'),F.count('price'),F.avg('price')))
             df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'), F.sum('count(price)'))
             df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
             df = df.withColumnRenamed('sum(count(price))', 'count(price)')
-            df = df.withColumn('mean(price)', F.col('sum(price)') / F.col('count(price)'))
+            df = df.withColumn('avg(price)', F.col('sum(price)') / F.col('count(price)'))
             df.show(10)
     else:
         if event == 'view':
