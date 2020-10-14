@@ -230,10 +230,7 @@ def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"
         .mode(mode)\
         .save()
 
-
-if __name__ == "__main__":
-
-    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
+def stream_to_minute(dimensions):
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
@@ -262,3 +259,8 @@ if __name__ == "__main__":
     # view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
     # # write to postgresql database
     # write_to_psql(view_dim, purchase_dim, dimensions, mode = "append", timescale="hour") # "append"
+
+
+if __name__ == "__main__":
+    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
+    stream_to_minute(dimensions)
