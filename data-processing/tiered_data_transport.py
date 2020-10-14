@@ -261,5 +261,5 @@ if __name__ == "__main__":
 
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     events = ['purchase']#, 'view'] # test purchase then test view
-    #min_to_hour(dimensions, events)
-    compress_csv()
+    min_to_hour(dimensions, events)
+    #compress_csv()
