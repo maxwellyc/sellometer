@@ -238,7 +238,10 @@ def stream_to_minute(events, dimensions):
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
             write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute')
-
+    bucket = 'maxwell-insight'
+    src_dir = 'serverpool/'
+    dst_dir = 'spark-processed/'
+    os.system[f's3cmd mv s3://{bucket}/{src_dir}* s3://{bucket}/{dst_dir}']
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l1', 'category_l3'] # 'category_l2'
