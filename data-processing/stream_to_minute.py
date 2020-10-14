@@ -36,6 +36,8 @@ def get_next_time_tick_from_log(next=True):
         time_tick = f.readlines()[0].strip("\n")
     else:
         time_tick = def_tick
+    # debug override
+    def_tick = '2019-10-01-00-19-00'
     time_tick = str_to_datetime(time_tick)
     if next:
         time_tick += datetime.timedelta(minutes=1)
