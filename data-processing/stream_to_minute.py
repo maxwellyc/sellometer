@@ -57,8 +57,10 @@ def get_latest_time_from_sql_db(spark):
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
         .load()
-        #t_max = datetime_to_str(str_to_datetime(df.agg({"event_time": "max"}).collect()[0][0]))
-        t_max = df.agg({"event_time": "max"}).collect()[0][0]
+        t_max = datetime_to_str(
+        str_to_datetime(df.agg({"event_time": "max"}).collect()[0][0],
+        time_format = 'yyyy-MM-dd HH:mm:ss'
+        ))
         print (f'Latest event time in DB is: {t_max}')
         return t_max
     # except:
