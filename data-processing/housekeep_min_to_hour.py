@@ -45,8 +45,8 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         return t_max
 
 
-def remove_min_data_from_sql(df, curr_time, hours_window=24, time_format='%Y-%m-%d %H:%M:%S'):
-    cutoff = str_to_datetime(curr_time, time_format) - datetime.timedelta(hours=hours_window)
+def remove_min_data_from_sql(df, curr_time, hours_window=24):
+    cutoff = curr_time - datetime.timedelta(hours=hours_window)
     print ('min data before slice')
     df.show(50)
     print (f"Current time: {curr_time}, Cutoff time: {cutoff}")
@@ -56,13 +56,13 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24, time_format='%Y-%m-
     return df
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
-    df = df.filter( (df.event_time >= str_to_datetime(start_tick,time_format)) &
-    (df.event_time < str_to_datetime(start_tick,time_format) + datetime.timedelta(hours=t_window)) )
+    df = df.filter( (df.event_time >= start_tick) &
+    (df.event_time < start_tick + datetime.timedelta(hours=t_window)) )
     print ('select_time_window')
     df.show(50)
     return df
 
-def compress_time(df, t_window, start_tick="2019-10-01-00-00-00", tstep = 60, from_csv = True ):
+def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
     # Datetime transformation #######################################################
     # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01-00-00-00"
@@ -76,7 +76,7 @@ def compress_time(df, t_window, start_tick="2019-10-01-00-00-00", tstep = 60, fr
             'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
             )
     if t_window:
-        df = select_time_window(df, start_tick=start_tick, t_window = t_window)
+        df = select_time_window(df, start_tick=start_tick, t_window=t_window)
     df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
     df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
     # t_max = df.agg({"event_time": "max"}).collect()[0][0]
@@ -115,8 +115,9 @@ def min_to_hour(dimensions, events):
     # start_tick = check_min_data_avail()
     # if start_tick:
     sql_c, spark = spark_init()
-    curr_min = get_latest_time_from_sql_db(spark, suffix='minute')
-    curr_hour = get_latest_time_from_sql_db(spark, suffix='hour')
+    time_format = '%Y-%m-%d %H:%M:%S'
+    curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
+    curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
@@ -134,8 +135,9 @@ def min_to_hour(dimensions, events):
 
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
-            if str_to_datetime(curr_min) > str_to_datetime(curr_hour) + datetime.timedelta(hours=1):
-                df = compress_time(df_0,start_tick=curr_hour, t_window=3600,
+            if (str_to_datetime(curr_min,) >
+            str_to_datetime(curr_hour) + datetime.timedelta(hours=1)):
+                df = compress_time(df_0, t_window=3600, start_tick=curr_hour,
                 tstep=3600, from_csv=False)
                 # append temp table into t2 datatable
                 write_to_psql(df, evt, dim, mode="append", suffix='hour')
