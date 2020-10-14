@@ -47,19 +47,13 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
 
 def remove_min_data_from_sql(df, curr_time, hours_window=24):
     cutoff = curr_time - datetime.timedelta(hours=hours_window)
-    print ('min data before slice')
-    df.show(50)
-    print (f"Current time: {curr_time}, Cutoff time: {cutoff}")
+    print (f"Current time: {curr_time}, 24 hours cutoff time: {cutoff}")
     df = df.filter(df.event_time > cutoff )
-    print ('remove_min_data')
-    df.show(50)
     return df
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
     df = df.filter( (df.event_time >= start_tick) &
     (df.event_time < start_tick + datetime.timedelta(hours=t_window)) )
-    print ('select_time_window')
-    df.show(50)
     return df
 
 def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
