@@ -23,10 +23,15 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
-def remove_server_num(f_name,suffix='.csv'):
+def remove_server_num(f_name,suffix='.csv',serverNum=True):
     # remove server # from file name
     # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
-    return '-'.join(f_name.strip(suffix).split('-')[:-1])
+    if "temp/" in f_name:
+        f_name = f_name[5:]
+    if serverNum:
+        return '-'.join(f_name.split(suffix)[0].split('-')[:-1])
+    else:
+        return f_name.split(suffix)[0]
 
 def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H:%M:%S'):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
