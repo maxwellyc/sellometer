@@ -23,35 +23,6 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
-
-# def check_min_data_avail():
-#     # reads previous processed time in logs/min_tick.txt and returns next time tick
-#     # default file names and locations
-#     min_tick = return_tick("min_tick.txt")
-#     hour_tick = return_tick("hour_tick.txt")
-#     min_tick_dt = str_to_datetime(min_tick)
-#     hour_tick_dt = str_to_datetime(hour_tick)
-#     # <= so that all data of the hour is available. In case where eg.
-#     # 2019-10-02-10-00-00 has multiple entries but is only partially logged in
-#     if min_tick_dt <= hour_tick_dt + datetime.timedelta(hours=1):
-#         # no integer hour has passed since last min->hour process
-#         print (min_tick_dt, hour_tick_dt)
-#         return None
-#     else:
-#         # have enough minute data to generate hour file up to previous hour + 1 hour
-#         print (hour_tick_dt, hour_tick_dt+ datetime.timedelta(hours=1))
-#         return hour_tick_dt
-
-# def write_time_tick_to_log(time_fn):
-#     # writes current processed time tick in logs/min_tick.txt for bookkeeping
-#     # default file names and locations
-#     time_fn = "min_tick.txt"
-#     f_dir = "logs"
-#     output = open(f"{f_dir}/{time_tick_fn}",'w')
-#     output.write(time_tick)
-#     output.close()
-#     return
-
 def get_latest_time_from_sql_db(spark, suffix='minute'):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
@@ -122,7 +93,6 @@ def write_to_psql(df, event, dim, mode, suffix):
 
 def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     table_name = "_".join([event, dim, suffix])
-    # df = pd.read_sql_table(table_name, engine)
     df = spark.read \
         .format("jdbc") \
     .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
@@ -134,7 +104,7 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
 
     return df
 
-def min_to_hour(engine, dimensions, events):
+def min_to_hour(dimensions, events):
     # start_tick = check_min_data_avail()
     # if start_tick:
     sql_c, spark = spark_init()
@@ -143,7 +113,7 @@ def min_to_hour(engine, dimensions, events):
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
-            df = read_sql_to_df(engine,event=evt,dim=dim,suffix='minute')
+            df = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # from last recorded hourly, slice 3600 second of dataframe for processing
             df = select_time_window(df, start_tick=curr_hour, t_window=3600 )
             # compress hourly data of past hour
@@ -164,5 +134,4 @@ if __name__ == "__main__":
 
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     events = ['purchase']#, 'view'] # test purchase then test view
-    engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
-    min_to_hour(engine, dimensions, events)
+    min_to_hour(dimensions, events)
