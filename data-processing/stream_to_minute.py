@@ -226,6 +226,7 @@ def stream_to_minute(events, dimensions):
     bucket = 'maxwell-insight'
     src_dir = 'serverpool/'
     dst_dir = 'spark-processed/'
+    print ('moving files')
     os.system(f's3cmd mv s3://{bucket}/{src_dir}{time_tick}*.csv s3://{bucket}/{dst_dir}')
     write_time_tick_to_log(time_tick)
 
