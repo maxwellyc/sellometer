@@ -113,7 +113,7 @@ def min_to_hour(engine, dimensions, events):
     start_tick, end_tick = check_min_data_avail()
     if start_tick:
         for evt in events:
-            for dim in dimesions:
+            for dim in dimensions:
                 # read min data from t1 datatable
                 main_df = read_sql_to_df(engine, event=evt, dimension=dim,
                  time_gran='minute')
