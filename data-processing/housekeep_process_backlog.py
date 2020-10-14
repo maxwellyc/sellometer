@@ -17,6 +17,26 @@ def spark_init():
     sql_c = SQLContext(sc)
     return sql_c, spark
 
+def get_next_time_tick_from_log(next=True, debug=False):
+    # reads previous processed time in logs/min_tick.txt and returns next time tick
+    # default file names and locations
+    def_tick = "2019-09-30-23-59-00"
+    time_fn = "min_tick.txt"
+    f_dir = "logs"
+    if time_fn in os.listdir(f_dir):
+        f = open(f"{f_dir}/{time_fn}",'r')
+        time_tick = f.readlines()[0].strip("\n")
+    else:
+        time_tick = def_tick
+    # debug override
+    if debug:
+        time_tick = '2019-10-01-00-19-00'
+    time_tick = str_to_datetime(time_tick)
+    if next:
+        time_tick += datetime.timedelta(minutes=1)
+    time_tick = datetime_to_str(time_tick)
+    return time_tick
+
 def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/' ,read_time_tick = True):
     ################################################################################
     # read data from S3 ############################################################
@@ -233,7 +253,7 @@ if __name__ == "__main__":
     new_df, main_df = {}, {'view':{}, 'purchase':{}}
     new_df['view'], new_df['purchase'] = spark_process(src_dir='backlogs/',read_time_tick=False)
     for evt in main_df:
-        for dim in dimesions:
+        for dim in dimensions:
             main_df[evt][dim] = read_sql_to_df(engine, event=evt, dimension=dim,
              time_gran='minute', group=False)
             main_df[evt][dim] = main_df[evt][dim].union(new_df[evt][dim])
