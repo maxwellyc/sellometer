@@ -45,7 +45,7 @@ def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
 #     time_tick = datetime_to_str(time_tick)
 #     return time_tick
 
-def get_latest_time_from_sql_db():
+def get_latest_time_from_sql_db(spark):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
     # try:
@@ -98,7 +98,7 @@ def read_s3_to_df(sql_c, spark):
     # for mini batches need to change this section into dynamical
     bucket = 'maxwell-insight'
     lof = list_s3_files()
-    curr_time = get_latest_time_from_sql_db()
+    curr_time = get_latest_time_from_sql_db(spark)
     # move backlog files into s3://{bucket}/backlogs/
     print (curr_time)
     for f_name in lof:
