@@ -98,7 +98,7 @@ def read_s3_to_df(sql_c, spark, process_all=True):
             tt_dt = str_to_datetime(remove_server_num(f_name))
             # if backlog file (ie earlier than latest time already in datatable)
             if tt_dt < str_to_datetime(curr_time):
-                print (f"Current time: {curr_time_tick} --- Backlog file: {f_name}")
+                print (f"Current time: {curr_time} --- Backlog file: {f_name}")
                 os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
             else:
                 print (f"Processing {f_name}")
