@@ -232,7 +232,7 @@ def compress_csv():
                 continue
 
     df = read_s3_to_df_bk(sql_c, spark)
-    df = df.withColumn('_c0', df['_c0'].cast(IntegerType()))
+    df = df.withColumn('_c0', df['_c0'].cast('integer'))
     comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv.gzip"
     df.orderBy('_c0')\
     .coalesce(1)\
