@@ -237,7 +237,7 @@ def stream_to_minute(events, dimensions):
     for evt in events:
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
-            write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute')
+            write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute_test')
 
 
 if __name__ == "__main__":

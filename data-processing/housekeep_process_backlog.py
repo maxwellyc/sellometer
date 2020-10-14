@@ -112,7 +112,6 @@ def clean_data(spark,df):
     df = df.drop('category_id')
     df = df.drop('category_code')
 
-    # df.show(n=50)
     ################################################################################
     # create separate dataframe for view and purchase,
     # data transformation will be different for these two types of events.
@@ -229,7 +228,6 @@ def merge_df(df, event, dim):
             df = df.withColumnRenamed('count(count(price))','count(price)')
             df = df.withColumn('avg(price)', F.col('sum(total_price)') / F.col('count(price)'))
             df.drop('sum(total_price)')
-            df.show(10)
         elif event == 'purchase':
             # purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
             #                 .agg(F.sum('price'),F.count('price'),F.avg('price')))
@@ -237,12 +235,10 @@ def merge_df(df, event, dim):
             df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
             df = df.withColumnRenamed('sum(count(price))', 'count(price)')
             df = df.withColumn('avg(price)', F.col('sum(price)') / F.col('count(price)'))
-            df.show(10)
     else:
         if event == 'view':
             df = df.groupby(dim, 'event_time').agg(F.sum('count(price)'))
             df = df.withColumnRenamed('sum(count(price))', 'count(price)')
-            df.show(10)
         elif event == 'purchase':
             df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'))
             df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
