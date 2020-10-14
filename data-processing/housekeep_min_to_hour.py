@@ -231,7 +231,7 @@ def compress_csv():
     print (lof_zipped)
     max_processed_time = folder_time_range(lof_pool)[1]
     print ('f2')
-    max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-H','.csv.gzip',False)[1]
+    max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-%H','.csv.gzip',False)[1]
     max_zipped_next = max_zipped_time + datetime.timedelta(hours=1)
     print (max_processed_time, max_zipped_next)
     if max_processed_time > max_zipped_next:
