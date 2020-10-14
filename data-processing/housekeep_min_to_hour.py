@@ -120,10 +120,18 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
-def read_sql_to_df(engine, event='purchase', dim='product_id',
-suffix='minute'):
+def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     table_name = "_".join([event, dim, suffix])
-    df = pd.read_sql_table(table_name, engine)
+    # df = pd.read_sql_table(table_name, engine)
+    df = spark.read \
+        .format("jdbc") \
+    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
+    .option("dbtable", table_name) \
+    .option("user",os.environ['psql_username'])\
+    .option("password",os.environ['psql_pw'])\
+    .option("driver","org.postgresql.Driver")\
+    .load()
+
     return df
 
 def min_to_hour(engine, dimensions, events):
