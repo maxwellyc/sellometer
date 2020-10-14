@@ -9,7 +9,7 @@ import os, subprocess
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
 dst_dir = 'spark-processed/'
-schedule = timedelta(seconds=90)
+schedule = timedelta(seconds=60)
 
 args = {
     'owner': 'airflow',
@@ -27,18 +27,18 @@ dag = DAG(
     default_args=args
     )
 
-def spark_live_process():
+def spark_live_processing():
     response = subprocess.check_output(f's3cmd du $s3/{src_dir}', shell=True).decode('ascii')
     file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
     # use extra processors when file size greater than 9 Mb
-    max_cores = 12 if file_size > 9 else 6
+    max_cores = 12 if file_size > 10 else 8
     print(max_cores,'spark cores executing')
     os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
-    '$sparkf ~/eCommerce/data-processing/stream_to_minute.py')
+    '$sparkf ~/eCommerce/data-processing/streaming.py')
 
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
-    poke_interval= 4, # (seconds); checking file every 4 seconds
+    poke_interval= 3, # (seconds); checking file every 4 seconds
     timeout=60 * 60, # timeout in 1 hours
     bucket_key=f"s3://{bucket}/{src_dir}*.csv",
     bucket_name=None,
@@ -46,14 +46,9 @@ file_sensor = S3KeySensor(
     dag=dag)
 
 spark_live_process = PythonOperator(
-  task_id='spark_live_process',
+  task_id='spark_live_processing',
   python_callable=spark_live_process,
   dag = dag)
 
-move_processed_csv =  BashOperator(
-  task_id='move_processed_csv',
-  bash_command=f's3cmd mv s3://{bucket}/{src_dir}* s3://{bucket}/{dst_dir}',
-  dag = dag)
 
-
-file_sensor >> spark_live_process  >> move_processed_csv
+file_sensor >> spark_live_process

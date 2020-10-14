@@ -151,7 +151,7 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     .option("user",os.environ['psql_username'])\
     .option("password",os.environ['psql_pw'])\
     .option("driver","org.postgresql.Driver")\
-    .load()
+    .load().cache()
     return df
 
 def min_to_hour(dimensions, events):
@@ -168,9 +168,10 @@ def min_to_hour(dimensions, events):
             # remove data from more than 24 hours away from t1 table
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 1)
             # rewrite minute level data back to t1 table
-            write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
-            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
-            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            # write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
+            # df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
+            # write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute')
 
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
