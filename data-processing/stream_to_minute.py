@@ -191,17 +191,17 @@ def group_by_dimensions(main_df, events, dimensions):
             # total $$$ amount sold per dimension, if product_id also compute count and mean
             if dim == 'product_id':
                 if evt == 'view':
-                    main_gb[evt][dim] = (main_df[evt][dim].groupby(dim, 'event_time')
+                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
                                     .agg(F.count('price'),F.mean('price')))
                 elif evt == 'purchase':
-                    main_gb[evt][dim] = (main_df[evt][dim].groupby(dim, 'event_time')
+                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
                                     .agg(F.sum('price'),F.count('price'),F.mean('price')))
             else:
                 if evt == 'view':
-                    main_gb[evt][dim] = (main_df[evt][dim].groupby(dim, 'event_time')
+                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
                                     .agg(F.count('price')))
                 elif evt == 'purchase':
-                    main_gb[evt][dim] = (main_df[evt][dim].groupby(dim, 'event_time')
+                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
                                     .agg(F.sum('price')))
 
     return main_gb
