@@ -62,7 +62,7 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     df_cut = df.filter(df.event_time > cutoff )
     return df_cut
 
-def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
+def list_s3_files(dir="serverpool", bucket='maxwell-insight'):
     dir += "/"
     conn = client('s3')
     list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
@@ -252,6 +252,7 @@ def compress_csv(timeframe='hour'):
     #             print (e)
     print ('f3')
     try:
+        max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
         df = read_s3_to_df_bk(sql_c, spark, prefix=max_zipped_time)
         df = df.withColumn('_c0', df['_c0'].cast('integer'))
         comp_f_name = datetime_to_str(max_zipped_next, tt_format) + ".csv.gzip"
