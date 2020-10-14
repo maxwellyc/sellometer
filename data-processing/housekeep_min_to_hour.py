@@ -180,7 +180,7 @@ def min_to_hour(dimensions, events):
 def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S'):
     # returns datetime.datetime objects
     file_times = []
-    for f_name in file_times:
+    for f_name in lof:
         try:
             t = remove_server_num(f_name)
             t = str_to_datetime(t, time_format)
