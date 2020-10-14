@@ -87,11 +87,10 @@ def group_by_dimensions(df, evt, dim):
                             .agg(F.sum('price'),F.count('price'),F.mean('price')))
     else:
         if evt == 'view':
-            gb = (df.groupby(dim, 'event_time')
-                            .agg(F.count('price')))
+            gb = (df.groupby(dim, 'event_time').agg(F.count('price')))
         elif evt == 'purchase':
-            gb = (df.groupby(dim, 'event_time')
-                            .agg(F.sum('price')))
+            gb = (df.groupby(dim, 'event_time').agg(F.sum('price')))
+
     return gb
 
 def write_to_psql(df, event, dim, mode, suffix):
@@ -148,7 +147,7 @@ def min_to_hour(dimensions, events):
             if curr_min > curr_hour + datetime.timedelta(hours=1):
                 df = compress_time(df_0, t_window=3600, start_tick=curr_hour,
                 tstep=3600, from_csv=False)
-                gb = group_by_dimensions(df, events, dimensions)
+                gb = group_by_dimensions(df, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
