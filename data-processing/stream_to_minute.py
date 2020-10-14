@@ -245,4 +245,4 @@ def stream_to_minute(events, dimensions, move_files=False):
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
     events = ['purchase', 'view'] # test purchase then test view
-    stream_to_minute(events, dimensions, move_files=True)
+    stream_to_minute(events, dimensions, move_files=False)
