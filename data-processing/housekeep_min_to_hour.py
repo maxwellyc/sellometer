@@ -48,8 +48,10 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
 def remove_min_data_from_sql(df, curr_time, hours_window=24):
     cutoff = curr_time - datetime.timedelta(hours=hours_window)
     print (f"Current time: {curr_time}, 24 hours cutoff time: {cutoff}")
-    df = df.filter(df.event_time > cutoff )
-    return df
+    df_cut = df.filter(df.event_time > cutoff )
+    df.show(100)
+    df_cut.show(100)
+    return df_cut
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
     df = df.filter( (df.event_time >= start_tick) &
