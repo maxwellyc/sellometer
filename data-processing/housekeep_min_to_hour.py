@@ -70,7 +70,7 @@ def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
     for f in list_of_files:
         if '/' in f or not f: continue
         tmp.append(f)
-    return list_of_files
+    return tmp
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
     df = df.filter( (df.event_time >= start_tick) &
