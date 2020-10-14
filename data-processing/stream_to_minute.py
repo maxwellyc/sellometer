@@ -91,7 +91,7 @@ def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
     # dst_dir = 'spark-processed/'
     os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
 
-def read_s3_to_df(sql_c, spark, process_all=True):
+def read_s3_to_df(sql_c, spark):
     ################################################################################
     # read data from S3 ############################################################
     # for mini batches need to change this section into dynamical
@@ -112,18 +112,11 @@ def read_s3_to_df(sql_c, spark, process_all=True):
     key = 'serverpool/*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
-    try:
-        df = sql_c.read.csv(s3file, header=True)
-        # drop unused column
-        df = df.drop('_c0')
-        print (f"Time of latest event in datatable: {curr_time}")
-        return df, curr_time
-    except:
-        print (f"Check start time in log file, skipping current time tick: {time_tick}")
-        return None, None
-
-
-
+    df = sql_c.read.csv(s3file, header=True)
+    # drop unused column
+    df = df.drop('_c0')
+    print (f"Time of latest event in datatable: {curr_time}")
+    return df, curr_time
 
 def compress_time(df, tstep = 60, from_csv = True):
     # Datetime transformation #######################################################
@@ -245,11 +238,11 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
-def stream_to_minute(events, dimensions, process_all=False, move_files=False):
+def stream_to_minute(events, dimensions, move_files=False):
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
-    df_0, time_tick = read_s3_to_df(sql_c, spark, process_all)
+    df_0, time_tick = read_s3_to_df(sql_c, spark)
     if not df_0: return
     # clean data
     df_0 = clean_data(spark, df_0)
@@ -264,9 +257,6 @@ def stream_to_minute(events, dimensions, process_all=False, move_files=False):
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
             write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
-    write_time_tick_to_log(time_tick)
-    if process_all:
-        time_tick = ''
     if move_files:
         print ('Moving processed files')
         move_s3_file('maxwell-insight', 'serverpool/', 'spark-processed/')
@@ -275,4 +265,4 @@ def stream_to_minute(events, dimensions, process_all=False, move_files=False):
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
     events = ['purchase', 'view'] # test purchase then test view
-    stream_to_minute(events, dimensions,process_all=True, move_files=True)
+    stream_to_minute(events, dimensions, move_files=True)
