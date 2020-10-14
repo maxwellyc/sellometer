@@ -233,7 +233,8 @@ def compress_csv():
 
     df = read_s3_to_df_bk(sql_c, spark)
     comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv.gzip"
-    df.coalesce(1)\
+    df.orderBy('event_time')\
+    .coalesce(1)\
     .write\
     .option("header", True)\
     .option("compression","gzip")\
