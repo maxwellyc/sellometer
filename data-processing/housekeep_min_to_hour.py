@@ -23,7 +23,7 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
-def get_latest_time_from_sql_db(spark, suffix='minute'):
+def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H:%M:%S'):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
     try:
@@ -36,11 +36,11 @@ def get_latest_time_from_sql_db(spark, suffix='minute'):
         .option("driver","org.postgresql.Driver")\
         .load()
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        t_max = datetime_to_str(t_max,time_format = '%Y-%m-%d %H:%M:%S')
+        t_max = datetime_to_str(t_max,time_format)
         print (f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
         return t_max
     except:
-        t_max = "2019-10-01-00-00-00"
+        t_max = "2019-10-01 00:00:00"
         print (f'Using default time: {t_max}')
         return t_max
 
