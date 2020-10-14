@@ -99,6 +99,7 @@ def read_s3_to_df(sql_c, spark):
     lof = list_s3_files()
     curr_time = get_latest_time_from_sql_db()
     # move backlog files into s3://{bucket}/backlogs/
+    print (curr_time)
     for f_name in lof:
         if ".csv" in f_name:
             tt_dt = str_to_datetime(remove_server_num(f_name))
@@ -112,11 +113,14 @@ def read_s3_to_df(sql_c, spark):
     key = 'serverpool/*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
-    df = sql_c.read.csv(s3file, header=True)
-    # drop unused column
-    df = df.drop('_c0')
-    print (f"Time of latest event in datatable: {curr_time}")
-    return df, curr_time
+    try:
+        df = sql_c.read.csv(s3file, header=True)
+        # drop unused column
+        df = df.drop('_c0')
+        print (f"Time of latest event in datatable: {curr_time}")
+        return df, curr_time
+    except:
+        return None, None
 
 def compress_time(df, tstep = 60, from_csv = True):
     # Datetime transformation #######################################################
@@ -243,7 +247,9 @@ def stream_to_minute(events, dimensions, move_files=False):
     sql_c, spark = spark_init()
     # read csv from s3
     df_0, time_tick = read_s3_to_df(sql_c, spark)
-    if not df_0: return
+    if not df_0:
+        print ("No files were read into dataframe")
+        return
     # clean data
     df_0 = clean_data(spark, df_0)
     # compress time into minute granularity, used for live monitoring
