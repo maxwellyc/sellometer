@@ -30,6 +30,25 @@ def get_next_time_tick_from_log(next=True):
     time_tick = datetime_to_str(time_tick)
     return time_tick
 
+def get_latest_time_from_sql_db():
+    # reads previous processed time in logs/min_tick.txt and returns next time tick
+    # default file names and locations
+    try:
+        df = spark.read \
+            .format("jdbc") \
+        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
+        .option("dbtable", 'purchase_product_id_minute') \
+        .option("user",os.environ['psql_username'])\
+        .option("password",os.environ['psql_pw'])\
+        .option("driver","org.postgresql.Driver")\
+        .load()
+        t_max = datetime_to_str(str_to_datetime(df.agg({"event_time": "max"}).collect()[0][0]))
+        print (f'Latest event time in DB is: {t_max}')
+    except:
+        t_max = "2019-10-01-00-00-00"
+        print (f'Using default time: {t_max}')
+    return t_max
+
 def remove_server_num(f_name):
     # remove server # from file name
     # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
@@ -41,7 +60,7 @@ def collect_backlogs():
     src_dir = 'serverpool/'
     dst_dir = 'backlogs/'
     lof = list_s3_files()
-    curr_time_tick = get_next_time_tick_from_log(next=False)
+    curr_time_tick = get_latest_time_from_sql_db()
     for f_name in lof:
         if ".csv" in f_name:
             tt_dt = str_to_datetime(remove_server_num(f_name))
@@ -49,7 +68,6 @@ def collect_backlogs():
                 print (f"Current time: {curr_time_tick} --- Backlog file: {f_name}")
                 os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
     return
-
 
 if __name__ == "__main__":
     collect_backlogs()

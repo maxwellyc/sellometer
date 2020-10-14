@@ -25,25 +25,44 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
-def get_next_time_tick_from_log(next=True, debug=False):
+# def get_latest_time_from_log(next=True, debug=False):
+#     # reads previous processed time in logs/min_tick.txt and returns next time tick
+#     # default file names and locations
+#     def_tick = "2019-09-30-23-59-00"
+#     time_fn = "min_tick.txt"
+#     f_dir = "logs"
+#     if time_fn in os.listdir(f_dir):
+#         f = open(f"{f_dir}/{time_fn}",'r')
+#         time_tick = f.readlines()[0].strip("\n")
+#     else:
+#         time_tick = def_tick
+#     # debug override
+#     if debug:
+#         time_tick = '2019-10-01-00-19-00'
+#     time_tick = str_to_datetime(time_tick)
+#     if next:
+#         time_tick += datetime.timedelta(minutes=1)
+#     time_tick = datetime_to_str(time_tick)
+#     return time_tick
+
+def get_latest_time_from_sql_db():
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
-    def_tick = "2019-09-30-23-59-00"
-    time_fn = "min_tick.txt"
-    f_dir = "logs"
-    if time_fn in os.listdir(f_dir):
-        f = open(f"{f_dir}/{time_fn}",'r')
-        time_tick = f.readlines()[0].strip("\n")
-    else:
-        time_tick = def_tick
-    # debug override
-    if debug:
-        time_tick = '2019-10-01-00-19-00'
-    time_tick = str_to_datetime(time_tick)
-    if next:
-        time_tick += datetime.timedelta(minutes=1)
-    time_tick = datetime_to_str(time_tick)
-    return time_tick
+    try:
+        df = spark.read \
+            .format("jdbc") \
+        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
+        .option("dbtable", 'purchase_product_id_minute') \
+        .option("user",os.environ['psql_username'])\
+        .option("password",os.environ['psql_pw'])\
+        .option("driver","org.postgresql.Driver")\
+        .load()
+        t_max = datetime_to_str(str_to_datetime(df.agg({"event_time": "max"}).collect()[0][0]))
+        print (f'Latest event time in DB is: {t_max}')
+    except:
+        t_max = "9999-10-01-00-00-00"
+        print (f'Using default time: {t_max}')
+    return t_max
 
 def write_time_tick_to_log(time_tick):
     # writes current processed time tick in logs/min_tick.txt for bookkeeping
@@ -55,34 +74,48 @@ def write_time_tick_to_log(time_tick):
     output.close()
     return
 
+def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
+    dir += "/"
+    conn = client('s3')
+    list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
+    return list_of_files
+
 def remove_server_num(f_name):
     # remove server # from file name
     # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
     return '-'.join(f_name.strip(".csv").split('-')[:-1])
 
-def read_s3_to_df(sql_c, spark, time_tick=None, process_all=True):
+def read_s3_to_df(sql_c, spark, process_all=True):
     ################################################################################
     # read data from S3 ############################################################
     # for mini batches need to change this section into dynamical
-    if not time_tick:
-        time_tick = get_next_time_tick_from_log(next=True)
     bucket = 'maxwell-insight'
-    if process_all:
-        key = f'serverpool/*.csv'
-    else:
-        key = f'serverpool/{time_tick}-*.csv'
+    lof = list_s3_files()
+    curr_time = get_latest_time_from_sql_db()
+    # move backlog files into s3://{bucket}/backlogs/
+    for f_name in lof:
+        if ".csv" in f_name:
+            tt_dt = str_to_datetime(remove_server_num(f_name))
+            # if backlog file (ie earlier than latest time already in datatable)
+            if tt_dt < str_to_datetime(curr_time):
+                print (f"Current time: {curr_time_tick} --- Backlog file: {f_name}")
+                os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
+    # once backlog files are moved, process all that's left in serverpool folder
+    key = 'serverpool/*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     try:
         df = sql_c.read.csv(s3file, header=True)
         # drop unused column
         df = df.drop('_c0')
-        t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        t_max_tick = datetime_to_str(str_to_datetime(t_max, '%Y-%m-%d %H:%M:%S'))
-        return df, t_max_tick
+        print (f"Time of latest event in datatable: {curr_time}")
+        return df, curr_time
     except:
         print (f"Check start time in log file, skipping current time tick: {time_tick}")
         return None, None
+
+
+
 
 def compress_time(df, tstep = 60, from_csv = True):
     # Datetime transformation #######################################################
@@ -237,4 +270,4 @@ def stream_to_minute(events, dimensions, process_all=False, move_files=False):
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
     events = ['purchase', 'view'] # test purchase then test view
-    stream_to_minute(events, dimensions,True)
+    stream_to_minute(events, dimensions,process_all=True, move_files=True)
