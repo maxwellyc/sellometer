@@ -183,12 +183,12 @@ def min_to_hour(dimensions, events):
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
-def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv"):
+def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",serverNum=True):
     # returns datetime.datetime objects
     file_times = []
     for f_name in lof:
         try:
-            t = remove_server_num(f_name, suffix)
+            t = remove_server_num(f_name, suffix, serverNum)
             t = str_to_datetime(t, time_format)
             file_times.append(t)
         except Exception as e:
@@ -223,8 +223,10 @@ def compress_csv():
     sql_c, spark = spark_init()
     lof_pool = list_s3_files(dir="spark-processed", bucket = 'maxwell-insight')
     lof_zipped = list_s3_files(dir="csv-bookkeeping", bucket = 'maxwell-insight')
+    print ('f1')
     max_processed_time = folder_time_range(lof_pool)[1]
-    max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-H','.csv.gzip')[1]
+    print ('f2')
+    max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-H','.csv.gzip',False)[1]
     max_zipped_next = max_zipped_time + datetime.timedelta(hours=1)
     print (max_processed_time, max_zipped_next)
     if max_processed_time > max_zipped_next:
@@ -237,6 +239,7 @@ def compress_csv():
                                  'csv-bookkeeping/temp/', f_name=f)
             except Exception as e:
                 print (e)
+    print ('f3')
     try:
         return
         df = read_s3_to_df_bk(sql_c, spark)
