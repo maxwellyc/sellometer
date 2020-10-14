@@ -116,7 +116,7 @@ def compress_time(df, tstep = 60, from_csv = True):
     return df
     ################################################################################
 
-def clean_data(df):
+def clean_data(spark, df):
     # Data cleaning ################################################################
 
     # if missing category code, fill with category id.
@@ -237,7 +237,7 @@ def stream_to_minute(dimensions):
     df_0 = read_s3_to_df(sql_c, spark)
     if not df_0: return
     # clean data
-    df_0 = clean_data(df_0)
+    df_0 = clean_data(spark, df_0)
     # compress time into minute granularity
     df_minute = compress_time(df_0, tstep = 60)
     # # compress time into hour granularity
