@@ -250,7 +250,7 @@ def merge_df(df, event, dim):
 def process_backlog(events, dimensions):
     engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
     new_df, main_df = {}, {'view':{}, 'purchase':{}}
-    new_df['view'], new_df['purchase'] = spark_process(src_dir='backlogs/',read_time_tick=False)
+    new_df['view'], new_df['purchase'] = spark_process(src_dir='backlogs/')
     for evt in main_df:
         for dim in dimensions:
             main_df[evt][dim] = read_sql_to_df(engine, event=evt, dimension=dim,
