@@ -46,8 +46,9 @@ def get_latest_time_from_sql_db(spark, suffix='minute'):
 
 
 def remove_min_data_from_sql(df, curr_time, hours_window = 24):
-    cutoff = curr_time - datetime.timedelta(hours=hours_window)
+    cutoff = str_to_datetime(curr_time) - datetime.timedelta(hours=hours_window)
     df = df.filter(df.event_time > cutoff )
+    df.show(50)
     return df
 
 def select_time_window(df, start_tick, t_window=1):
