@@ -236,7 +236,7 @@ def merge_df(df, event, dim):
             df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'), F.sum('count(price)'))
             df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
             df = df.withColumnRenamed('sum(count(price))', 'count(price)')
-            df = df.withColumn('mean(price)', F.col('sum(price)') / F.col('conut(price)'))
+            df = df.withColumn('mean(price)', F.col('sum(price)') / F.col('count(price)'))
             df.show(10)
     else:
         if event == 'view':
