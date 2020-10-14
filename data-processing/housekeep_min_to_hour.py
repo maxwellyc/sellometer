@@ -50,8 +50,9 @@ def remove_min_data_from_sql(df, curr_time, hours_window = 24):
     df = df.filter(df.event_time > cutoff )
     return df
 
-def select_time_window(df, curr_time, t_window=None):
-    df = df.filter( (df >= str_to_datetime(curr_time)) & (df < str_to_datetime(curr_time) + datetime.timedelta(hours=1)) )
+def select_time_window(df, start_tick, t_window=1):
+    df = df.filter( (df >= str_to_datetime(start_tick)) &
+    (df < str_to_datetime(start_tick) + datetime.timedelta(hours=t_window)) )
     df.show(100)
     return df
 
@@ -121,7 +122,7 @@ def min_to_hour(dimensions, events):
 
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
-            df = select_time_window(df_0, start_tick=curr_min, t_window=3600 )
+            df = select_time_window(df_0, start_tick=curr_min )
             # store past hour data in rank table for ranking
             write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
 
