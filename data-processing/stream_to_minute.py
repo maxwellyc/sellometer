@@ -79,7 +79,7 @@ def read_s3_to_df(sql_c, spark, time_tick=None):
     # read data from S3 ############################################################
     # for mini batches need to change this section into dynamical
     if not time_tick:
-        time_tick = get_next_time_tick_from_log(next=True)
+        time_tick = get_next_time_tick_from_log(next=True, debug=True)
     print (f"Spark Cluster processing {time_tick} file batch")
     bucket = 'maxwell-insight'
     key = f'serverpool/{time_tick}-*.csv'
