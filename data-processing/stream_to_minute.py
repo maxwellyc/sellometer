@@ -41,7 +41,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute'):
         print (f'Latest event time in DB is: {t_max}')
         return t_max
     except:
-        t_max = "2019-10-01-00-00-00"
+        t_max = "2019-10-01 00:00:00"
         print (f'Using default time: {t_max}')
         return t_max
 
