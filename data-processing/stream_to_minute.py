@@ -25,7 +25,7 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
-def get_next_time_tick_from_log(next=True, debug=True):
+def get_next_time_tick_from_log(next=True, debug=False):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
     def_tick = "2019-09-30-23-59-00"
