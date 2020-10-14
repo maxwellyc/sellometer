@@ -45,7 +45,7 @@ def collect_backlogs():
     for f_name in lof:
         if ".csv" in f_name:
             tt_dt = str_to_datetime(remove_server_num(f_name))
-            if tt_dt <= curr_time_tick:
+            if tt_dt <= str_to_datetime(curr_time_tick):
                 print (f"Current time: {curr_time_tick} --- Backlog file: {f_name}")
                 #os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
     return
