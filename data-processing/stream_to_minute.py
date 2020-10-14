@@ -23,15 +23,15 @@ def remove_server_num(f_name):
     # remove server # from file name
     # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
     return '-'.join(f_name.strip(".csv").split('-')[:-1])
-    
-def get_latest_time_from_sql_db(spark):
+
+def get_latest_time_from_sql_db(spark, suffix='minute'):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
     try:
         df = spark.read \
             .format("jdbc") \
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-        .option("dbtable", 'purchase_product_id_minute') \
+        .option("dbtable", f'purchase_product_id_{suffix}') \
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
@@ -68,8 +68,9 @@ def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
     os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
 
 def read_s3_to_df(sql_c, spark):
-    ################################################################################
     # read data from S3 ############################################################
+
+
     # for mini batches need to change this section into dynamical
     bucket = 'maxwell-insight'
     lof = list_s3_files()
@@ -80,7 +81,7 @@ def read_s3_to_df(sql_c, spark):
         if ".csv" in f_name:
             tt_dt = str_to_datetime(remove_server_num(f_name))
             # if backlog file (ie earlier than latest time already in datatable)
-            if tt_dt < str_to_datetime(curr_time, time_format = '%Y-%m-%d %H:%M:%S'):
+            if tt_dt <= str_to_datetime(curr_time, time_format = '%Y-%m-%d %H:%M:%S'):
                 print (f"Current time: {curr_time} --- Backlog file: {f_name}")
                 move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
             else:

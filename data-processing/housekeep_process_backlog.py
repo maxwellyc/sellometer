@@ -223,7 +223,6 @@ def spark_process(sql_c, spark, dimensions=['product_id'], src_dir='serverpool/'
 def merge_df(df, event, dim):
     # when performing union on backlog dataframe and main dataframe
     # need to recalculate average values
-
     if dim == 'product_id':
         if event == 'view':
         # view_dims[dim] = (view_df.groupby(dim, 'event_time')
