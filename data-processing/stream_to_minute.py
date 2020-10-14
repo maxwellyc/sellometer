@@ -86,7 +86,7 @@ def read_s3_to_df(sql_c, spark):
         if ".csv" in f_name:
             tt_dt = str_to_datetime(remove_server_num(f_name))
             # if backlog file (ie earlier than latest time already in datatable)
-            if tt_dt < str_to_datetime(curr_time):
+            if tt_dt < str_to_datetime(curr_time, time_format = '%Y-%m-%d %H:%M:%S'):
                 print (f"Current time: {curr_time} --- Backlog file: {f_name}")
                 move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
             else:
