@@ -202,8 +202,8 @@ def group_by_dimensions(view_df, purchase_df, dimensions):
         # view_dims[dim] = view_dims[dim].orderBy(dim, 'event_time')
         # purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'event_time')
 
-        view_dims[dim].cache()
-        purchase_dims[dim].cache()
+        view_dims[dim]
+        purchase_dims[dim]
 
     return view_dims, purchase_dims
 
@@ -234,7 +234,7 @@ def stream_to_minute(dimensions):
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
-    df_0 = read_s3_to_df(sql_c, spark).cache()
+    df_0 = read_s3_to_df(sql_c, spark)
     if not df_0: return
     # clean data
     df_0 = clean_data(df_0)
