@@ -200,7 +200,7 @@ def spark_process(dimensions=['product_id'], src_dir='serverpool/', backlog_mode
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
-    df_0 = read_s3_to_df(sql_c, spark, src_dir)
+    df_0 = read_s3_to_df(sql_c, spark, src_dir=src_dir)
     # clean data
     df_0 = clean_data(df_0)
     # compress time into minute granularity
