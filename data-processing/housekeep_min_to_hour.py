@@ -144,11 +144,13 @@ def min_to_hour(dimensions, events):
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
-            df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute').cache()
+            df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # remove data from more than 24 hours away from t1 table
-            df_0 = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
+            df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
             # rewrite minute level data back to t1 table
-            write_to_psql(df_0, evt, dim, mode="overwrite", suffix='minute')
+            write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
+            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
+            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
 
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
