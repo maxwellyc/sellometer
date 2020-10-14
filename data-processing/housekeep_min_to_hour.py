@@ -47,14 +47,17 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
 
 def remove_min_data_from_sql(df, curr_time, hours_window=24, time_format='%Y-%m-%d %H:%M:%S'):
     cutoff = str_to_datetime(curr_time, time_format) - datetime.timedelta(hours=hours_window)
+    print ('min data before slice')
+    df.show(50)
+    print (f"Current time: {curr_time}, Cutoff time: {cutoff}")
     df = df.filter(df.event_time > cutoff )
     print ('remove_min_data')
     df.show(50)
     return df
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
-    df = df.filter( (df >= str_to_datetime(start_tick,time_format)) &
-    (df < str_to_datetime(start_tick,time_format) + datetime.timedelta(hours=t_window)) )
+    df = df.filter( (df.event_time >= str_to_datetime(start_tick,time_format)) &
+    (df.event_time < str_to_datetime(start_tick,time_format) + datetime.timedelta(hours=t_window)) )
     print ('select_time_window')
     df.show(50)
     return df
@@ -121,7 +124,7 @@ def min_to_hour(dimensions, events):
             # remove data from more than 24 hours away from t1 datatable
             df = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
             # rewrite minute level data
-            write_to_psql(df, evt, dim, mode="overwrite", suffix='minute')
+            # write_to_psql(df, evt, dim, mode="overwrite", suffix='minute')
 
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
