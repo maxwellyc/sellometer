@@ -23,6 +23,11 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
+def remove_server_num(f_name):
+    # remove server # from file name
+    # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
+    return '-'.join(f_name.strip(".csv").split('-')[:-1])
+
 def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H:%M:%S'):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
@@ -50,6 +55,12 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     print (f"Current time: {curr_time}, 24 hours cutoff time: {cutoff}")
     df_cut = df.filter(df.event_time > cutoff )
     return df_cut
+
+def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
+    dir += "/"
+    conn = client('s3')
+    list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
+    return list_of_files
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
     df = df.filter( (df.event_time >= start_tick) &
@@ -131,7 +142,6 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     .option("password",os.environ['psql_pw'])\
     .option("driver","org.postgresql.Driver")\
     .load()
-
     return df
 
 def min_to_hour(dimensions, events):
@@ -167,9 +177,65 @@ def min_to_hour(dimensions, events):
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
+def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S'):
+    # returns datetime.datetime objects
+    file_times = []
+    for f_name in file_times:
+        try:
+            t = remove_server_num(f_name)
+            t = str_to_datetime(t, time_format)
+            file_times.append(t)
+        except:
+            continue
+    if file_times:
+        return file_times.min(), file_times.max()
+    else:
+        # if time_format == '%Y-%m-%d-%H-%M-%S':
+        return str_to_datetime("2019-10-01-00-00-00"), str_to_datetime("2019-10-01-00-00-00")
+        # elif time_format == '%Y-%m-%d':
+        #     return str_to_datetime("2019-09-30"), str_to_datetime("2019-09-30")
+
+def compress_file(path):
+    df.write.option("compression","gzip").csv(path)
+    return
+
+def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
+    # bucket = 'maxwell-insight'
+    # src_dir = 'serverpool/'
+    # dst_dir = 'spark-processed/'
+    os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
+
+def read_s3_to_df_bk(sql_c, spark):
+    # read data from S3 ############################################################
+    # for mini batches need to change this section into dynamical
+    lof = list_s3_files(dir="csv-bookkeeping/temp", bucket = 'maxwell-insight')
+    key = "csv-bookkeeping/temp/*.csv"
+    s3file = f's3a://{bucket}/{key}'
+    return sql_c.read.csv(s3file, header=True)
+
+def compress_csv():
+    sql_c, spark = spark_init()
+    lof_pool = list_s3_files(dir="spark-processed", bucket = 'maxwell-insight')
+    lof_zipped = list_s3_files(dir="csv-bookkeeping", bucket = 'maxwell-insight')
+    max_processed_time = folder_time_range(lof_pool)[1]
+    max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d')[1]
+    max_zipped_next = max_zipped_time + datetime.timedelta(hours=1)
+    if max_processed_time > max_zipped_next:
+        for f in lof_pool:
+            t = str_to_datetime(remove_server_num(f), '%Y-%m-%d-%H-%M-%S')
+            if max_zipped_time <= t < max_zipped_next:
+                move_s3_file('maxwell-insight', 'spark-processed/',
+                             'csv-bookkeeping/temp/', f_name=f)
+    df = read_s3_to_df_bk(sql_c, spark)
+    comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv"
+    df.sortBy("product_id", "event_time").write\
+    .partitionBy("product_id")\
+    .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
+
 
 if __name__ == "__main__":
 
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     events = ['purchase']#, 'view'] # test purchase then test view
-    min_to_hour(dimensions, events)
+    #min_to_hour(dimensions, events)
+    compress_csv()
