@@ -28,7 +28,7 @@ def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
 def get_next_time_tick_from_log(next=True):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
-    def_tick = "2019-10-01-00-00-00"
+    def_tick = "2019-09-30-23-59-00"
     time_fn = "min_tick.txt"
     f_dir = "logs"
     if time_fn in os.listdir(f_dir):
@@ -82,9 +82,12 @@ def read_s3_to_df(sql_c, spark, time_tick=None):
     key = f'serverpool/{time_tick}-*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
-    df = sql_c.read.csv(s3file, header=True)
-    # drop unused column
-    df = df.drop('_c0')
+    try:
+        df = sql_c.read.csv(s3file, header=True)
+        # drop unused column
+        df = df.drop('_c0')
+    except:
+        print (f"Check start time in log file, skipping current time tick: {time_tick}")
 
     write_time_tick_to_log(time_tick)
 
