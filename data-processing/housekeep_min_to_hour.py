@@ -129,6 +129,7 @@ suffix='minute'):
 def min_to_hour(engine, dimensions, events):
     # start_tick = check_min_data_avail()
     # if start_tick:
+    sql_c, spark = spark_init()
     curr_min = get_latest_time_from_sql_db(spark, suffix='minute')
     curr_hour = get_latest_time_from_sql_db(spark, suffix='hour')
     for evt in events:
