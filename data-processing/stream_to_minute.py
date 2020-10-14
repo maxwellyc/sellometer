@@ -60,20 +60,6 @@ def remove_server_num(f_name):
     # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
     return '-'.join(f_name.strip(".csv").split('-')[:-1])
 
-def check_backlogs():
-    lof = list_s3_files()
-    curr_time_tick = get_next_time_tick_from_log(next=False)
-    backlogs_list = []
-    backlogs = open("logs/backlogs.txt","w")
-    for f_name in lof:
-        if ".csv" in f_name:
-            tt_dt = str_to_datetime(remove_server_num(f_name))
-            if tt_dt <= curr_time_tick:
-                backlogs_list.append(datetime_to_str(tt_dt))
-    backlogs.write("\n".join(backlogs_list))
-    backlogs.close()
-    return
-
 def read_s3_to_df(sql_c, spark, time_tick=None):
     ################################################################################
     # read data from S3 ############################################################
@@ -89,10 +75,10 @@ def read_s3_to_df(sql_c, spark, time_tick=None):
         df = sql_c.read.csv(s3file, header=True)
         # drop unused column
         df = df.drop('_c0')
-        return df
+        return df, time_tick
     except:
         print (f"Check start time in log file, skipping current time tick: {time_tick}")
-        return None
+        return None, None
 
 
 
@@ -222,7 +208,7 @@ def stream_to_minute(events, dimensions):
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
-    df_0 = read_s3_to_df(sql_c, spark)
+    df_0, time_tick = read_s3_to_df(sql_c, spark)
     if not df_0: return
     # clean data
     df_0 = clean_data(spark, df_0)
@@ -240,7 +226,7 @@ def stream_to_minute(events, dimensions):
     bucket = 'maxwell-insight'
     src_dir = 'serverpool/'
     dst_dir = 'spark-processed/'
-    os.system(f's3cmd mv s3://{bucket}/{src_dir}* s3://{bucket}/{dst_dir}')
+    os.system(f's3cmd mv s3://{bucket}/{src_dir}{time_tick}*.csv s3://{bucket}/{dst_dir}')
     write_time_tick_to_log(time_tick)
 
 if __name__ == "__main__":
