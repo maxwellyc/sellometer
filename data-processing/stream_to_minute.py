@@ -28,7 +28,7 @@ def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
 def get_latest_time_from_sql_db(spark):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
-    # try:
+    try:
         df = spark.read \
             .format("jdbc") \
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
@@ -41,10 +41,10 @@ def get_latest_time_from_sql_db(spark):
         t_max = datetime_to_str(t_max,time_format = '%Y-%m-%d %H:%M:%S')
         print (f'Latest event time in DB is: {t_max}')
         return t_max
-    # except:
-    #     t_max = "2019-10-01-00-00-00"
-    #     print (f'Using default time: {t_max}')
-    #     return t_max
+    except:
+        t_max = "2019-10-01-00-00-00"
+        print (f'Using default time: {t_max}')
+        return t_max
 
 def write_time_tick_to_log(time_tick):
     # writes current processed time tick in logs/min_tick.txt for bookkeeping
