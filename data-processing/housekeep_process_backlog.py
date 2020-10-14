@@ -194,7 +194,7 @@ read_time_tick=True, backlog_mode = False):
 
     # write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="minute") # "append"
 
-def merge_view(df, event, dim):
+def merge_df(df, event, dim):
     # when performing union on backlog dataframe and main dataframe
     # need to recalculate average values
 
