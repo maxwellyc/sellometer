@@ -166,7 +166,7 @@ def clean_data(spark, df):
 def split_by_event(events, df):
     main_df = {}
     for evt in events:
-        main_df[evt] = df.filter(df['event_type'] == evt)
+        main_df[evt] = df.filter(df['event_type'] == evt).repartition(24)
         main_df[evt] = main_df[evt].drop('event_type')
 
         # if same user session viewed same product_id twice, even at differnt event_time, remove duplicate entry.
