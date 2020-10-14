@@ -44,11 +44,10 @@ def get_next_time_tick_from_log(next=True, debug=False):
     time_tick = datetime_to_str(time_tick)
     return time_tick
 
-def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/' ,read_time_tick = True):
+def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/'):
     ################################################################################
     # read data from S3 ############################################################
-    key = f'{src_dir}.csv'
-    s3file = f's3a://{bucket}/{key}'
+    s3file = f's3a://{bucket}/{src_dir}*.csv'
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
     # drop unused column
@@ -195,13 +194,12 @@ time_gran='minute', group=False):
         df_gb = df.groupby(by=[dimension]).sum()
         return df, df_gb
 
-def spark_process(dimensions=['product_id'], src_dir='serverpool/',
-read_time_tick=True, backlog_mode = False):
+def spark_process(dimensions=['product_id'], src_dir='serverpool/', backlog_mode = True):
     #dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
-    df_0 = read_s3_to_df(sql_c, spark, src_dir, read_time_tick)
+    df_0 = read_s3_to_df(sql_c, spark, src_dir)
     # clean data
     df_0 = clean_data(df_0)
     # compress time into minute granularity
