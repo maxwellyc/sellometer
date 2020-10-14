@@ -41,6 +41,7 @@ def check_min_data_avail():
     # 2019-10-02-10-00-00 has multiple entries but is only partially logged in
     if min_tick_dt <= hour_tick_dt + datetime.timedelta(hours=1):
         # no integer hour has passed since last min->hour process
+        print (min_tick_dt, hour_tick_dt)
         return None
     else:
         # have enough minute data to generate hour file up to previous hour + 1 hour
@@ -110,7 +111,7 @@ time_gran='minute'):
     return df
 
 def min_to_hour(engine, dimensions, events):
-    start_tick, end_tick = check_min_data_avail()
+    start_tick = check_min_data_avail()
     if start_tick:
         for evt in events:
             for dim in dimensions:
@@ -131,4 +132,4 @@ if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     events = ['purchase']#, 'view'] # test purchase then test view
     engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
-    # min_to_hour(engine, dimensions, events)
+    min_to_hour(engine, dimensions, events)
