@@ -44,8 +44,9 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         t_max = datetime_to_str(t_max,time_format)
         print (f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
         return t_max
-    except:
+    except Exception as e:
         t_max = "2019-10-01 00:00:00"
+        print (e)
         print (f'Using default time: {t_max}')
         return t_max
 
@@ -185,8 +186,8 @@ def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv"):
             t = remove_server_num(f_name, suffix)
             t = str_to_datetime(t, time_format)
             file_times.append(t)
-        except:
-            continue
+        except Exception as e:
+            print (e)
     if file_times:
         return min(file_times), max(file_times)
     else:
@@ -226,20 +227,24 @@ def compress_csv():
             try:
                 t = str_to_datetime(remove_server_num(f), '%Y-%m-%d-%H-%M-%S')
                 if max_zipped_time <= t < max_zipped_next:
+                    print (t)
                     move_s3_file('maxwell-insight', 'spark-processed/',
                                  'csv-bookkeeping/temp/', f_name=f)
-            except:
-                continue
-
-    df = read_s3_to_df_bk(sql_c, spark)
-    df = df.withColumn('_c0', df['_c0'].cast('integer'))
-    comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv.gzip"
-    df.orderBy('_c0')\
-    .coalesce(1)\
-    .write\
-    .option("header", True)\
-    .option("compression","gzip")\
-    .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
+            except Exception as e:
+                print (e)
+    try:
+        return
+        df = read_s3_to_df_bk(sql_c, spark)
+        df = df.withColumn('_c0', df['_c0'].cast('integer'))
+        comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv.gzip"
+        df.orderBy('_c0')\
+        .coalesce(1)\
+        .write\
+        .option("header", True)\
+        .option("compression","gzip")\
+        .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
+    except Exception as e:
+        print (e)
 
 
 if __name__ == "__main__":
