@@ -113,21 +113,26 @@ def min_to_hour(dimensions, events):
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
-            df = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-            # from last recorded hourly, slice 3600 second of dataframe for processing
-            df = select_time_window(df, start_tick=curr_hour, t_window=3600 )
-            # compress hourly data of past hour
-            df = compress_time(df,start_tick=start_tick, t_window=3600,
-            tstep=3600, from_csv=False)
+            df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # remove data from more than 24 hours away from t1 datatable
-            main_df = remove_min_data_from_sql(df, curr_min, hours_window = 24)
+            df = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
+            # rewrite minute level data
+            write_to_psql(df, evt, dim, mode="overwrite", suffix='minute')
 
+            # slice 3600 second of dataframe for ranking purpose
+            # rank datatable is a dynamic sliding window and updates every minute
+            df = select_time_window(df_0, start_tick=curr_min, t_window=3600 )
             # store past hour data in rank table for ranking
             write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
-            # append temp table into t2 datatable
-            write_to_psql(df, evt, dim, mode="append", suffix='hour')
-            # rewrite minute level data
-            write_to_psql(main_df, evt, dim, mode="overwrite", suffix='minute')
+
+            # compress hourly data into t2 datatable only when integer hour has passed
+            # since last hourly datapoint
+            if curr_min > curr_hour + datetime.timedelta(hours=1):
+                df = compress_time(df_0,start_tick=curr_hour, t_window=3600,
+                tstep=3600, from_csv=False)
+                # append temp table into t2 datatable
+                write_to_psql(df, evt, dim, mode="append", suffix='hour')
+
 
 
 if __name__ == "__main__":
