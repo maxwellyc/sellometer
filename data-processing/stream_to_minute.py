@@ -203,31 +203,8 @@ def group_by_dimensions(main_df, events, dimensions):
                 elif evt == 'purchase':
                     main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
                                     .agg(F.sum('price')))
-
     return main_gb
 
-def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"):
-# write dataframe to postgreSQL
-    for dim in dimensions:
-        view_dims[dim].write\
-        .format("jdbc")\
-        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-        .option("dbtable","view_" + dim + f"_{timescale}")\
-        .option("user",os.environ['psql_username'])\
-        .option("password",os.environ['psql_pw'])\
-        .option("driver","org.postgresql.Driver")\
-        .mode(mode)\
-        .save()
-
-        purchase_dims[dim].write\
-        .format("jdbc")\
-        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-        .option("dbtable","purchase_" + dim + f"_{timescale}")\
-        .option("user",os.environ['psql_username'])\
-        .option("password",os.environ['psql_pw'])\
-        .option("driver","org.postgresql.Driver")\
-        .mode(mode)\
-        .save()
 def write_to_psql(df, event, dim, mode, suffix):
     # write dataframe to postgreSQL
     # suffix can be 'hour', 'minute', 'rank', this is used to name datatables
