@@ -233,7 +233,7 @@ def compress_csv():
 
     df = read_s3_to_df_bk(sql_c, spark)
     comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv"
-    df.orderby("event_time").write\
+    df.orderBy("event_time").write\
     .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
 
 
