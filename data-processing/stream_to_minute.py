@@ -66,7 +66,6 @@ def read_s3_to_df(sql_c, spark, time_tick=None, process_all=True):
     # for mini batches need to change this section into dynamical
     if not time_tick:
         time_tick = get_next_time_tick_from_log(next=True)
-    print (f"Spark Cluster processing {time_tick} file batch")
     bucket = 'maxwell-insight'
     if process_all:
         key = f'serverpool/*.csv'
@@ -79,8 +78,8 @@ def read_s3_to_df(sql_c, spark, time_tick=None, process_all=True):
         # drop unused column
         df = df.drop('_c0')
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        print(t_max, type(t_max))
-        return df, time_tick
+        t_max_tick = str_to_datetime(t_max, '%Y-%m-%d %H:%M:%S')
+        return df, t_max_tick
     except:
         print (f"Check start time in log file, skipping current time tick: {time_tick}")
         return None, None
@@ -205,11 +204,11 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
-def stream_to_minute(events, dimensions):
+def stream_to_minute(events, dimensions, process_all=False, move_files=False):
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
-    df_0, time_tick = read_s3_to_df(sql_c, spark)
+    df_0, time_tick = read_s3_to_df(sql_c, spark, process_all)
     if not df_0: return
     # clean data
     df_0 = clean_data(spark, df_0)
@@ -224,14 +223,18 @@ def stream_to_minute(events, dimensions):
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
             write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute')
+    write_time_tick_to_log(time_tick)
     bucket = 'maxwell-insight'
     src_dir = 'serverpool/'
     dst_dir = 'spark-processed/'
-    print ('moving files')
-    os.system(f's3cmd mv s3://{bucket}/{src_dir}{time_tick}*.csv s3://{bucket}/{dst_dir}')
-    write_time_tick_to_log(time_tick)
+    if process_all:
+        time_tick = ''
+    if move_files:
+        print ('moving files')
+        os.system(f's3cmd mv s3://{bucket}/{src_dir}{time_tick}*.csv s3://{bucket}/{dst_dir}')
+
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
     events = ['purchase', 'view'] # test purchase then test view
-    stream_to_minute(events, dimensions)
+    stream_to_minute(events, dimensions,True)
