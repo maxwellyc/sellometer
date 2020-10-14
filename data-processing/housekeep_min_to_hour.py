@@ -49,8 +49,6 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     cutoff = curr_time - datetime.timedelta(hours=hours_window)
     print (f"Current time: {curr_time}, 24 hours cutoff time: {cutoff}")
     df_cut = df.filter(df.event_time > cutoff )
-    df.show(100)
-    df_cut.show(100)
     return df_cut
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
@@ -149,7 +147,7 @@ def min_to_hour(dimensions, events):
             # remove data from more than 24 hours away from t1 datatable
             df = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
             # rewrite minute level data
-            # write_to_psql(df, evt, dim, mode="overwrite", suffix='minute')
+            write_to_psql(df, evt, dim, mode="overwrite", suffix='minute')
 
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
