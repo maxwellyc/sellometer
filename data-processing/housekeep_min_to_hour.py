@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 
 def spark_init():
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("spark_check_backlog")
+    conf = SparkConf().setAppName("DT_tier_transfer")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
