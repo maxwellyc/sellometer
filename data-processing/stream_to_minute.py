@@ -60,7 +60,7 @@ def remove_server_num(f_name):
     # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
     return '-'.join(f_name.strip(".csv").split('-')[:-1])
 
-def read_s3_to_df(sql_c, spark, time_tick=None):
+def read_s3_to_df(sql_c, spark, time_tick=None, process_all=True):
     ################################################################################
     # read data from S3 ############################################################
     # for mini batches need to change this section into dynamical
@@ -68,21 +68,22 @@ def read_s3_to_df(sql_c, spark, time_tick=None):
         time_tick = get_next_time_tick_from_log(next=True)
     print (f"Spark Cluster processing {time_tick} file batch")
     bucket = 'maxwell-insight'
-    key = f'serverpool/{time_tick}-*.csv'
+    if process_all:
+        key = f'serverpool/*.csv'
+    else:
+        key = f'serverpool/{time_tick}-*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     try:
         df = sql_c.read.csv(s3file, header=True)
         # drop unused column
         df = df.drop('_c0')
+        t_max = df.agg({"event_time": "max"}).collect()[0][0]
+        print(t_max, type(t_max))
         return df, time_tick
     except:
         print (f"Check start time in log file, skipping current time tick: {time_tick}")
         return None, None
-
-
-
-    ################################################################################
 
 def compress_time(df, tstep = 60, from_csv = True):
     # Datetime transformation #######################################################
