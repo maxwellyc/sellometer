@@ -13,7 +13,7 @@ def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
 
 def spark_init():
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("spark_check_backlog")
+    conf = SparkConf().setAppName("stream_to_minute")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
@@ -237,10 +237,10 @@ def stream_to_minute(events, dimensions):
     for evt in events:
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
-            write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute_test')
+            write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute')
 
 
 if __name__ == "__main__":
-    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
+    dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
     stream_to_minute(events, dimensions)
