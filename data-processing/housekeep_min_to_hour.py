@@ -122,7 +122,7 @@ def write_to_psql(df, event, dim, mode, suffix):
 
 def read_sql_to_df(engine, event='purchase', dim='product_id',
 suffix='minute'):
-    table_name = "_".join([event, dimension, suffix])
+    table_name = "_".join([event, dim, suffix])
     df = pd.read_sql_table(table_name, engine)
     return df
 
