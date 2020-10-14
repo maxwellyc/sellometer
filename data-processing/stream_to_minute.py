@@ -78,7 +78,7 @@ def read_s3_to_df(sql_c, spark, time_tick=None, process_all=True):
         # drop unused column
         df = df.drop('_c0')
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        t_max_tick = str_to_datetime(t_max, '%Y-%m-%d %H:%M:%S')
+        t_max_tick = datetime_to_str(str_to_datetime(t_max, '%Y-%m-%d %H:%M:%S'))
         return df, t_max_tick
     except:
         print (f"Check start time in log file, skipping current time tick: {time_tick}")
