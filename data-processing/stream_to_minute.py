@@ -25,26 +25,6 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
-# def get_latest_time_from_log(next=True, debug=False):
-#     # reads previous processed time in logs/min_tick.txt and returns next time tick
-#     # default file names and locations
-#     def_tick = "2019-09-30-23-59-00"
-#     time_fn = "min_tick.txt"
-#     f_dir = "logs"
-#     if time_fn in os.listdir(f_dir):
-#         f = open(f"{f_dir}/{time_fn}",'r')
-#         time_tick = f.readlines()[0].strip("\n")
-#     else:
-#         time_tick = def_tick
-#     # debug override
-#     if debug:
-#         time_tick = '2019-10-01-00-19-00'
-#     time_tick = str_to_datetime(time_tick)
-#     if next:
-#         time_tick += datetime.timedelta(minutes=1)
-#     time_tick = datetime_to_str(time_tick)
-#     return time_tick
-
 def get_latest_time_from_sql_db(spark):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
@@ -58,9 +38,7 @@ def get_latest_time_from_sql_db(spark):
         .option("driver","org.postgresql.Driver")\
         .load()
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        print (type(t_max), t_max)
-
-        t_max = datetime_to_str(str_to_datetime(t_max,time_format = 'yyyy-MM-dd HH:mm:ss'))
+        t_max = datetime_to_str(t_max,time_format = '%Y-%m-%d %H:%M:%S')
         print (f'Latest event time in DB is: {t_max}')
         return t_max
     # except:
