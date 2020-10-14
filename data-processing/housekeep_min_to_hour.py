@@ -67,7 +67,7 @@ def write_time_tick_to_log(time_fn):
     return
 
 def compress_time(df, start_tick="2019-10-01-00-00-00", t_window=None,
-, tstep = 60, from_csv = True):
+tstep = 60, from_csv = True):
     # Datetime transformation #######################################################
     # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01-00-00-00"
