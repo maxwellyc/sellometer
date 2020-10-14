@@ -227,11 +227,7 @@ def compress_csv(timeframe='hour'):
     sql_c, spark = spark_init()
     lof_pool = list_s3_files(dir="spark-processed", bucket = 'maxwell-insight')
     lof_zipped = list_s3_files(dir="csv-bookkeeping", bucket = 'maxwell-insight')
-    print ('f1')
-    print (lof_zipped)
-    print (lof_pool)
     max_processed_time = folder_time_range(lof_pool)[1]
-    print ('f2')
     if timeframe == 'hour':
         tt_format = '%Y-%m-%d-%H'
         max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-%H','.csv.gzip',False)[1]
@@ -240,17 +236,8 @@ def compress_csv(timeframe='hour'):
         tt_format = '%Y-%m-%d'
         max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d','.csv.gzip',False)[1]
         max_zipped_next = max_zipped_time + datetime.timedelta(days=1)
-    print (max_processed_time, max_zipped_next)
-    # if max_processed_time > max_zipped_next:
-    #     for f in lof_pool:
-    #         try:
-    #             t = str_to_datetime(remove_server_num(f), '%Y-%m-%d-%H-%M-%S')
-    #             if not (max_zipped_time <= t < max_zipped_next):
-    #                 move_s3_file('maxwell-insight', 'spark-processed/',
-    #                              'csv-bookkeeping/temp/', f_name=f)
-    #         except Exception as e:
-    #             print (e)
-    print ('f3')
+    print ("Last processed file time label:",max_processed_time)
+    print ("Last compressed file time label:",max_zipped_next)
     try:
         max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
         df = read_s3_to_df_bk(sql_c, spark, prefix=max_zipped_time)
