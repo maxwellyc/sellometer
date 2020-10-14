@@ -85,6 +85,12 @@ def remove_server_num(f_name):
     # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
     return '-'.join(f_name.strip(".csv").split('-')[:-1])
 
+def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
+    # bucket = 'maxwell-insight'
+    # src_dir = 'serverpool/'
+    # dst_dir = 'spark-processed/'
+    os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
+
 def read_s3_to_df(sql_c, spark, process_all=True):
     ################################################################################
     # read data from S3 ############################################################
@@ -99,7 +105,7 @@ def read_s3_to_df(sql_c, spark, process_all=True):
             # if backlog file (ie earlier than latest time already in datatable)
             if tt_dt < str_to_datetime(curr_time):
                 print (f"Current time: {curr_time} --- Backlog file: {f_name}")
-                os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
+                move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
             else:
                 print (f"Processing {f_name}")
     # once backlog files are moved, process all that's left in serverpool folder
@@ -259,14 +265,11 @@ def stream_to_minute(events, dimensions, process_all=False, move_files=False):
             # store minute-by-minute data into t1 datatable: _minute
             write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
     write_time_tick_to_log(time_tick)
-    bucket = 'maxwell-insight'
-    src_dir = 'serverpool/'
-    dst_dir = 'spark-processed/'
     if process_all:
         time_tick = ''
     if move_files:
-        print ('moving files')
-        os.system(f's3cmd mv s3://{bucket}/{src_dir}{time_tick}*.csv s3://{bucket}/{dst_dir}')
+        print ('Moving processed files')
+        move_s3_file('maxwell-insight', 'serverpool/', 'spark-processed/')
 
 
 if __name__ == "__main__":
