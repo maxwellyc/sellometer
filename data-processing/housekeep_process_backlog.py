@@ -47,12 +47,7 @@ def get_next_time_tick_from_log(next=True, debug=False):
 def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/' ,read_time_tick = True):
     ################################################################################
     # read data from S3 ############################################################
-    if read_time_tick:
-        time_tick = get_next_time_tick_from_log()
-    else:
-        time_tick = ""
-    print (f"Spark Cluster processing {time_tick} file batch")
-    key = f'{src_dir}{time_tick}-*.csv'
+    key = f'{src_dir}.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
