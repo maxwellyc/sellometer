@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 
 def spark_init():
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("DT_tier_transfer")
+    conf = SparkConf().setAppName("DT_tier_transfer").set("spark.sql.sources.partitionOverwriteMode","dynamic")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
