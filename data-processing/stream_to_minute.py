@@ -85,7 +85,6 @@ def read_s3_to_df(sql_c, spark, time_tick=None):
     key = f'serverpool/{time_tick}-*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
-    write_time_tick_to_log(time_tick)
     try:
         df = sql_c.read.csv(s3file, header=True)
         # drop unused column
@@ -242,6 +241,7 @@ def stream_to_minute(events, dimensions):
     src_dir = 'serverpool/'
     dst_dir = 'spark-processed/'
     os.system(f's3cmd mv s3://{bucket}/{src_dir}* s3://{bucket}/{dst_dir}')
+    write_time_tick_to_log(time_tick)
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
