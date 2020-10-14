@@ -47,7 +47,7 @@ def write_time_tick_to_log(time_tick):
     # default file names and locations
     time_fn = "min_tick.txt"
     f_dir = "logs"
-    output = open(f"{f_dir}/{time_tick_fn}",'w')
+    output = open(f"{f_dir}/{time_fn}",'w')
     output.write(time_tick)
     output.close()
     return
@@ -82,16 +82,18 @@ def read_s3_to_df(sql_c, spark, time_tick=None):
     key = f'serverpool/{time_tick}-*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
+    write_time_tick_to_log(time_tick)
     try:
         df = sql_c.read.csv(s3file, header=True)
         # drop unused column
         df = df.drop('_c0')
+        return df
     except:
         print (f"Check start time in log file, skipping current time tick: {time_tick}")
+        return None
 
-    write_time_tick_to_log(time_tick)
 
-    return df
+
     ################################################################################
 
 def compress_time(df, tstep = 60, from_csv = True):
@@ -236,6 +238,7 @@ if __name__ == "__main__":
     sql_c, spark = spark_init()
     # read csv from s3
     df_0 = read_s3_to_df(sql_c, spark).cache()
+    if not df_0: return
     # clean data
     df_0 = clean_data(df_0)
     # compress time into minute granularity
