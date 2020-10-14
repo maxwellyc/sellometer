@@ -38,7 +38,7 @@ def spark_live_process():
 
 file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
-    poke_interval= 1, # (seconds); checking file every half an hour
+    poke_interval= 4, # (seconds); checking file every 4 seconds
     timeout=60 * 60, # timeout in 1 hours
     bucket_key=f"s3://{bucket}/{src_dir}*.csv",
     bucket_name=None,
