@@ -160,52 +160,48 @@ def clean_data(spark, df):
     # data transformation will be different for these two types of events.
     return df
 
-def split_by_event(df):
+def split_by_event(events, df):
+    main_df = {}
+    for evt in events:
+        main_df[evt] = df.filter(df['event_type'] == evt)
+        main_df[evt] = main_df[evt].drop('event_type')
 
-    purchase_df = df.filter(df['event_type'] == 'purchase')
-    view_df = df.filter(df['event_type'] == 'view')
+        # if same user session viewed same product_id twice, even at differnt event_time, remove duplicate entry.
+        # same user refreshing the page should not reflect more interest on the same product
+        # need to be careful here as user can buy a product twice within the same session,
+        # we should not remove duplicate on purchase_df
+        if evt == 'view':
+            main_df[evt] = (main_df[evt]
+                .orderBy('event_time')
+                .coalesce(1)
+                .dropDuplicates(subset=['user_session','product_id']))
 
-    purchase_df = purchase_df.drop('event_type')
-    view_df = view_df.drop('event_type')
+    return main_df
 
-    # if same user session viewed same product_id twice, even at differnt event_time, remove duplicate entry.
-    # same user refreshing the page should not reflect more interest on the same product
-    # need to be careful here as user can buy a product twice within the same session,
-    # we should not remove duplicate on purchase_df
-    view_df = (view_df
-        .orderBy('event_time')
-        .coalesce(1)
-        .dropDuplicates(subset=['user_session','product_id'])
-    )
-
-    return view_df, purchase_df
-
-def group_by_dimensions(view_df, purchase_df, dimensions):
-
-    view_dims, purchase_dims = {}, {}
+def group_by_dimensions(main_df, events, dimensions):
+    main_gb = {}
     # total view counts per dimesion, total sales amount per dimension
-    for dim in dimensions:
-        # total view counts per dimension, if product_id, also compute mean price
-        # total $$$ amount sold per dimension, if product_id also compute count and mean
-        if dim == 'product_id':
-            view_dims[dim] = (view_df.groupby(dim, 'event_time')
-                                .agg(F.count('price'),F.mean('price')))
-            purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
-                                .agg(F.sum('price'),F.count('price'),F.mean('price')))
-        else:
-            view_dims[dim] = (view_df.groupby(dim, 'event_time')
-                                .agg(F.count('price')))
-            purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
-                                .agg(F.sum('price')))
+    for evt in events:
+        main_gb[evt] = {}
+        for dim in dimensions:
+            # total view counts per dimension, if product_id, also compute mean price
+            # total $$$ amount sold per dimension, if product_id also compute count and mean
+            if dim == 'product_id':
+                if evt == 'view':
+                    main_gb[evt][dim] = (main_df[evt][dim].groupby(dim, 'event_time')
+                                    .agg(F.count('price'),F.mean('price')))
+                elif evt == 'purchase':
+                    main_gb[evt][dim] = (main_df[evt][dim].groupby(dim, 'event_time')
+                                    .agg(F.sum('price'),F.count('price'),F.mean('price')))
+            else:
+                if evt == 'view':
+                    main_gb[evt][dim] = (main_df[evt][dim].groupby(dim, 'event_time')
+                                    .agg(F.count('price')))
+                elif evt == 'purchase':
+                    main_gb[evt][dim] = (main_df[evt][dim].groupby(dim, 'event_time')
+                                    .agg(F.sum('price')))
 
-        # sort dataframe for plotting
-        # view_dims[dim] = view_dims[dim].orderBy(dim, 'event_time')
-        # purchase_dims[dim] = purchase_dims[dim].orderBy(dim, 'event_time')
-
-        view_dims[dim]
-        purchase_dims[dim]
-
-    return view_dims, purchase_dims
+    return main_gb
 
 def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"):
 # write dataframe to postgreSQL
@@ -229,8 +225,21 @@ def write_to_psql(view_dims, purchase_dims, dimensions, mode, timescale="minute"
         .option("driver","org.postgresql.Driver")\
         .mode(mode)\
         .save()
+def write_to_psql(df, event, dim, mode, suffix):
+    # write dataframe to postgreSQL
+    # suffix can be 'hour', 'minute', 'rank', this is used to name datatables
+    df.write\
+    .format("jdbc")\
+    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
+    .option("dbtable", f"{event}_{dim}_{suffix}")\
+    .option("user",os.environ['psql_username'])\
+    .option("password",os.environ['psql_pw'])\
+    .option("driver","org.postgresql.Driver")\
+    .mode(mode)\
+    .save()
+    return
 
-def stream_to_minute(dimensions):
+def stream_to_minute(events, dimensions):
     # initialize spark
     sql_c, spark = spark_init()
     # read csv from s3
@@ -238,29 +247,21 @@ def stream_to_minute(dimensions):
     if not df_0: return
     # clean data
     df_0 = clean_data(spark, df_0)
-    # compress time into minute granularity
-    df_minute = compress_time(df_0, tstep = 60)
+    # compress time into minute granularity, used for live monitoring
+    df_0 = compress_time(df_0, tstep = 60)
     # # compress time into hour granularity
-    # df_hour = compress_time(df_0, tstep = 3600 )
+    main_df = split_by_event(events, df_0)
 
-    # minute time scale: used for plotting
-
-    # split by event type: view and purchase
-    view_df, purchase_df = split_by_event(df_minute)
     # groupby different product dimensions
-    view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
-    # write to postgresql database
-    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", timescale="minute") # "append"
+    main_gb = group_by_dimensions(main_df, events, dimensions)
 
-    # # hourly time scale: used for ranking
-
-    # view_df, purchase_df = split_by_event(df_hour)
-    # # groupby different product dimensions
-    # view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
-    # # write to postgresql database
-    # write_to_psql(view_dim, purchase_dim, dimensions, mode = "append", timescale="hour") # "append"
+    for evt in events:
+        for dim in dimesions:
+            # store minute-by-minute data into t1 datatable: _minute
+            write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute')
 
 
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
-    stream_to_minute(dimensions)
+    events = ['purchase', 'view'] # test purchase then test view
+    stream_to_minute(events, dimensions)
