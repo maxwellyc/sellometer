@@ -220,6 +220,7 @@ def compress_csv():
     max_processed_time = folder_time_range(lof_pool)[1]
     max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d')[1]
     max_zipped_next = max_zipped_time + datetime.timedelta(hours=1)
+    print (max_processed_time, max_zipped_next)
     if max_processed_time > max_zipped_next:
         for f in lof_pool:
             t = str_to_datetime(remove_server_num(f), '%Y-%m-%d-%H-%M-%S')
