@@ -188,7 +188,7 @@ def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S'):
         except:
             continue
     if file_times:
-        return file_times.min(), file_times.max()
+        return min(file_times), max(file_times)
     else:
         # if time_format == '%Y-%m-%d-%H-%M-%S':
         return str_to_datetime("2019-10-01-00-00-00"), str_to_datetime("2019-10-01-00-00-00")
