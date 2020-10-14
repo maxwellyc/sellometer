@@ -26,7 +26,7 @@ def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
 def remove_server_num(f_name):
     # remove server # from file name
     # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
-    return '-'.join(f_name.strip(".csv").split('-')[:-1])
+    return '-'.join(f_name.strip(suffix).split('-')[:-1])
 
 def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H:%M:%S'):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
@@ -177,12 +177,12 @@ def min_to_hour(dimensions, events):
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
-def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S'):
+def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv"):
     # returns datetime.datetime objects
     file_times = []
     for f_name in lof:
         try:
-            t = remove_server_num(f_name)
+            t = remove_server_num(f_name, suffix)
             t = str_to_datetime(t, time_format)
             file_times.append(t)
         except:
@@ -218,7 +218,7 @@ def compress_csv():
     lof_pool = list_s3_files(dir="spark-processed", bucket = 'maxwell-insight')
     lof_zipped = list_s3_files(dir="csv-bookkeeping", bucket = 'maxwell-insight')
     max_processed_time = folder_time_range(lof_pool)[1]
-    max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d')[1]
+    max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-H','.csv.gzip')[1]
     max_zipped_next = max_zipped_time + datetime.timedelta(hours=1)
     print (max_processed_time, max_zipped_next)
     if max_processed_time > max_zipped_next:
@@ -232,6 +232,7 @@ def compress_csv():
                 continue
 
     df = read_s3_to_df_bk(sql_c, spark)
+    df = df.withColumn('_c0', df['_c0'].cast(IntegerType()))
     comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv.gzip"
     df.orderBy('_c0')\
     .coalesce(1)\
