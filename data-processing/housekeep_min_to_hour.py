@@ -224,6 +224,7 @@ def compress_csv():
     lof_pool = list_s3_files(dir="spark-processed", bucket = 'maxwell-insight')
     lof_zipped = list_s3_files(dir="csv-bookkeeping", bucket = 'maxwell-insight')
     print ('f1')
+    print (lof_zipped)
     max_processed_time = folder_time_range(lof_pool)[1]
     print ('f2')
     max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-H','.csv.gzip',False)[1]
