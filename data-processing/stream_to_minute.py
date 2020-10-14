@@ -254,7 +254,7 @@ def stream_to_minute(events, dimensions):
     df_0.show(20)
     # # compress time into hour granularity
     main_df = split_by_event(events, df_0)
-    print (main_df)
+    print (main_df['view'])
     # groupby different product dimensions
     main_gb = group_by_dimensions(main_df, events, dimensions)
 
