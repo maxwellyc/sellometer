@@ -146,7 +146,7 @@ def min_to_hour(dimensions, events):
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # remove data from more than 24 hours away from t1 datatable
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
-            df.show(50)
+            df_cut.show(50)
             # rewrite minute level data
             write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute')
 
