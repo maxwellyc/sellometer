@@ -134,7 +134,7 @@ def min_to_hour(dimensions, events):
 
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
-            if curr_min > curr_hour + datetime.timedelta(hours=1):
+            if str_to_datetime(curr_min) > str_to_datetime(curr_hour) + datetime.timedelta(hours=1):
                 df = compress_time(df_0,start_tick=curr_hour, t_window=3600,
                 tstep=3600, from_csv=False)
                 # append temp table into t2 datatable
