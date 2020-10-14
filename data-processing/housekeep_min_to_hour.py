@@ -82,7 +82,23 @@ def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
     # t_max = df.agg({"event_time": "max"}).collect()[0][0]
 
     return df
-    ################################################################################
+
+def group_by_dimensions(df, events, dimensions):
+    if dim == 'product_id':
+        if evt == 'view':
+            gb = (df.groupby(dim, 'event_time')
+                            .agg(F.count('price'),F.mean('price')))
+        elif evt == 'purchase':
+            gb = (df.groupby(dim, 'event_time')
+                            .agg(F.sum('price'),F.count('price'),F.mean('price')))
+    else:
+        if evt == 'view':
+            gb = (df.groupby(dim, 'event_time')
+                            .agg(F.count('price')))
+        elif evt == 'purchase':
+            gb = (df.groupby(dim, 'event_time')
+                            .agg(F.sum('price')))
+    return gb
 
 def write_to_psql(df, event, dim, mode, suffix):
     # write dataframe to postgreSQL
@@ -138,9 +154,9 @@ def min_to_hour(dimensions, events):
             if curr_min > curr_hour + datetime.timedelta(hours=1):
                 df = compress_time(df_0, t_window=3600, start_tick=curr_hour,
                 tstep=3600, from_csv=False)
+                gb = group_by_dimensions(df, events, dimensions)
                 # append temp table into t2 datatable
-                write_to_psql(df, evt, dim, mode="append", suffix='hour')
-
+                write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
 
 if __name__ == "__main__":
