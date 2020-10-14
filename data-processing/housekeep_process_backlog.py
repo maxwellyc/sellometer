@@ -48,7 +48,6 @@ def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/
     ################################################################################
     # read data from S3 ############################################################
     s3file = f's3a://{bucket}/{src_dir}*.csv'
-    print (s3file)
     # read csv file on s3 into spark dataframe
     df = sql_c.read.csv(s3file, header=True)
     # drop unused column
@@ -185,20 +184,22 @@ def write_to_psql(view_dims, purchase_dims, dimensions, mode, suffix="minute"):
         .mode(mode)\
         .save()
 
-def read_sql_to_df(engine, event='purchase', dimension='product_id',
-time_gran='minute', group=False):
-    table_name = "_".join([event, dimension, time_gran])
-    df = pd.read_sql_table(table_name, engine)
-    if not group:
-        return df
-    else:
-        df_gb = df.groupby(by=[dimension]).sum()
-        return df, df_gb
+def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
+    table_name = "_".join([event, dim, suffix])
+    # df = pd.read_sql_table(table_name, engine)
+    df = spark.read \
+        .format("jdbc") \
+    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
+    .option("dbtable", table_name) \
+    .option("user",os.environ['psql_username'])\
+    .option("password",os.environ['psql_pw'])\
+    .option("driver","org.postgresql.Driver")\
+    .load()
 
-def spark_process(dimensions=['product_id'], src_dir='serverpool/', backlog_mode = True):
+    return df
+
+def spark_process(sql_c, spark, dimensions=['product_id'], src_dir='serverpool/', backlog_mode = True):
     #dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
-    # initialize spark
-    sql_c, spark = spark_init()
     # read csv from s3
     df_0 = read_s3_to_df(sql_c, spark, src_dir=src_dir)
     # clean data
@@ -248,17 +249,31 @@ def merge_df(df, event, dim):
 
     return df
 
+def write_to_psql(df, event, dim, mode, suffix):
+    # write dataframe to postgreSQL
+    # suffix can be 'hour', 'minute', 'rank', this is used to name datatables
+    df.write\
+    .format("jdbc")\
+    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
+    .option("dbtable", f"{event}_{dim}_{suffix}")\
+    .option("user",os.environ['psql_username'])\
+    .option("password",os.environ['psql_pw'])\
+    .option("driver","org.postgresql.Driver")\
+    .mode(mode)\
+    .save()
+    return
+
 def process_backlog(events, dimensions):
-    engine = create_engine(f"postgresql://{os.environ['psql_username']}:{os.environ['psql_pw']}@10.0.0.5:5431/ecommerce")
-    new_df, main_df = {}, {'view':{}, 'purchase':{}}
-    new_df['view'], new_df['purchase'] = spark_process(src_dir='backlogs/')
-    for evt in main_df:
+    # initialize spark
+    sql_c, spark = spark_init()
+    new_df = {}
+    new_df['view'], new_df['purchase'] = spark_process(sql_c,spark,src_dir='backlogs/')
+    for evt in events:
         for dim in dimensions:
-            main_df[evt][dim] = read_sql_to_df(engine, event=evt, dimension=dim,
-             time_gran='minute', group=False)
-            main_df[evt][dim] = main_df[evt][dim].union(new_df[evt][dim])
-            main_df[evt][dim] = merge_df(main_df[evt][dim], evt, dim)
-    write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", suffix="minute_bl")
+            df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute', group=False)
+            df = df.union(new_df[evt][dim])
+            df = merge_df(df, evt, dim)
+            write_to_psql(df, evt, dim, mode="overwrite", suffix='minute')
 
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
