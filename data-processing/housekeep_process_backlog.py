@@ -23,6 +23,11 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
+def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
+    # bucket = 'maxwell-insight'
+    # src_dir = 'serverpool/'
+    # dst_dir = 'spark-processed/'
+    os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
 
 def get_next_time_tick_from_log(next=True, debug=False):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
@@ -270,6 +275,7 @@ def process_backlog(events, dimensions):
             df = df.union(new_df[evt][dim])
             df = merge_df(df, evt, dim)
             write_to_psql(df, evt, dim, mode="overwrite", suffix='minute_bl')
+    #move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/', f_name)
 
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']

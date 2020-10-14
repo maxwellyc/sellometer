@@ -5,12 +5,6 @@ import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 from boto3 import client
 
-def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
-    dir += "/"
-    conn = client('s3')
-    list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
-    return list_of_files
-
 def spark_init():
     # initialize spark session and spark context####################################
     conf = SparkConf().setAppName("stream_to_minute")
@@ -25,6 +19,11 @@ def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
     return dt_obj.strftime(time_format)
 
+def remove_server_num(f_name):
+    # remove server # from file name
+    # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
+    return '-'.join(f_name.strip(".csv").split('-')[:-1])
+    
 def get_latest_time_from_sql_db(spark):
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
@@ -61,11 +60,6 @@ def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
     conn = client('s3')
     list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
     return list_of_files
-
-def remove_server_num(f_name):
-    # remove server # from file name
-    # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
-    return '-'.join(f_name.strip(".csv").split('-')[:-1])
 
 def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
     # bucket = 'maxwell-insight'
@@ -248,7 +242,6 @@ def stream_to_minute(events, dimensions, move_files=False):
     if move_files:
         print ('Moving processed files')
         move_s3_file('maxwell-insight', 'serverpool/', 'spark-processed/')
-
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
