@@ -260,7 +260,7 @@ def stream_to_minute(events, dimensions):
     main_gb = group_by_dimensions(main_df, events, dimensions)
 
     for evt in events:
-        for dim in dimesions:
+        for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
             write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute')
 
