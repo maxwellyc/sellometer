@@ -149,6 +149,7 @@ def min_to_hour(dimensions, events):
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
             df_cut.show(50)
             # rewrite minute level data
+            write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute2')
             write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute')
 
             # slice 3600 second of dataframe for ranking purpose
