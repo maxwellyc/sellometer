@@ -69,8 +69,6 @@ def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
 
 def read_s3_to_df(sql_c, spark):
     # read data from S3 ############################################################
-
-
     # for mini batches need to change this section into dynamical
     bucket = 'maxwell-insight'
     lof = list_s3_files()
