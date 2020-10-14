@@ -235,7 +235,7 @@ def compress_csv():
     comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv.gzip"
     df.coalesce(1)\
     .write\
-    .option("header", true)\
+    .option("header", True)\
     .option("compression","gzip")\
     .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
 
