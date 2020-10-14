@@ -100,6 +100,8 @@ def read_s3_to_df(sql_c, spark, process_all=True):
             if tt_dt < str_to_datetime(curr_time):
                 print (f"Current time: {curr_time_tick} --- Backlog file: {f_name}")
                 os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
+            else:
+                print (f"Processing {f_name}")
     # once backlog files are moved, process all that's left in serverpool folder
     key = 'serverpool/*.csv'
     s3file = f's3a://{bucket}/{key}'
