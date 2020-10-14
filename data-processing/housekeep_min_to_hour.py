@@ -77,21 +77,34 @@ def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
 
     return df
 
-def group_by_dimensions(df, evt, dim):
+def merge_df(df, event, dim):
+    # when performing union on backlog dataframe and main dataframe
+    # need to recalculate average values
     if dim == 'product_id':
-        if evt == 'view':
-            gb = (df.groupby(dim, 'event_time')
-                            .agg(F.count('price'),F.mean('price')))
-        elif evt == 'purchase':
-            gb = (df.groupby(dim, 'event_time')
-                            .agg(F.sum('price'),F.count('price'),F.mean('price')))
+        if event == 'view':
+        # view_dims[dim] = (view_df.groupby(dim, 'event_time')
+        #                     .agg(F.count('price'),F.avg('price')))
+            df = df.withColumn('total_price', F.col('count(price)') * F.col('avg(price)'))
+            df = df.groupby(dim, 'event_time').agg(F.count('count(price)'), F.sum('total_price'))
+            df = df.withColumnRenamed('count(count(price))','count(price)')
+            df = df.withColumn('avg(price)', F.col('sum(total_price)') / F.col('count(price)'))
+            df.drop('sum(total_price)')
+        elif event == 'purchase':
+            # purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
+            #                 .agg(F.sum('price'),F.count('price'),F.avg('price')))
+            df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'), F.sum('count(price)'))
+            df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
+            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
+            df = df.withColumn('avg(price)', F.col('sum(price)') / F.col('count(price)'))
     else:
-        if evt == 'view':
-            gb = (df.groupby(dim, 'event_time').agg(F.count('price')))
-        elif evt == 'purchase':
-            gb = (df.groupby(dim, 'event_time').agg(F.sum('price')))
+        if event == 'view':
+            df = df.groupby(dim, 'event_time').agg(F.sum('count(price)'))
+            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
+        elif event == 'purchase':
+            df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'))
+            df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
 
-    return gb
+    return df
 
 def write_to_psql(df, event, dim, mode, suffix):
     # write dataframe to postgreSQL
@@ -147,7 +160,7 @@ def min_to_hour(dimensions, events):
             if curr_min > curr_hour + datetime.timedelta(hours=1):
                 df = compress_time(df_0, t_window=3600, start_tick=curr_hour,
                 tstep=3600, from_csv=False)
-                gb = group_by_dimensions(df, evt, dim)
+                gb = merge_df(df, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
