@@ -77,7 +77,7 @@ def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
 
     return df
 
-def group_by_dimensions(df, events, dimensions):
+def group_by_dimensions(df, evt, dim):
     if dim == 'product_id':
         if evt == 'view':
             gb = (df.groupby(dim, 'event_time')
