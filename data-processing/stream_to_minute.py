@@ -244,6 +244,6 @@ def stream_to_minute(events, dimensions):
     os.system('s3cmd mv s3://{bucket}/{src_dir}* s3://{bucket}/{dst_dir}')
 
 if __name__ == "__main__":
-    dimensions = ['product_id', 'brand', 'category_l1', 'category_l3'] # 'category_l2'
+    dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
     events = ['purchase', 'view'] # test purchase then test view
     stream_to_minute(events, dimensions)
