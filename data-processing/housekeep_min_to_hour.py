@@ -223,10 +223,14 @@ def compress_csv():
     print (max_processed_time, max_zipped_next)
     if max_processed_time > max_zipped_next:
         for f in lof_pool:
-            t = str_to_datetime(remove_server_num(f), '%Y-%m-%d-%H-%M-%S')
-            if max_zipped_time <= t < max_zipped_next:
-                move_s3_file('maxwell-insight', 'spark-processed/',
-                             'csv-bookkeeping/temp/', f_name=f)
+            try:
+                t = str_to_datetime(remove_server_num(f), '%Y-%m-%d-%H-%M-%S')
+                if max_zipped_time <= t < max_zipped_next:
+                    move_s3_file('maxwell-insight', 'spark-processed/',
+                                 'csv-bookkeeping/temp/', f_name=f)
+            except:
+                continue
+                
     df = read_s3_to_df_bk(sql_c, spark)
     comp_f_name = datetime_to_str(max_zipped_next, "%Y-%m-%d-%H") + ".csv"
     df.sortBy("product_id", "event_time").write\
