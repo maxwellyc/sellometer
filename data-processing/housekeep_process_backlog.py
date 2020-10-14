@@ -270,7 +270,7 @@ def process_backlog(events, dimensions):
     new_df['view'], new_df['purchase'] = spark_process(sql_c,spark,src_dir='backlogs/')
     for evt in events:
         for dim in dimensions:
-            df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute', group=False)
+            df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
             df = df.union(new_df[evt][dim])
             df = merge_df(df, evt, dim)
             write_to_psql(df, evt, dim, mode="overwrite", suffix='minute')
