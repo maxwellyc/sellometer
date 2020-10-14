@@ -249,6 +249,7 @@ def stream_to_minute(events, dimensions):
     df_0 = clean_data(spark, df_0)
     # compress time into minute granularity, used for live monitoring
     df_0 = compress_time(df_0, tstep = 60)
+    df_0.show(20)
     # # compress time into hour granularity
     main_df = split_by_event(events, df_0)
     print (main_df)
