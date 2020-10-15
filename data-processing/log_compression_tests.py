@@ -85,18 +85,20 @@ def compress_csv(timeframe='hour'):
     print ("Last processed file time label:",max_processed_time)
     print ("Last compressed file time label:",max_zipped_next)
     try:
+        print (prefix)
         max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
         df = read_s3_to_df_bk(sql_c, spark, prefix=max_zipped_time)
         df = df.withColumn('_c0', df['_c0'].cast('integer'))
         comp_f_name = datetime_to_str(max_zipped_next, tt_format) + ".csv.gzip"
-        df.orderBy('_c0')\
-        .coalesce(1)\
-        .write\
-        .option("header", True)\
-        .option("compression","gzip")\
-        .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
-
-        remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
+        print (comp_f_name)
+        # df.orderBy('_c0')\
+        # .coalesce(1)\
+        # .write\
+        # .option("header", True)\
+        # .option("compression","gzip")\
+        # .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
+        #
+        # remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
 
     except Exception as e:
         print (e)
