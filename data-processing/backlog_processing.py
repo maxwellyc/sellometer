@@ -75,7 +75,7 @@ def compress_time(df, tstep = 60, from_csv = True):
             )
     df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
     df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
-    t_max = df.agg({"event_time": "max"}).collect()[0][0]
+
     return df
     ################################################################################
 
@@ -263,15 +263,13 @@ def process_backlogs(events, dimensions):
         for dim in dimensions:
             print (evt, dim)
             df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
-            df.show(10)
-            new_df[evt][dim].show(10)
             df = df.union(new_df[evt][dim])
             df = merge_df(df, evt, dim)
             write_to_psql(df, evt, dim, mode="overwrite", suffix='minute_bl')
             df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
             write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
 
-    # move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
+    move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
