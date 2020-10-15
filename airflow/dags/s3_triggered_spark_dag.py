@@ -85,8 +85,9 @@ new_file_sensor = S3KeySensor(
 spark_live_process = PythonOperator(
   task_id='spark_live_process',
   python_callable=run_streaming,
-  trigger_rule='none_failed'
-  dag = dag_1)
+  trigger_rule='none_failed',
+  dag = dag_1
+  )
 
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
@@ -106,7 +107,8 @@ min_to_hour = PythonOperator(
 logs_compression = BranchPythonOperator(
     task_id='logs_compression',
     python_callable=run_logs_compression,
-    dag = dag_2)
+    dag=dag_2
+)
 
 dummy_task = DummyOperator(
     task_id='dummy',
