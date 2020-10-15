@@ -92,7 +92,7 @@ def compress_csv(timeframe='hour'):
             df = df.withColumn('_c0', df['_c0'].cast('integer'))
             comp_f_name = next_prefix + ".csv.gzip"
             print (comp_f_name)
-            
+
             # sort by index and compress
             df.orderBy('_c0')\
             .coalesce(1)\
