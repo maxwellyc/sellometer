@@ -57,8 +57,9 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     return df_cut
 
 def select_time_window(df, end_tick, t_window=3600, time_format='%Y-%m-%d %H:%M:%S'):
-    df = df.filter( (df.event_time < end_tick) &
-    (df.event_time >= end_tick - datetime.timedelta(seconds=t_window)) )
+    start_tick = end_tick - datetime.timedelta(seconds=t_window)
+    print (start_tick, end_tick)
+    df = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
     return df
 
 def compress_time(df, t_window, end_tick, tstep = 60, from_csv = True ):
@@ -157,7 +158,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
                 tstep=3600, from_csv=False)
                 gb = merge_df(df, evt, dim)
                 # append temp table into t2 datatable
-                write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
+                write_to_psql(gb, evt, dim, mode="append", suffix='hour')
 
             # periodically check if spark process processed eg. 2019-10-01-00-01-00-1.csv
             # in one batc and *-3.csv in another.
