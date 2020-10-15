@@ -140,7 +140,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
     curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
     next_hour = curr_hour + datetime.timedelta(hours=1)
-    hours_diff = (curr_min - curr_hour).hours
+    hours_diff = (curr_min - curr_hour).seconds // 3600
     print (f"Current time in minute level table: {curr_min}")
     print (f"Storing hourly data between: {next_hour}")
     for evt in events:
@@ -151,6 +151,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
             # rank datatable is a dynamic sliding window and updates every minute
             df = select_time_window(df_0,
             start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
+            print (df)
             # store past hour data in rank table for ranking
             write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
             # compress hourly data into t2 datatable only when integer hour has passed
