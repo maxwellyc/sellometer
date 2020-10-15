@@ -202,21 +202,22 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
 
     return df
 
-def spark_process(sql_c, spark, dimensions=['product_id'], src_dir='serverpool/', backlog_mode = True):
-    #dimensions = ['product_id', 'brand', 'category_l1', 'category_l2', 'category_l3']
+def stream_to_minute(sql_c, spark, events, dimensions, src_dir):
+    # initialize spark
     # read csv from s3
     df_0 = read_s3_to_df(sql_c, spark, src_dir=src_dir)
+    if not df_0:
+        print ("No files were read into dataframe")
+        return
     # clean data
     df_0 = clean_data(spark, df_0)
-    # compress time into minute granularity
-    df = compress_time(df_0, tstep = 60)
-
-    # split by event type: view and purchase
-    view_df, purchase_df = split_by_event(df)
+    # compress time into minute granularity, used for live monitoring
+    df_0 = compress_time(df_0, tstep = 60)
+    # # compress time into hour granularity
+    main_df = split_by_event(events, df_0)
     # groupby different product dimensions
-    view_dim, purchase_dim = group_by_dimensions(view_df, purchase_df, dimensions)
-
-    return view_dim, purchase_dim
+    main_gb = group_by_dimensions(main_df, events, dimensions)
+    return main_gb
 
     # write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", suffix="minute") # "append"
 
@@ -267,7 +268,7 @@ def process_backlogs(events, dimensions):
     # initialize spark
     sql_c, spark = spark_init()
     new_df = {}
-    new_df['view'], new_df['purchase'] = spark_process(sql_c,spark,src_dir='backlogs/')
+    new_df = stream_to_minute(sql_c,spark, events, dimensions,src_dir='backlogs/')
     for evt in events:
         for dim in dimensions:
             print (evt, dim)
