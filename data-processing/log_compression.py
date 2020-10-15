@@ -84,6 +84,8 @@ def compress_csv(timeframe='hour'):
     max_zipped_next = max_zipped_time + datetime.timedelta(hours=hour_diff)
     print ("Last processed file time label:", max_processed_time)
     print ("Last compressed file time label:", max_zipped_time)
+    comp_f_name = next_prefix + ".csv.gzip"
+    print (comp_f_name)
     if max_processed_time >= max_zipped_next:
         try:
             next_prefix = datetime_to_str(max_zipped_next, tt_format)
