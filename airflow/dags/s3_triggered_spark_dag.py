@@ -7,7 +7,7 @@ from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
 import os, subprocess,sys
 
-import check_backlog.collect_backlogs as collect_backlogs
+import ~/eCommerce/data_processing/check_backlog.collect_backlogs as collect_backlogs
 sys.path.append('~/eCommerce/data_processing')
 
 bucket = 'maxwell-insight'
@@ -103,7 +103,7 @@ logs_compression = BranchPythonOperator(
     task_id='logs_compression',
     python_callable=run_logs_compression,
     dag = dag_2)
-    
+
 # sensor = ExternalTaskSensor(
 #     task_id = 'sensor',
 #     external_dag_id = 'main_spark_process',
