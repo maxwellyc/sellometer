@@ -150,7 +150,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
             print (curr_min, curr_hour)
             select_time_window(start_tick=curr_min )
 
-            df = compress_time("", t_window=3600, start_tick=curr_hour,
+            df = compress_time("", t_window=1, start_tick=curr_hour,
             tstep=3600, from_csv=False)
 
 

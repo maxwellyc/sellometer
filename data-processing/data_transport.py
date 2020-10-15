@@ -156,7 +156,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
             if curr_min > curr_hour + datetime.timedelta(hours=1):
-                df = compress_time(df_0, t_window=3600, start_tick=curr_hour,
+                df = compress_time(df_0, t_window=1, start_tick=curr_hour,
                 tstep=3600, from_csv=False)
                 gb = merge_df(df, evt, dim)
                 # append temp table into t2 datatable
