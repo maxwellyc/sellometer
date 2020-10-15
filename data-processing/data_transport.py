@@ -139,6 +139,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
     curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
+    next_hour = curr_hour + datetime.timedelta(hours=1)
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
@@ -148,10 +149,9 @@ def min_to_hour(sql_c, spark, events, dimensions):
             df = select_time_window(df_0, end_tick=curr_min )
             # store past hour data in rank table for ranking
             write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
-
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
-            next_hour = curr_hour + datetime.timedelta(hours=1)
+            print (curr_min, next_hour)
             if curr_min > next_hour:
                 df = compress_time(df_0, t_window=3600, end_tick=next_hour,
                 tstep=3600, from_csv=False)
