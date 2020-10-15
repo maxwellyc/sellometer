@@ -6,12 +6,11 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 # from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
-import os, subprocess, sys
+import os, subprocess, sys, imp
+util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/check_backlog.py')
 # sys.path.append('/home/ubuntu/eCommerce/data_processing')
-sys.path.insert(0,os.path.abspath(os.path.dirname('/home/ubuntu/eCommerce/data-processing/')))
+# sys.path.insert(0,os.path.abspath(os.path.dirname('/home/ubuntu/eCommerce/data-processing/')))
 #sys.path.insert(0,os.path.abspath(os.path.dirname('/home/ubuntu/eCommerce/data_processing')))
-import check_backlog
-
 
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
@@ -60,7 +59,7 @@ def run_streaming():
     print(max_cores,'spark cores executing')
     print(sys.path)
     subprocess.call(f'spark-submit --conf spark.cores.max={max_cores} ' +\
-    '$sparkf streaming.py')
+    '$sparkf ~/eCommerce/data-processing/streaming.py')
 
 def run_logs_compression():
     os.chdir("~/eCommerce/data-processing/")
@@ -95,7 +94,7 @@ spark_live_process = PythonOperator(
 
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
-    python_callable=check_backlog.collect_backlogs,
+    python_callable=util.collect_backlogs,
     dag = dag_1)
 
 process_backlogs = PythonOperator(
