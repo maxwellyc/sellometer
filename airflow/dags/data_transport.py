@@ -28,7 +28,7 @@ args = {
     'retry_delay': timedelta(seconds=5),
     }
 dag = DAG(
-    dag_id='main_spark_process',
+    dag_id='data_transport',
     schedule_interval=timedelta(seconds=120),
     max_active_runs=2,
     default_args=args
