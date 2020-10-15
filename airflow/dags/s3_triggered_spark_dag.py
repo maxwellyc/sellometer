@@ -6,7 +6,8 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
 import os, subprocess,sys
-sys.path.append('/home/ubuntu/eCommerce/data_processing')
+# sys.path.append('/home/ubuntu/eCommerce/data_processing')
+sys.path.insert(0,os.path.abspath(os.path.dirname('/home/ubuntu/eCommerce/data_processing')))
 import check_backlog
 
 
