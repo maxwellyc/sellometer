@@ -5,7 +5,7 @@ import time, datetime, os
 
 def spark_init():
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("DT_tier_transfer")
+    conf = SparkConf().setAppName("min_data_window")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
@@ -137,7 +137,7 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     .load()
     return df
 
-def min_data_window(events, dimensions):
+def min_data_window(sql_c, spark, events, dimensions):
 
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)

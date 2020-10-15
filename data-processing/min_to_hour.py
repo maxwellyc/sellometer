@@ -5,7 +5,7 @@ import time, datetime, os
 
 def spark_init():
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("DT_tier_transfer")
+    conf = SparkConf().setAppName("min_to_hour")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
