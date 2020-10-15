@@ -271,6 +271,8 @@ def process_backlogs(events, dimensions):
     for evt in events:
         for dim in dimensions:
             df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
+            df.show(10)
+            new_df[evt][dim].show(10)
             df = df.union(new_df[evt][dim])
             df = merge_df(df, evt, dim)
             write_to_psql(df, evt, dim, mode="overwrite", suffix='minute_bl')
