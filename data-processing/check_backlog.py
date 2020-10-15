@@ -15,6 +15,7 @@ def collect_backlogs():
         dst_dir = 'backlogs/'
         lof = list_s3_files(dir = dst_dir)
         print (lof)
+        print("fls")
         for f in lof:
             if ".csv" in f:
                 return 'process_backlogs'
