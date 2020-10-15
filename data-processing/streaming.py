@@ -32,7 +32,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute'):
         df = spark.read \
             .format("jdbc") \
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-        .option("dbtable", f'purchase_product_id_{suffix}') \
+        .option("dbtable", f'view_product_id_{suffix}') \
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
