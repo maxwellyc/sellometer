@@ -122,25 +122,23 @@ def clean_data(spark,df):
     # data transformation will be different for these two types of events.
     return df
 
-def split_by_event(df):
+def split_by_event(events, df):
+    main_df = {}
+    for evt in events:
+        main_df[evt] = df.filter(df['event_type'] == evt)
+        main_df[evt] = main_df[evt].drop('event_type')
 
-    purchase_df = df.filter(df['event_type'] == 'purchase')
-    view_df = df.filter(df['event_type'] == 'view')
+        # if same user session viewed same product_id twice, even at differnt event_time, remove duplicate entry.
+        # same user refreshing the page should not reflect more interest on the same product
+        # need to be careful here as user can buy a product twice within the same session,
+        # we should not remove duplicate on purchase_df
+        if evt == 'view':
+            main_df[evt] = (main_df[evt]
+                .orderBy('event_time')
+                .coalesce(1)
+                .dropDuplicates(subset=['user_session','product_id']))
 
-    purchase_df = purchase_df.drop('event_type')
-    view_df = view_df.drop('event_type')
-
-    # if same user session viewed same product_id twice, even at differnt event_time, remove duplicate entry.
-    # same user refreshing the page should not reflect more interest on the same product
-    # need to be careful here as user can buy a product twice within the same session,
-    # we should not remove duplicate on purchase_df
-    view_df = (view_df
-        .orderBy('event_time')
-        .coalesce(1)
-        .dropDuplicates(subset=['user_session','product_id'])
-    )
-
-    return view_df, purchase_df
+    return main_df
 
 def group_by_dimensions(view_df, purchase_df, dimensions):
 
