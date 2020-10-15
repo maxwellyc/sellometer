@@ -43,11 +43,11 @@ def run_streaming():
     '$sparkf ~/eCommerce/data-processing/streaming.py')
 
 def run_backlog_processing():
-        response = subprocess.check_output(f's3cmd du $s3/backlogs/', shell=True).decode('ascii')
-        file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
-        # use extra processors when file size greater than 10 Mb
-        max_cores = 12 if file_size > 10 else 10
-        print(max_cores,'spark cores executing')
+    response = subprocess.check_output(f's3cmd du $s3/backlogs/', shell=True).decode('ascii')
+    file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
+    # use extra processors when file size greater than 10 Mb
+    max_cores = 12 if file_size > 10 else 10
+    print(max_cores,'spark cores executing')
     os.system(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
 
