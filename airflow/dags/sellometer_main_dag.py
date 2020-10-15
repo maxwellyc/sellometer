@@ -33,7 +33,7 @@ def run_streaming():
     response = subprocess.check_output(f's3cmd du $s3/serverpool/', shell=True).decode('ascii')
     file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
     # use extra processors when file size greater than 10 Mb
-    max_cores = 12 if file_size > 10 else 10
+    max_cores = 12 if file_size > 20 else 8
     print(max_cores,'spark cores executing')
     os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/streaming.py')
