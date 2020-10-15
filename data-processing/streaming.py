@@ -237,7 +237,7 @@ def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     for evt in events:
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
-            write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
+            write_to_psql(main_gb[evt][dim], evt, dim, mode="overwrite", suffix='minute')
     if move_files:
         print ('Moving processed files')
         move_s3_file('maxwell-insight', 'serverpool/', 'spark-processed/')
