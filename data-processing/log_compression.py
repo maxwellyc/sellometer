@@ -103,8 +103,14 @@ def compress_csv(timeframe='hour'):
 
         remove_s3_file('maxwell-insight', 'spark-processed/', prefix=next_prefix)
 
-    except Exception as e:
-        print (e)
+        except Exception as e:
+            print (e)
+    else:
+        print ("Not enough time has passed since last compression.")
+        print (f"Currently compressed 1-{timeframe} starting from {max_zipped_time}")
+        print (f"Currently newly processed files up until {max_processed_time}")
+        return
+
 
 
 if __name__ == "__main__":
