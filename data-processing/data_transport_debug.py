@@ -143,25 +143,14 @@ def min_to_hour(sql_c, spark, events, dimensions):
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
     curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
-    print (curr_min, curr_hour)
-    # for evt in events:
-    #     for dim in dimensions:
-    #         # read min data from t1 datatable
-    #         df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-    #         # slice 3600 second of dataframe for ranking purpose
-    #         # rank datatable is a dynamic sliding window and updates every minute
-    #         df = select_time_window(df_0, start_tick=curr_min )
-    #         # store past hour data in rank table for ranking
-    #         write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
-    #
-    #         # compress hourly data into t2 datatable only when integer hour has passed
-    #         # since last hourly datapoint
-    #         if curr_min > curr_hour + datetime.timedelta(hours=1):
-    #             df = compress_time(df_0, t_window=3600, start_tick=curr_hour,
-    #             tstep=3600, from_csv=False)
-    #             gb = merge_df(df, evt, dim)
-    #             # append temp table into t2 datatable
-    #             write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
+    # print (curr_min, curr_hour)
+    for evt in events:
+        for dim in dimensions:
+            # compress hourly data into t2 datatable only when integer hour has passed
+            # since last hourly datapoint
+            print (curr_min, curr_hour)
+            if curr_min > curr_hour + datetime.timedelta(hours=1):
+                print (curr_min, curr_hour + datetime.timedelta(hours=1))
 
 
 if __name__ == "__main__":
