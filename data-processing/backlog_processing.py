@@ -140,51 +140,45 @@ def split_by_event(events, df):
 
     return main_df
 
-def group_by_dimensions(view_df, purchase_df, dimensions):
-
-    view_dims, purchase_dims = {}, {}
+def group_by_dimensions(main_df, events, dimensions):
+    main_gb = {}
     # total view counts per dimesion, total sales amount per dimension
-    for dim in dimensions:
-        # total view counts per dimension, if product_id, also compute avg price
-        # total $$$ amount sold per dimension, if product_id also compute count and avg
-        if dim == 'product_id':
-            view_dims[dim] = (view_df.groupby(dim, 'event_time')
-                                .agg(F.count('price'),F.avg('price')))
-            purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
-                                .agg(F.sum('price'),F.count('price'),F.avg('price')))
-        else:
-            view_dims[dim] = (view_df.groupby(dim, 'event_time')
-                                .agg(F.count('price')))
-            purchase_dims[dim] = (purchase_df.groupby(dim, 'event_time')
-                                .agg(F.sum('price')))
+    for evt in events:
+        main_gb[evt] = {}
+        for dim in dimensions:
+            # total view counts per dimension, if product_id, also compute mean price
+            # total $$$ amount sold per dimension, if product_id also compute count and mean
+            if dim == 'product_id':
+                if evt == 'view':
+                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
+                                    .agg(F.count('price'),F.mean('price')))
+                elif evt == 'purchase':
+                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
+                                    .agg(F.sum('price'),F.count('price'),F.mean('price')))
+            else:
+                if evt == 'view':
+                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
+                                    .agg(F.count('price')))
+                elif evt == 'purchase':
+                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
+                                    .agg(F.sum('price')))
+    return main_gb
 
-        view_dims[dim]
-        purchase_dims[dim]
 
-    return view_dims, purchase_dims
+def write_to_psql(df, event, dim, mode, suffix):
+    # write dataframe to postgreSQL
+    # suffix can be 'hour', 'minute', 'rank', this is used to name datatables
+    df.write\
+    .format("jdbc")\
+    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
+    .option("dbtable", f"{event}_{dim}_{suffix}")\
+    .option("user",os.environ['psql_username'])\
+    .option("password",os.environ['psql_pw'])\
+    .option("driver","org.postgresql.Driver")\
+    .mode(mode)\
+    .save()
+    return
 
-def write_to_psql(view_dims, purchase_dims, dimensions, mode, suffix="minute"):
-# write dataframe to postgreSQL
-    for dim in dimensions:
-        view_dims[dim].write\
-        .format("jdbc")\
-        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-        .option("dbtable","view_" + dim + f"_{suffix}")\
-        .option("user",os.environ['psql_username'])\
-        .option("password",os.environ['psql_pw'])\
-        .option("driver","org.postgresql.Driver")\
-        .mode(mode)\
-        .save()
-
-        purchase_dims[dim].write\
-        .format("jdbc")\
-        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-        .option("dbtable","purchase_" + dim + f"_{suffix}")\
-        .option("user",os.environ['psql_username'])\
-        .option("password",os.environ['psql_pw'])\
-        .option("driver","org.postgresql.Driver")\
-        .mode(mode)\
-        .save()
 
 def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     table_name = "_".join([event, dim, suffix])
@@ -216,8 +210,6 @@ def stream_to_minute(sql_c, spark, events, dimensions, src_dir):
     # groupby different product dimensions
     main_gb = group_by_dimensions(main_df, events, dimensions)
     return main_gb
-
-    # write_to_psql(view_dim, purchase_dim, dimensions, mode = "overwrite", suffix="minute") # "append"
 
 def merge_df(df, event, dim):
     # when performing union on backlog dataframe and main dataframe
