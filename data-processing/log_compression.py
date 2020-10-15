@@ -100,8 +100,7 @@ def compress_csv(timeframe='hour'):
             .option("header", True)\
             .option("compression","gzip")\
             .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
-
-        remove_s3_file('maxwell-insight', 'spark-processed/', prefix=next_prefix)
+            remove_s3_file('maxwell-insight', 'spark-processed/', prefix=next_prefix)
 
         except Exception as e:
             print (e)
