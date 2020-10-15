@@ -11,8 +11,6 @@ def collect_backlogs():
     # move backlogged files into backlogs folder on s3
     try:
         lof = list_s3_files(dir = 'backlogs')
-        print (lof)
-        print("flsvi")
         for f in lof:
             if ".csv" in f:
                 return 'process_backlogs'
@@ -22,4 +20,4 @@ def collect_backlogs():
         return 'dummy_task'
 
 if __name__ == "__main__":
-    collect_backlogs()
+    print (collect_backlogs())
