@@ -85,27 +85,29 @@ def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24,
 def merge_df(df, event, dim, rank = False):
     # when performing union on backlog dataframe and main dataframe
     # need to recalculate average values
+    if rank:
+        gb_cols = [dim]
+    else:
+        gb_cols = [dim, 'event_time']
     if dim == 'product_id':
         if event == 'view':
             df = df.withColumn('total_price', F.col('count(price)') * F.col('avg(price)'))
-            df = df.groupby(dim, 'event_time').agg(F.sum('count(price)'), F.sum('total_price'))
+            df = df.groupby(gb_cols).agg(F.sum('count(price)'), F.sum('total_price'))
             df = df.withColumnRenamed('sum(count(price))','count(price)')
             df = df.withColumn('avg(price)', F.col('sum(total_price)') / F.col('count(price)'))
             df = df.drop('sum(total_price)')
         elif event == 'purchase':
-            df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'), F.sum('count(price)'))
+            df = df.groupby(gb_cols).agg(F.sum('sum(price)'), F.sum('count(price)'))
             df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
             df = df.withColumnRenamed('sum(count(price))', 'count(price)')
             df = df.withColumn('avg(price)', F.col('sum(price)') / F.col('count(price)'))
     else:
         if event == 'view':
-            df = df.groupby(dim, 'event_time').agg(F.sum('count(price)'))
+            df = df.groupby(gb_cols).agg(F.sum('count(price)'))
             df = df.withColumnRenamed('sum(count(price))', 'count(price)')
         elif event == 'purchase':
-            df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'))
+            df = df.groupby(gb_cols).agg(F.sum('sum(price)'))
             df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
-    if rank:
-        df = df.drop('event_time')
     return df
 
 def write_to_psql(df, event, dim, mode, suffix):
