@@ -28,27 +28,11 @@ args_1 = {
     'retry_delay': timedelta(seconds=5),
     }
 
-args_2 = {
-    'owner': 'airflow',
-    'retries': 1,
-    'start_date': days_ago(1),
-    'depends_on_past': True,
-    'wait_for_downstream':True,
-    'retry_delay': timedelta(minutes=1),
-    }
-
 dag_1 = DAG(
     dag_id='main_spark_process',
     schedule_interval=timedelta(seconds=120),
     max_active_runs=2,
     default_args=args_1
-    )
-
-dag_2 = DAG(
-    dag_id='data_transport',
-    schedule_interval=timedelta(minutes=30),
-    max_active_runs=2,
-    default_args=args_2
     )
 
 def run_streaming():
@@ -59,14 +43,6 @@ def run_streaming():
     print(max_cores,'spark cores executing')
     os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/streaming.py')
-
-def run_logs_compression():
-    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
-    '$sparkf ~/eCommerce/data-processing/log_compression.py')
-
-def run_min_to_hour():
-    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
-    '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
 
 def run_backlog_processing():
     os.system(f'spark-submit --conf spark.cores.max=4 ' +\
@@ -98,29 +74,10 @@ process_backlogs = PythonOperator(
     python_callable=run_backlog_processing,
     dag = dag_1)
 
-min_to_hour = PythonOperator(
-  task_id='min_to_hour',
-  python_callable=run_min_to_hour,
-  dag = dag_2)
-
-logs_compression = BranchPythonOperator(
-    task_id='logs_compression',
-    python_callable=run_logs_compression,
-    dag=dag_2
-)
-
 dummy_task = DummyOperator(
     task_id='dummy_task',
     dag=dag_1
 )
-# sensor = ExternalTaskSensor(
-#     task_id = 'sensor',
-#     external_dag_id = 'main_spark_process',
-#     external_task_id = 'spark_live_process'
-# )
-
 
 new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process
 check_backlog >> process_backlogs >> spark_live_process
-
-min_to_hour >> logs_compression
