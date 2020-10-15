@@ -9,20 +9,17 @@ def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
 
 def collect_backlogs():
     # move backlogged files into backlogs folder on s3
-    # try:
-        bucket = 'maxwell-insight'
-        src_dir = 'serverpool/'
-        dst_dir = 'backlogs/'
-        lof = list_s3_files(dir = dst_dir)
+    try:
+        lof = list_s3_files(dir = 'backlogs')
         print (lof)
         print("flsvi")
         for f in lof:
             if ".csv" in f:
                 return 'process_backlogs'
         return 'dummy_task'
-    # except Exception as e:
-    #     print (e)
-    #     return 'dummy_task'
+    except Exception as e:
+        print (e)
+        return 'dummy_task'
 
 if __name__ == "__main__":
     collect_backlogs()
