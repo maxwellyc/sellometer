@@ -82,24 +82,34 @@ def compress_csv(timeframe='hour'):
         tt_format = '%Y-%m-%d'
         max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d','.csv.gzip',False)[1]
         max_zipped_next = max_zipped_time + datetime.timedelta(days=1)
-    print ("Last processed file time label:",max_processed_time)
-    print ("Last compressed file time label:",max_zipped_next)
-    try:
-        max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
-        df = read_s3_to_df_bk(sql_c, spark, prefix=max_zipped_time)
-        df = df.withColumn('_c0', df['_c0'].cast('integer'))
-        comp_f_name = datetime_to_str(max_zipped_next, tt_format) + ".csv.gzip"
-        df.orderBy('_c0')\
-        .coalesce(1)\
-        .write\
-        .option("header", True)\
-        .option("compression","gzip")\
-        .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
+    print ("Last processed file time label:", max_processed_time)
+    print ("Last compressed file time label:", max_zipped_time)
+    if max_processed_time >= max_zipped_next:
+        try:
+            max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
+            df = read_s3_to_df_bk(sql_c, spark, prefix=max_zipped_time)
+            df = df.withColumn('_c0', df['_c0'].cast('integer'))
+            comp_f_name = max_zipped_time + "-2.csv.gzip"
+            print (comp_f_name)
 
-        remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
+            # sort by index and compress
+            df.orderBy('_c0')\
+            .coalesce(1)\
+            .write\
+            .option("header", True)\
+            .option("compression","gzip")\
+            .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
 
-    except Exception as e:
-        print (e)
+            # remove file in spark-processed directory
+            remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
+
+        except Exception as e:
+            print (e)
+    else:
+        print ("Not enough time has passed since last compression.")
+        print (f"Currently compressed 1-{timeframe} starting from {max_zipped_time}")
+        print (f"Currently newly processed files up until {max_processed_time}")
+        return
 
 
 if __name__ == "__main__":
