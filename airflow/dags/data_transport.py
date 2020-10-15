@@ -47,7 +47,7 @@ min_to_hour = PythonOperator(
   python_callable=run_min_to_hour,
   dag = dag)
 
-logs_compression = BranchPythonOperator(
+logs_compression = PythonOperator(
     task_id='logs_compression',
     python_callable=run_logs_compression,
     dag=dag
