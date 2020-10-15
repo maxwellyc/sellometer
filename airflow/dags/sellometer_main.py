@@ -55,14 +55,14 @@ new_file_sensor = S3KeySensor(
     wildcard_match=True,
     dag=dag)
 
-backlog_sensor = S3KeySensor(
-    task_id='backlog_sensor',
-    poke_interval= 3, # (seconds); checking file every 4 seconds
-    timeout=60 * 60, *24, # timeout in 24 hours
-    bucket_key=f"s3://{bucket}/backlogs/*.csv",
-    bucket_name=None,
-    wildcard_match=True,
-    dag=dag)
+# backlog_sensor = S3KeySensor(
+#     task_id='backlog_sensor',
+#     poke_interval= 3, # (seconds); checking file every 4 seconds
+#     timeout=60 * 60, *24, # timeout in 24 hours
+#     bucket_key=f"s3://{bucket}/backlogs/*.csv",
+#     bucket_name=None,
+#     wildcard_match=True,
+#     dag=dag)
 
 
 spark_live_process = PythonOperator(
@@ -86,6 +86,6 @@ dummy_task = DummyOperator(
     task_id='dummy_task',
     dag=dag)
 
-backlog_sensor >> check_backlog
+# backlog_sensor >> check_backlog
 new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process # >> min_to_hour
 check_backlog >> process_backlogs >> spark_live_process # >> min_to_hour
