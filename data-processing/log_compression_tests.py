@@ -84,7 +84,7 @@ def compress_csv(timeframe='hour'):
         max_zipped_next = max_zipped_time + datetime.timedelta(days=1)
     print ("Last processed file time label:",max_processed_time)
     print ("Last compressed file time label:",max_zipped_next)
-    if max_processed_time >= max_zipped_next:
+    if True: #max_processed_time >= max_zipped_next:
         try:
             max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
             max_zipped_time = "2019-10-01-01"
