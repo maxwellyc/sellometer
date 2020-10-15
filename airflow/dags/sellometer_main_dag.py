@@ -15,7 +15,7 @@ events = ['purchase', 'view'] # test purchase then test view
 
 args = {
     'owner': 'airflow',
-    'retries': 1,
+    'retries': 0,
     'start_date': days_ago(1),
     'depends_on_past': False,
     'wait_for_downstream':False,
@@ -24,7 +24,7 @@ args = {
 
 dag = DAG(
     dag_id='main_spark_process',
-    schedule_interval=timedelta(seconds=90),
+    schedule_interval=timedelta(seconds=60),
     max_active_runs=1,
     default_args=args
     )
@@ -54,7 +54,7 @@ new_file_sensor = S3KeySensor(
 
 backlog_sensor = S3KeySensor(
     task_id='backlog_sensor',
-    poke_interval= 3, # (seconds); checking file every 4 seconds
+    poke_interval= 5, # (seconds); checking file every 4 seconds
     timeout= 30, # timeout in 1 hours
     bucket_key=f"s3://{bucket}/backlogs/*.csv",
     bucket_name=None,
