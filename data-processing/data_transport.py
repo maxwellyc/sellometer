@@ -57,9 +57,10 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     return df_cut
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
-    df = df.filter( (df.event_time >= start_tick) &
-    (df.event_time < start_tick + datetime.timedelta(hours=t_window)) )
-    return df
+    # df = df.filter( (df.event_time >= start_tick) &
+    # (df.event_time < start_tick + datetime.timedelta(hours=t_window)) )
+    print (start_tick, start_tick + datetime.timedelta(hours=t_window))
+    return
 
 def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
     # Datetime transformation #######################################################
@@ -146,21 +147,21 @@ def min_to_hour(sql_c, spark, events, dimensions):
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
-            df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
+            # df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
-            df = select_time_window(df_0, start_tick=curr_min )
+            select_time_window(df_0, start_tick=curr_min )
             # store past hour data in rank table for ranking
-            write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
+            # write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
 
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
             if curr_min > curr_hour + datetime.timedelta(hours=1):
                 df = compress_time(df_0, t_window=3600, start_tick=curr_hour,
                 tstep=3600, from_csv=False)
-                gb = merge_df(df, evt, dim)
-                # append temp table into t2 datatable
-                write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
+                # gb = merge_df(df, evt, dim)
+                # # append temp table into t2 datatable
+                # write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
 
 if __name__ == "__main__":
