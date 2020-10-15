@@ -56,10 +56,9 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     df_cut = df.filter(df.event_time > cutoff )
     return df_cut
 
-def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
-    df = df.filter( (df.event_time >= start_tick) &
-    (df.event_time < start_tick + datetime.timedelta(hours=t_window)) )
-    return df
+def select_time_window(start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
+    print (start_tick, start_tick + datetime.timedelta(hours=t_window))
+    return
 
 def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
     # Datetime transformation #######################################################
@@ -149,6 +148,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
             print (curr_min, curr_hour)
+            select_time_window(start_tick=curr_min )
             if curr_min > curr_hour + datetime.timedelta(hours=1):
                 print (curr_min, curr_hour + datetime.timedelta(hours=1))
 
