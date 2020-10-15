@@ -81,14 +81,15 @@ def compress_csv(timeframe='hour'):
         tt_format = '%Y-%m-%d'
         hour_diff = 24
     max_zipped_time = folder_time_range(lof_zipped,tt_format,'.csv.gzip',False)[1]
-    max_zipped_next = max_zipped_time + datetime.timedelta(hours=hour_diff)
+    max_zip_next = max_zipped_time + datetime.timedelta(hours=hour_diff)
     print ("Last processed file time label:", max_processed_time)
     print ("Last compressed file time label:", max_zipped_time)
-    comp_f_name = next_prefix + ".csv.gzip"
-    print (comp_f_name)
-    if max_processed_time >= max_zipped_next:
+    # the next zip file has time prefix max_zip_next
+    # the current processed file has to have a complete hour from the begin time
+    # in order for the compressed file to cover all files in that hour
+    if max_processed_time >= max_zip_next + datetime.timedelta(hours=hour_diff):
         try:
-            next_prefix = datetime_to_str(max_zipped_next, tt_format)
+            next_prefix = datetime_to_str(max_zip_next, tt_format)
             df = read_s3_to_df_bk(sql_c, spark, prefix=next_prefix)
 
             df = df.withColumn('_c0', df['_c0'].cast('integer'))
