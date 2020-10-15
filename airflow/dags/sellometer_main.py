@@ -60,7 +60,7 @@ def run_streaming():
     print(max_cores,'spark cores executing')
     print(sys.path)
     subprocess.call(f'spark-submit --conf spark.cores.max={max_cores} ' +\
-    '$sparkf ~/eCommerce/data-processing/streaming.py')
+    '$sparkf streaming.py')
 
 def run_logs_compression():
     os.chdir("~/eCommerce/data-processing/")
