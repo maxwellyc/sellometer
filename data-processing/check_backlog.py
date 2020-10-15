@@ -6,7 +6,7 @@ def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
     conn = client('s3')
     list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
     return list_of_files
-    
+
 def collect_backlogs():
     # move backlogged files into backlogs folder on s3
     try:
@@ -14,6 +14,7 @@ def collect_backlogs():
         src_dir = 'serverpool/'
         dst_dir = 'backlogs/'
         lof = list_s3_files(dir = dst_dir)
+        print (lof)
         for f in lof:
             if ".csv" in f:
                 return 'process_backlogs'
