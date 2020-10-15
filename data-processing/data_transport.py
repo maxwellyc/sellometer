@@ -57,8 +57,8 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     return df_cut
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
-    df = df.filter( (df.event_time >= start_tick) &
-    (df.event_time < start_tick + datetime.timedelta(hours=t_window)) )
+    df = df.filter( (df.event_time <= start_tick) &
+    (df.event_time > start_tick - datetime.timedelta(hours=t_window)) )
     return df
 
 def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):

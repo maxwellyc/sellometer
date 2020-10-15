@@ -57,7 +57,7 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     return df_cut
 
 def select_time_window(start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
-    print (start_tick, start_tick + datetime.timedelta(hours=t_window))
+    print (start_tick - datetime.timedelta(hours=t_window), start_tick)
     return
 
 def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
@@ -75,9 +75,9 @@ def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
             )
     if t_window:
         df = select_time_window(df, start_tick=start_tick, t_window=t_window)
-    df = df.withColumn("event_time", ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0)
-    df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
-    # t_max = df.agg({"event_time": "max"}).collect()[0][0]
+    # df = df.withColumn("event_time", ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0)
+    # df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
+    # # t_max = df.agg({"event_time": "max"}).collect()[0][0]
 
     return df
 
@@ -150,7 +150,8 @@ def min_to_hour(sql_c, spark, events, dimensions):
             print (curr_min, curr_hour)
             select_time_window(start_tick=curr_min )
             if curr_min > curr_hour + datetime.timedelta(hours=1):
-                print (curr_min, curr_hour + datetime.timedelta(hours=1))
+                df = compress_time("", t_window=3600, start_tick=curr_hour,
+                tstep=3600, from_csv=False)
 
 
 if __name__ == "__main__":
