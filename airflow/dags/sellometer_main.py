@@ -38,12 +38,12 @@ def run_streaming():
     file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
     # use extra processors when file size greater than 10 Mb
     max_cores = 12 if file_size > 10 else 10
-    print(max_cores,'spark cores executing')
+    print(max_cores,'spark cores executing main task.')
     os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/streaming.py')
 
 def run_backlog_processing():
-    os.system(f'spark-submit --conf spark.cores.max=12 ' +\
+    os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
 
 new_file_sensor = S3KeySensor(
@@ -69,12 +69,12 @@ spark_live_process = PythonOperator(
   task_id='spark_live_process',
   python_callable=run_streaming,
   trigger_rule='none_failed',
-  dag = dag
-  )
+  dag = dag)
 
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
     python_callable=util.collect_backlogs,
+    trigger_rule='any_success'
     dag = dag)
 
 process_backlogs = PythonOperator(
@@ -84,17 +84,7 @@ process_backlogs = PythonOperator(
 
 dummy_task = DummyOperator(
     task_id='dummy_task',
-    dag=dag
-)
-
-def run_min_to_hour():
-    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
-    '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
-
-# min_to_hour = PythonOperator(
-#   task_id='min_to_hour',
-#   python_callable=run_min_to_hour,
-#   dag = dag)
+    dag=dag)
 
 backlog_sensor >> check_backlog
 new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process # >> min_to_hour
