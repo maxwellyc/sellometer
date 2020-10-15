@@ -40,14 +40,14 @@ args_2 = {
 dag_1 = DAG(
     dag_id='main_spark_process',
     schedule_interval=timedelta(seconds=120),
-    max_active_runs=1,
+    max_active_runs_per_dag=1,
     default_args=args_1
     )
 
 dag_2 = DAG(
     dag_id='data_transport',
     schedule_interval=timedelta(minutes=30),
-    max_active_runs=1,
+    max_active_runs_per_dag=1,
     default_args=args_2
     )
 
@@ -65,7 +65,7 @@ def run_logs_compression():
     '$sparkf ~/eCommerce/data-processing/log_compression.py')
 
 def run_min_to_hour():
-    sos.system(f'spark-submit --conf spark.cores.max=4 ' +\
+    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
 
 def run_backlog_processing():
