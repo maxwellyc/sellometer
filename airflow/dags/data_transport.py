@@ -23,14 +23,14 @@ args = {
     'owner': 'airflow',
     'retries': 1,
     'start_date': days_ago(1),
-    'depends_on_past': True,
-    'wait_for_downstream':True,
+    'depends_on_past': False,
+    'wait_for_downstream':False,
     'retry_delay': timedelta(seconds=5),
     }
 dag = DAG(
     dag_id='data_transport',
     schedule_interval=timedelta(seconds=120),
-    max_active_runs=2,
+    max_active_runs=1,
     default_args=args
     )
 
