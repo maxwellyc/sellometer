@@ -46,7 +46,7 @@ def run_backlog_processing():
 new_file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
     poke_interval= 3, # (seconds); checking file every 4 seconds
-    timeout= 30, # timeout in 1 hours
+    timeout= 20, # timeout in 1 hours
     bucket_key=f"s3://{bucket}/serverpool/*.csv",
     bucket_name=None,
     wildcard_match=True,
@@ -55,7 +55,7 @@ new_file_sensor = S3KeySensor(
 backlog_sensor = S3KeySensor(
     task_id='backlog_sensor',
     poke_interval= 3, # (seconds); checking file every 4 seconds
-    timeout= 30, # timeout in 1 hours
+    timeout= 20, # timeout in 1 hours
     bucket_key=f"s3://{bucket}/backlogs/*.csv",
     bucket_name=None,
     wildcard_match=True,
