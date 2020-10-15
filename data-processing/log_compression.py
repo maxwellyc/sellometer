@@ -89,7 +89,7 @@ def compress_csv(timeframe='hour'):
             max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
             df = read_s3_to_df_bk(sql_c, spark, prefix=max_zipped_time)
             df = df.withColumn('_c0', df['_c0'].cast('integer'))
-            comp_f_name = max_zipped_time + "-2.csv.gzip"
+            comp_f_name = max_zipped_time + ".csv.gzip"
             print (comp_f_name)
 
             # sort by index and compress
