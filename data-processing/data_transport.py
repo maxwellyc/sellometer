@@ -151,7 +151,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
             # rank datatable is a dynamic sliding window and updates every minute
             df = select_time_window(df_0,
             start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
-            print (df)
+            df = merge_df(df, evt, dim)
             # store past hour data in rank table for ranking
             write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
             # compress hourly data into t2 datatable only when integer hour has passed
