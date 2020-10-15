@@ -51,7 +51,7 @@ def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",server
         return min(file_times), max(file_times)
     else:
         rt = str_to_datetime("2019-09-30-23-59-00")
-        return (str_to_datetime(datetime_to_str(rt, time_format),time_format)
+        return (str_to_datetime(datetime_to_str(rt, time_format),time_format),
         str_to_datetime(datetime_to_str(rt, time_format),time_format))
 
 def remove_s3_file(bucket, src_dir, prefix):
