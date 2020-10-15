@@ -73,7 +73,7 @@ def collect_backlogs():
         if backlogs_exist:
             return 'process_backlogs'
         else:
-            return 'spark_live_process'
+            return 'dummy_task'
     except Exception as e:
         print (e)
         return 'spark_live_process'

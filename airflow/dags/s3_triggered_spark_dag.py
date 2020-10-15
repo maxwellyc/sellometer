@@ -3,7 +3,8 @@ from airflow.models import DAG
 from airflow.operators.sensors import S3KeySensor
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.operators.bash_operator import BashOperator
-from airflow.sensors.external_task_sensor import ExternalTaskSensor
+from airflow.operators.dummy_operator import DummyOperator
+# from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
 import os, subprocess,sys
 # sys.path.append('/home/ubuntu/eCommerce/data_processing')
@@ -84,6 +85,7 @@ new_file_sensor = S3KeySensor(
 spark_live_process = PythonOperator(
   task_id='spark_live_process',
   python_callable=run_streaming,
+  trigger_rule='none_failed'
   dag = dag_1)
 
 check_backlog = BranchPythonOperator(
@@ -106,6 +108,10 @@ logs_compression = BranchPythonOperator(
     python_callable=run_logs_compression,
     dag = dag_2)
 
+dummy_task = DummyOperator(
+    task_id='dummy',
+    dag=dag_1
+)
 # sensor = ExternalTaskSensor(
 #     task_id = 'sensor',
 #     external_dag_id = 'main_spark_process',
@@ -113,7 +119,7 @@ logs_compression = BranchPythonOperator(
 # )
 
 
-new_file_sensor >> check_backlog >>  spark_live_process
-new_file_sensor >> check_backlog >> process_backlogs >> spark_live_process
+new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process
+check_backlog >> process_backlogs >> spark_live_process
 
 min_to_hour >> logs_compression
