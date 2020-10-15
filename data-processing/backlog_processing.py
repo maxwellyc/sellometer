@@ -274,7 +274,10 @@ def process_backlogs(events, dimensions):
             df = df.union(new_df[evt][dim])
             df = merge_df(df, evt, dim)
             write_to_psql(df, evt, dim, mode="overwrite", suffix='minute_bl')
-    #move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/', f_name)
+            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
+            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+
+    move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
 
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']

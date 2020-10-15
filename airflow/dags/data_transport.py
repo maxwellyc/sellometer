@@ -30,7 +30,7 @@ args = {
 dag = DAG(
     dag_id='data_transport',
     schedule_interval=timedelta(seconds=120),
-    max_active_runs=2,
+    max_active_runs=1,
     default_args=args
     )
 
