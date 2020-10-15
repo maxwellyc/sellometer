@@ -142,10 +142,10 @@ def min_to_hour(sql_c, spark, events, dimensions):
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
     curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
-    next_hour = curr_hour + datetime.timedelta(hours=1)
     hours_diff = (curr_min - curr_hour).seconds // 3600
+    next_hour = curr_hour + datetime.timedelta(hours=hours_diff)
     print (f"Current time in minute level table: {curr_min}")
-    print (f"Storing hourly data between: {next_hour}")
+    print (f"Storing hourly data between: {curr_hour} and {next_hour}")
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
@@ -162,8 +162,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
             if curr_min > next_hour:
                 print (f"++++++++Storing hourly data: {evt}_{dim}_hour")
                 df = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(seconds=1),
-                end_tick=curr_hour+hours_diff,
-                tstep=3600, from_csv=False)
+                end_tick=next_hour, tstep=3600, from_csv=False)
                 gb = merge_df(df, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="append", suffix='hour')
