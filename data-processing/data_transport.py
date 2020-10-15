@@ -57,6 +57,7 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     return df_cut
 
 def select_time_window(df, start_tick, end_tick, time_format='%Y-%m-%d %H:%M:%S'):
+    print (f"Selecting data between {start_tick} - {end_tick}")
     df = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
     return df
 
