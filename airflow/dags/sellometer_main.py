@@ -79,5 +79,15 @@ dummy_task = DummyOperator(
     dag=dag
 )
 
-new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process
-check_backlog >> process_backlogs >> spark_live_process
+def run_min_to_hour():
+    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
+    '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
+
+min_to_hour = PythonOperator(
+  task_id='min_to_hour',
+  python_callable=run_min_to_hour,
+  dag = dag)
+
+
+new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process >> min_to_hour
+check_backlog >> process_backlogs >> spark_live_process >> min_to_hour
