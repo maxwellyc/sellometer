@@ -7,8 +7,8 @@ from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
 import os, subprocess,sys
 
-import ~/eCommerce/data_processing/check_backlog.collect_backlogs as collect_backlogs
-sys.path.append('~/eCommerce/data_processing')
+import ../../data_processing/check_backlog.collect_backlogs as collect_backlogs
+# sys.path.append('~/eCommerce/data_processing')
 
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
