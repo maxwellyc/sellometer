@@ -164,7 +164,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
 
 if __name__ == "__main__":
 
-    dimensions = ['product_id', 'brand', 'category_l1']#, 'category_l2', 'category_l3']
+    dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
     min_to_hour(sql_c, spark, events, dimensions)
