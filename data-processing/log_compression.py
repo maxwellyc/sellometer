@@ -101,7 +101,7 @@ def compress_csv(timeframe='hour'):
             .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
 
             # remove file in spark-processed directory
-            remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
+            # remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
 
         except Exception as e:
             print (e)
