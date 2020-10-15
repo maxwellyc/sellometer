@@ -82,7 +82,7 @@ def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24,
 
     return df
 
-def merge_df(df, event, dim):
+def merge_df(df, event, dim, rank = False):
     # when performing union on backlog dataframe and main dataframe
     # need to recalculate average values
     if dim == 'product_id':
@@ -104,7 +104,8 @@ def merge_df(df, event, dim):
         elif event == 'purchase':
             df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'))
             df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
-
+    if rank:
+        df = df.drop('event_time')
     return df
 
 def write_to_psql(df, event, dim, mode, suffix):
@@ -151,9 +152,9 @@ def min_to_hour(sql_c, spark, events, dimensions):
             # rank datatable is a dynamic sliding window and updates every minute
             df = select_time_window(df_0,
             start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
-            df = merge_df(df, evt, dim)
+            gb = merge_df(df, evt, dim, rank=True)
             # store past hour data in rank table for ranking
-            write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
+            write_to_psql(gb, evt, dim, mode="overwrite", suffix='rank')
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
             if curr_min > next_hour:
