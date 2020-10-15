@@ -159,6 +159,14 @@ def min_to_hour(sql_c, spark, events, dimensions):
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
+            # periodically check if spark process processed eg. 2019-10-01-00-01-00-1.csv
+            # in one batc and *-3.csv in another.
+            # This process is identical as checking backlog, without the union part.
+            df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
+            df = merge_df(df, evt, dim)
+            write_to_psql(df, evt, dim, mode="overwrite", suffix='minute_temp')
+            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
+            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
 
 if __name__ == "__main__":
 
