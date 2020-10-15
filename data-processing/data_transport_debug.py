@@ -149,9 +149,9 @@ def min_to_hour(sql_c, spark, events, dimensions):
             # since last hourly datapoint
             print (curr_min, curr_hour)
             select_time_window(start_tick=curr_min )
-            if curr_min > curr_hour + datetime.timedelta(hours=1):
-                df = compress_time("", t_window=3600, start_tick=curr_hour,
-                tstep=3600, from_csv=False)
+
+            df = compress_time("", t_window=3600, start_tick=curr_hour,
+            tstep=3600, from_csv=False)
 
 
 if __name__ == "__main__":
