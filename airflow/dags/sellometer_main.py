@@ -58,18 +58,22 @@ def run_streaming():
     # use extra processors when file size greater than 10 Mb
     max_cores = 12 if file_size > 10 else 10
     print(max_cores,'spark cores executing')
+    os.chdir("~/eCommerce/data-processing/")
     subprocess.call(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/streaming.py')
 
 def run_logs_compression():
+    os.chdir("~/eCommerce/data-processing/")
     subprocess.call(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/log_compression.py')
 
 def run_min_to_hour():
+    os.chdir("~/eCommerce/data-processing/")
     subprocess.call(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
 
 def run_backlog_processing():
+    os.chdir("~/eCommerce/data-processing/")
     subprocess.call(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
 
