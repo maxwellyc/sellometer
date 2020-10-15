@@ -25,29 +25,17 @@ args = {
     'retry_delay': timedelta(seconds=5),
     }
 dag = DAG(
-    dag_id='data_transport',
-    schedule_interval=timedelta(minutes=10),
+    dag_id='daily_window',
+    schedule_interval=timedelta(minutes=30),
     max_active_runs=1,
     default_args=args
     )
 
-
-def run_logs_compression():
+def run_daily_window():
     os.system(f'spark-submit --conf spark.cores.max=6 ' +\
-    '$sparkf ~/eCommerce/data-processing/log_compression.py')
+    '$sparkf ~/eCommerce/data-processing/daily_window.py')
 
-def run_data_transport():
-    os.system(f'spark-submit --conf spark.cores.max=6 ' +\
-    '$sparkf ~/eCommerce/data-processing/data_transport.py')
-
-data_transport = PythonOperator(
-  task_id='min_to_hour',
-  python_callable=run_data_transport,
-  dag = dag)
-
-logs_compression = PythonOperator(
-    task_id='logs_compression',
-    python_callable=run_logs_compression,
+daily_window = PythonOperator(
+    task_id='daily_window',
+    python_callable=run_daily_window,
     dag=dag)
-
-data_transport >> logs_compression
