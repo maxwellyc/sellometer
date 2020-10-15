@@ -113,6 +113,7 @@ logs_compression = BranchPythonOperator(
 # )
 
 
-new_file_sensor >> check_backlog >> [process_backlogs >> spark_live_process, spark_live_process]
+new_file_sensor >> check_backlog >>  spark_live_process
+new_file_sensor >> check_backlog >> process_backlogs >> spark_live_process
 
 min_to_hour >> logs_compression
