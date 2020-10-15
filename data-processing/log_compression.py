@@ -50,10 +50,9 @@ def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",server
     if file_times:
         return min(file_times), max(file_times)
     else:
-        # if time_format == '%Y-%m-%d-%H-%M-%S':
-        return str_to_datetime("2019-10-01-00-00-00"), str_to_datetime("2019-10-01-00-00-00")
-        # elif time_format == '%Y-%m-%d':
-        #     return str_to_datetime("2019-09-30"), str_to_datetime("2019-09-30")
+        rt = str_to_datetime("2019-09-30-23-59-00")
+        return (str_to_datetime(datetime_to_str(rt, time_format),time_format)
+        str_to_datetime(datetime_to_str(rt, time_format),time_format))
 
 def remove_s3_file(bucket, src_dir, prefix):
     # bucket = 'maxwell-insight'
@@ -76,20 +75,21 @@ def compress_csv(timeframe='hour'):
     max_processed_time = folder_time_range(lof_pool)[1]
     if timeframe == 'hour':
         tt_format = '%Y-%m-%d-%H'
-        max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-%H','.csv.gzip',False)[1]
-        max_zipped_next = max_zipped_time + datetime.timedelta(hours=1)
+        hour_diff = 1
     elif timeframe == 'day':
         tt_format = '%Y-%m-%d'
-        max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d','.csv.gzip',False)[1]
-        max_zipped_next = max_zipped_time + datetime.timedelta(days=1)
+        hour_diff = 24
+    max_zipped_time = folder_time_range(lof_zipped,tt_format,'.csv.gzip',False)[1]
+    max_zipped_next = max_zipped_time + datetime.timedelta(hours=hour_diff)
+
     print ("Last processed file time label:", max_processed_time)
     print ("Last compressed file time label:", max_zipped_time)
     if max_processed_time >= max_zipped_next:
         try:
-            max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
-            df = read_s3_to_df_bk(sql_c, spark, prefix=max_zipped_time)
+            next_prefix = datetime_to_str(max_zipped_next, tt_format)
+            df = read_s3_to_df_bk(sql_c, spark, prefix=next_prefix)
             df = df.withColumn('_c0', df['_c0'].cast('integer'))
-            comp_f_name = max_zipped_time + ".csv.gzip"
+            comp_f_name = next_prefix + ".csv.gzip"
             print (comp_f_name)
 
             # sort by index and compress
@@ -101,7 +101,7 @@ def compress_csv(timeframe='hour'):
             .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
 
             # remove file in spark-processed directory
-            # remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
+            remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
 
         except Exception as e:
             print (e)
