@@ -56,13 +56,11 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     df_cut = df.filter(df.event_time > cutoff )
     return df_cut
 
-def select_time_window(df, end_tick, t_window=3600, time_format='%Y-%m-%d %H:%M:%S'):
-    start_tick = end_tick - datetime.timedelta(seconds=t_window)
-    print (start_tick, end_tick)
+def select_time_window(df, start_tick, end_tick, time_format='%Y-%m-%d %H:%M:%S'):
     df = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
     return df
 
-def compress_time(df, t_window, end_tick, tstep = 60, from_csv = True ):
+def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24, from_csv = True):
     # Datetime transformation #######################################################
     # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
     start_time = "2019-10-01-00-00-00"
@@ -72,11 +70,11 @@ def compress_time(df, t_window, end_tick, tstep = 60, from_csv = True ):
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
     if from_csv:
-        df = df.withColumn(
-            'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
-            )
-    if t_window:
-        df = select_time_window(df, end_tick=end_tick, t_window=t_window)
+        df = df.withColumn('event_time',
+            F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss'))
+    if end_tick:
+        if not start_tick: start_tick = end_tick - datetime.timedelta(hours=t_windows)
+        df = select_time_window(df, start_tick=start_tick, end_tick=end_tick)
     df = df.withColumn("event_time", ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0)
     df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
     # t_max = df.agg({"event_time": "max"}).collect()[0][0]
@@ -141,25 +139,29 @@ def min_to_hour(sql_c, spark, events, dimensions):
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
     curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
     next_hour = curr_hour + datetime.timedelta(hours=1)
+    hours_diff = (curr_min - curr_hour).hours
+    print (f"Current time in minute level table: {curr_min}")
+    print (f"Storing hourly data between: {next_hour}")
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
-            df = select_time_window(df_0, end_tick=curr_min )
+            df = select_time_window(df_0,
+            start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
             # store past hour data in rank table for ranking
             write_to_psql(df, evt, dim, mode="overwrite", suffix='rank')
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
-            print (curr_min, next_hour)
             if curr_min > next_hour:
-                df = compress_time(df_0, t_window=3600, end_tick=next_hour,
+                print (f"++++++++Storing hourly data: {evt}_{dim}_hour")
+                df = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(seconds=1),
+                end_tick=curr_hour+hours_diff,
                 tstep=3600, from_csv=False)
                 gb = merge_df(df, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="append", suffix='hour')
-
             # periodically check if spark process processed eg. 2019-10-01-00-01-00-1.csv
             # in one batc and *-3.csv in another.
             # This process is identical as checking backlog, without the union part.
