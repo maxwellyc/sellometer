@@ -24,7 +24,7 @@ args = {
     'retries': 1,
     'start_date': days_ago(1),
     'depends_on_past': False,
-    'wait_for_downstream':True,
+    'wait_for_downstream':False,
     'retry_delay': timedelta(seconds=5),
     }
 
