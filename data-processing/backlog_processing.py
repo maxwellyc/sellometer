@@ -270,6 +270,7 @@ def process_backlogs(events, dimensions):
     new_df['view'], new_df['purchase'] = spark_process(sql_c,spark,src_dir='backlogs/')
     for evt in events:
         for dim in dimensions:
+            print (evt, dim)
             df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
             df.show(10)
             new_df[evt][dim].show(10)
@@ -282,6 +283,6 @@ def process_backlogs(events, dimensions):
     move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
 
 if __name__ == "__main__":
-    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
+    dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
     process_backlogs(events, dimensions)
