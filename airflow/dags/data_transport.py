@@ -45,12 +45,12 @@ def run_min_to_hour():
 min_to_hour = PythonOperator(
   task_id='min_to_hour',
   python_callable=run_min_to_hour,
-  dag = dag_2)
+  dag = dag)
 
 logs_compression = BranchPythonOperator(
     task_id='logs_compression',
     python_callable=run_logs_compression,
-    dag=dag_2
+    dag=dag
 )
 
 min_to_hour >> logs_compression
