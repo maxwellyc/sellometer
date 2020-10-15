@@ -19,7 +19,7 @@ dst_dir = 'spark-processed/'
 dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
 events = ['purchase', 'view'] # test purchase then test view
 
-args_1 = {
+args = {
     'owner': 'airflow',
     'retries': 1,
     'start_date': days_ago(1),
@@ -27,11 +27,11 @@ args_1 = {
     'wait_for_downstream':True,
     'retry_delay': timedelta(seconds=5),
     }
-dag_1 = DAG(
+dag = DAG(
     dag_id='main_spark_process',
     schedule_interval=timedelta(seconds=120),
     max_active_runs=2,
-    default_args=args_1
+    default_args=args
     )
 
 def run_logs_compression():

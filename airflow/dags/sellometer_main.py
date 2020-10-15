@@ -19,7 +19,7 @@ dst_dir = 'spark-processed/'
 dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
 events = ['purchase', 'view'] # test purchase then test view
 
-args_1 = {
+args = {
     'owner': 'airflow',
     'retries': 1,
     'start_date': days_ago(1),
@@ -28,11 +28,11 @@ args_1 = {
     'retry_delay': timedelta(seconds=5),
     }
 
-dag_1 = DAG(
+dag = DAG(
     dag_id='main_spark_process',
     schedule_interval=timedelta(seconds=120),
     max_active_runs=2,
-    default_args=args_1
+    default_args=args
     )
 
 def run_streaming():
@@ -55,28 +55,28 @@ new_file_sensor = S3KeySensor(
     bucket_key=f"s3://{bucket}/{src_dir}*.csv",
     bucket_name=None,
     wildcard_match=True,
-    dag=dag_1)
+    dag=dag)
 
 spark_live_process = PythonOperator(
   task_id='spark_live_process',
   python_callable=run_streaming,
   trigger_rule='none_failed',
-  dag = dag_1
+  dag = dag
   )
 
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
     python_callable=util.collect_backlogs,
-    dag = dag_1)
+    dag = dag)
 
 process_backlogs = PythonOperator(
     task_id='process_backlogs',
     python_callable=run_backlog_processing,
-    dag = dag_1)
+    dag = dag)
 
 dummy_task = DummyOperator(
     task_id='dummy_task',
-    dag=dag_1
+    dag=dag
 )
 
 new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process
