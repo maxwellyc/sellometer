@@ -76,7 +76,7 @@ def collect_backlogs():
             return 'dummy_task'
     except Exception as e:
         print (e)
-        return 'spark_live_process'
+        return 'dummy_task'
 
 if __name__ == "__main__":
     collect_backlogs()
