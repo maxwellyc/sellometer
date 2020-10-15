@@ -39,6 +39,8 @@ def run_min_to_hour():
     os.system(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
 
+def min_data_window()
+
 min_to_hour = PythonOperator(
   task_id='min_to_hour',
   python_callable=run_min_to_hour,

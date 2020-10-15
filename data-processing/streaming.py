@@ -248,4 +248,3 @@ if __name__ == "__main__":
     sql_c, spark = spark_init()
     print ("Starting spark process!")
     stream_to_minute(sql_c, spark, events, dimensions, move_files=True)
-    min_data_window.min_data_window(sql_c, spark, events, dimensions)
