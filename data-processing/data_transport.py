@@ -2,7 +2,7 @@ from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
 import time, datetime, os, imp
-min_data_window = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/min_data_window.py')
+daily_window = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/daily_window.py')
 
 def spark_init():
     # initialize spark session and spark context####################################
@@ -169,4 +169,4 @@ if __name__ == "__main__":
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
     min_to_hour(sql_c, spark, events, dimensions)
-    min_data_window.min_data_window(sql_c, spark, events, dimensions)
+    daily_window.daily_window(sql_c, spark, events, dimensions)

@@ -35,15 +35,13 @@ def run_logs_compression():
     os.system(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/log_compression.py')
 
-def run_min_to_hour():
+def run_data_transport():
     os.system(f'spark-submit --conf spark.cores.max=4 ' +\
-    '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
+    '$sparkf ~/eCommerce/data-processing/data_transport.py')
 
-def min_data_window()
-
-min_to_hour = PythonOperator(
+data_transport = PythonOperator(
   task_id='min_to_hour',
-  python_callable=run_min_to_hour,
+  python_callable=run_data_transport,
   dag = dag)
 
 logs_compression = PythonOperator(
@@ -51,4 +49,4 @@ logs_compression = PythonOperator(
     python_callable=run_logs_compression,
     dag=dag)
 
-min_to_hour >> logs_compression
+data_transport >> logs_compression

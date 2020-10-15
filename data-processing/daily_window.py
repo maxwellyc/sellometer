@@ -5,7 +5,7 @@ import time, datetime, os
 
 def spark_init():
     # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("min_data_window")
+    conf = SparkConf().setAppName("daily_window")
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
@@ -137,7 +137,7 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     .load()
     return df
 
-def min_data_window(sql_c, spark, events, dimensions):
+def daily_window(sql_c, spark, events, dimensions):
 
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
@@ -157,4 +157,4 @@ if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
-    min_data_window(sql_c, spark, events, dimensions)
+    daily_window(sql_c, spark, events, dimensions)
