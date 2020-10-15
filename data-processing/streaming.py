@@ -4,6 +4,8 @@ from pyspark.sql import functions as F
 import time, datetime, os
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 from boto3 import client
+import min_data_window
+sys.path.append('~/eCommerce/data_processing')
 
 def spark_init():
     # initialize spark session and spark context####################################
@@ -217,9 +219,8 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
-def stream_to_minute(events, dimensions, move_files=False):
+def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     # initialize spark
-    sql_c, spark = spark_init()
     # read csv from s3
     df_0, time_tick = read_s3_to_df(sql_c, spark)
     if not df_0:
@@ -245,4 +246,6 @@ def stream_to_minute(events, dimensions, move_files=False):
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
     events = ['purchase', 'view'] # test purchase then test view
-    stream_to_minute(events, dimensions, move_files=False)
+    sql_c, spark = spark_init()
+    stream_to_minute(sql_c, spark, events, dimensions, move_files=True)
+    min_data_window.min_data_window(sql_c, spark, events, dimensions)

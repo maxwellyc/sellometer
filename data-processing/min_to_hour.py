@@ -2,12 +2,6 @@ from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
 import time, datetime, os
-from pyspark.sql.functions import pandas_udf, PandasUDFType
-from boto3 import client
-
-import psycopg2
-import os
-from sqlalchemy import create_engine
 
 def spark_init():
     # initialize spark session and spark context####################################
@@ -55,22 +49,11 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         print (f'Using default time: {t_max}')
         return t_max
 
-
 def remove_min_data_from_sql(df, curr_time, hours_window=24):
     cutoff = curr_time - datetime.timedelta(hours=hours_window)
     print (f"Current time: {curr_time}, 24 hours cutoff time: {cutoff}")
     df_cut = df.filter(df.event_time > cutoff )
     return df_cut
-
-def list_s3_files(dir="serverpool", bucket='maxwell-insight'):
-    dir += "/"
-    conn = client('s3')
-    list_of_files = [key['Key'].replace(dir,"",1) for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
-    tmp = []
-    for f in list_of_files:
-        if 'temp/' in f or not f: continue
-        tmp.append(f)
-    return tmp
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
     df = df.filter( (df.event_time >= start_tick) &
@@ -151,28 +134,16 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     .option("user",os.environ['psql_username'])\
     .option("password",os.environ['psql_pw'])\
     .option("driver","org.postgresql.Driver")\
-    .load().cache()
+    .load()
     return df
 
-def min_to_hour(dimensions, events):
-    # start_tick = check_min_data_avail()
-    # if start_tick:
-    sql_c, spark = spark_init()
+def min_to_hour(sql_c, spark, events, dimensions):
+
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
     curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
     for evt in events:
         for dim in dimensions:
-            # read min data from t1 datatable
-            df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-            # remove data from more than 24 hours away from t1 table
-            df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 1)
-            # rewrite minute level data back to t1 table
-            # write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
-            # df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
-            # write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
-            write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute')
-
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
             df = select_time_window(df_0, start_tick=curr_min )
@@ -188,78 +159,11 @@ def min_to_hour(dimensions, events):
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="overwrite", suffix='hour')
 
-def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",serverNum=True):
-    # returns datetime.datetime objects
-    file_times = []
-    for f_name in lof:
-        try:
-            t = remove_server_num(f_name, suffix, serverNum)
-            t = str_to_datetime(t, time_format)
-            file_times.append(t)
-        except Exception as e:
-            print (e)
-    if file_times:
-        return min(file_times), max(file_times)
-    else:
-        # if time_format == '%Y-%m-%d-%H-%M-%S':
-        return str_to_datetime("2019-10-01-00-00-00"), str_to_datetime("2019-10-01-00-00-00")
-        # elif time_format == '%Y-%m-%d':
-        #     return str_to_datetime("2019-09-30"), str_to_datetime("2019-09-30")
-
-def compress_file(path):
-    df.write.option("compression","gzip").csv(path)
-    return
-
-def remove_s3_file(bucket, src_dir, prefix):
-    # bucket = 'maxwell-insight'
-    # src_dir = 'serverpool/'
-    # dst_dir = 'spark-processed/'
-    os.system(f's3cmd rm s3://{bucket}/{src_dir}{prefix}*.csv')
-
-def read_s3_to_df_bk(sql_c, spark, prefix):
-    # read data from S3 ############################################################
-    # for mini batches need to change this section into dynamical
-    bucket = 'maxwell-insight'
-    key = f"spark-processed/{prefix}*.csv"
-    s3file = f's3a://{bucket}/{key}'
-    return sql_c.read.csv(s3file, header=True)
-
-def compress_csv(timeframe='hour'):
-    sql_c, spark = spark_init()
-    lof_pool = list_s3_files(dir="spark-processed", bucket = 'maxwell-insight')
-    lof_zipped = list_s3_files(dir="csv-bookkeeping", bucket = 'maxwell-insight')
-    max_processed_time = folder_time_range(lof_pool)[1]
-    if timeframe == 'hour':
-        tt_format = '%Y-%m-%d-%H'
-        max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d-%H','.csv.gzip',False)[1]
-        max_zipped_next = max_zipped_time + datetime.timedelta(hours=1)
-    elif timeframe == 'day':
-        tt_format = '%Y-%m-%d'
-        max_zipped_time = folder_time_range(lof_zipped,'%Y-%m-%d','.csv.gzip',False)[1]
-        max_zipped_next = max_zipped_time + datetime.timedelta(days=1)
-    print ("Last processed file time label:",max_processed_time)
-    print ("Last compressed file time label:",max_zipped_next)
-    try:
-        max_zipped_time = datetime_to_str(max_zipped_time, tt_format)
-        df = read_s3_to_df_bk(sql_c, spark, prefix=max_zipped_time)
-        df = df.withColumn('_c0', df['_c0'].cast('integer'))
-        comp_f_name = datetime_to_str(max_zipped_next, tt_format) + ".csv.gzip"
-        df.orderBy('_c0')\
-        .coalesce(1)\
-        .write\
-        .option("header", True)\
-        .option("compression","gzip")\
-        .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
-
-        remove_s3_file('maxwell-insight', 'spark-processed/', prefix=max_zipped_time)
-
-    except Exception as e:
-        print (e)
-
 
 if __name__ == "__main__":
 
-    dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
-    events = ['purchase']#, 'view'] # test purchase then test view
-    min_to_hour(dimensions, events)
+    dimensions = ['product_id', 'brand', 'category_l1']#, 'category_l2', 'category_l3']
+    events = ['purchase', 'view'] # test purchase then test view
+    sql_c, spark = spark_init()
+    min_to_hour(sql_c, spark, events, dimensions)
     #compress_csv()

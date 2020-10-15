@@ -56,18 +56,27 @@ def remove_server_num(f_name):
 
 def collect_backlogs():
     # move backlogged files into backlogs folder on s3
-    bucket = 'maxwell-insight'
-    src_dir = 'serverpool/'
-    dst_dir = 'backlogs/'
-    lof = list_s3_files()
-    curr_time_tick = get_latest_time_from_sql_db()
-    for f_name in lof:
-        if ".csv" in f_name:
-            tt_dt = str_to_datetime(remove_server_num(f_name))
-            if tt_dt < str_to_datetime(curr_time_tick):
-                print (f"Current time: {curr_time_tick} --- Backlog file: {f_name}")
-                os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
-    return
+    try:
+        bucket = 'maxwell-insight'
+        src_dir = 'serverpool/'
+        dst_dir = 'backlogs/'
+        lof = list_s3_files()
+        curr_time_tick = get_latest_time_from_sql_db()
+        backlogs_exist = False
+        for f_name in lof:
+            if ".csv" in f_name:
+                tt_dt = str_to_datetime(remove_server_num(f_name))
+                if tt_dt < str_to_datetime(curr_time_tick):
+                    backlogs_exist = True
+                    print (f"Current time: {curr_time_tick} --- Backlog file: {f_name}")
+                    os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
+        if backlogs_exist:
+            return 'process_backlogs'
+        else:
+            return 'spark_live_process'
+    except Exception as e:
+        print (e)
+        return 'spark_live_process'
 
 if __name__ == "__main__":
     collect_backlogs()

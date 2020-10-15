@@ -1,17 +1,23 @@
 from datetime import datetime, timedelta
 from airflow.models import DAG
 from airflow.operators.sensors import S3KeySensor
-from airflow.operators.python_operator import PythonOperator
+from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
 from airflow.operators.bash_operator import BashOperator
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
-import os, subprocess
+import os, subprocess,sys
+
+import check_backlog.collect_backlogs as collect_backlogs
+sys.path.append('~/eCommerce/data_processing')
 
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
 dst_dir = 'spark-processed/'
-schedule = timedelta(seconds=60)
 
-args = {
+dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
+events = ['purchase', 'view'] # test purchase then test view
+
+args_1 = {
     'owner': 'airflow',
     'retries': 1,
     'start_date': days_ago(1),
@@ -20,35 +26,91 @@ args = {
     'retry_delay': timedelta(seconds=5),
     }
 
-dag = DAG(
-    dag_id='s3_key_trigger',
-    schedule_interval=schedule,
+args_2 = {
+    'owner': 'airflow',
+    'retries': 1,
+    'start_date': days_ago(1),
+    'depends_on_past': True,
+    'wait_for_downstream':True,
+    'retry_delay': timedelta(minutes=1),
+    }
+
+dag_1 = DAG(
+    dag_id='main_spark_process',
+    schedule_interval=timedelta(seconds=120),
     max_active_runs=1,
-    default_args=args
+    default_args=args_1
     )
 
-def spark_live_processing():
+dag_2 = DAG(
+    dag_id='data_transport',
+    schedule_interval=timedelta(minutes=30),
+    max_active_runs=1,
+    default_args=args_2
+    )
+
+def run_streaming():
     response = subprocess.check_output(f's3cmd du $s3/{src_dir}', shell=True).decode('ascii')
     file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
-    # use extra processors when file size greater than 9 Mb
-    max_cores = 12 if file_size > 10 else 8
+    # use extra processors when file size greater than 10 Mb
+    max_cores = 12 if file_size > 10 else 10
     print(max_cores,'spark cores executing')
     os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/streaming.py')
 
-file_sensor = S3KeySensor(
+def run_logs_compression():
+    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
+    '$sparkf ~/eCommerce/data-processing/log_compression.py')
+
+def run_min_to_hour():
+    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
+    '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
+
+def run_backlog_processing():
+    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
+    '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
+
+new_file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
     poke_interval= 3, # (seconds); checking file every 4 seconds
     timeout=60 * 60, # timeout in 1 hours
     bucket_key=f"s3://{bucket}/{src_dir}*.csv",
     bucket_name=None,
     wildcard_match=True,
-    dag=dag)
+    dag=dag_1)
 
 spark_live_process = PythonOperator(
-  task_id='spark_live_processing',
-  python_callable=spark_live_process,
-  dag = dag)
+  task_id='spark_live_process',
+  python_callable=run_streaming,
+  dag = dag_1)
+
+check_backlog = BranchPythonOperator(
+    task_id='check_backlog',
+    python_callable=collect_backlogs,
+    dag = dag_1)
+
+process_backlogs = PythonOperator(
+    task_id='process_backlogs',
+    python_callable=run_backlog_processing,
+    dag = dag_1)
+
+min_to_hour = PythonOperator(
+  task_id='min_to_hour',
+  python_callable=run_min_to_hour,
+  dag = dag_2)
+
+logs_compression = BranchPythonOperator(
+    task_id='logs_compression',
+    python_callable=run_logs_compression,
+    dag = dag_2)
+    
+# sensor = ExternalTaskSensor(
+#     task_id = 'sensor',
+#     external_dag_id = 'main_spark_process',
+#     external_task_id = 'spark_live_process'
+# )
 
 
-file_sensor >> spark_live_process
+new_file_sensor >> check_backlog >> [process_backlogs >> spark_live_process, spark_live_process]
+
+min_to_hour >> logs_compression

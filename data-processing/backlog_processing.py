@@ -263,7 +263,7 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
-def process_backlog(events, dimensions):
+def process_backlogs(events, dimensions):
     # initialize spark
     sql_c, spark = spark_init()
     new_df = {}
@@ -279,4 +279,4 @@ def process_backlog(events, dimensions):
 if __name__ == "__main__":
     dimensions = ['product_id']#, 'brand', 'category_l1', 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
-    process_backlog(events, dimensions)
+    process_backlogs(events, dimensions)
