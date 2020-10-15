@@ -74,7 +74,7 @@ def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
             'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
             )
     if t_window:
-        df = select_time_window(df, start_tick=start_tick, t_window=t_window)
+        df = select_time_window(start_tick=start_tick, t_window=t_window)
     # df = df.withColumn("event_time", ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0)
     # df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
     # # t_max = df.agg({"event_time": "max"}).collect()[0][0]
