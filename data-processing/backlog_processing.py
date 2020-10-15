@@ -220,8 +220,7 @@ def merge_df(df, event, dim):
             df = df.groupby(dim, 'event_time').agg(F.sum('count(price)'), F.sum('total_price'))
             df = df.withColumnRenamed('sum(count(price))','count(price)')
             df = df.withColumn('avg(price)', F.col('sum(total_price)') / F.col('count(price)'))
-            df.drop('sum(total_price)')
-            df.show(10)
+            df = df.drop('sum(total_price)')
         elif event == 'purchase':
             df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'), F.sum('count(price)'))
             df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
@@ -262,12 +261,11 @@ def process_backlogs(events, dimensions):
             df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
             df = df.union(new_df[evt][dim])
             df = merge_df(df, evt, dim)
-            df.show(10)
             write_to_psql(df, evt, dim, mode="overwrite", suffix='minute_bl')
             df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
             write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
 
-    # move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
+    move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
