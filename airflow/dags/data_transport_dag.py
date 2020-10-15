@@ -19,7 +19,7 @@ events = ['purchase', 'view'] # test purchase then test view
 args = {
     'owner': 'airflow',
     'retries': 0,
-    'start_date': days_ago(1),
+    'start_date': days_ago(0,minute=60),
     'depends_on_past': False,
     'wait_for_downstream':False,
     'retry_delay': timedelta(seconds=5),
@@ -27,6 +27,13 @@ args = {
 dag = DAG(
     dag_id='data_transport',
     schedule_interval=timedelta(minutes=10),
+    max_active_runs=1,
+    default_args=args
+    )
+
+subdag = DAG(
+    dag_id='data_transport',
+    schedule_interval=timedelta(minutes=30),
     max_active_runs=1,
     default_args=args
     )
@@ -39,6 +46,10 @@ def run_data_transport():
     os.system(f'spark-submit --conf spark.cores.max=6 ' +\
     '$sparkf ~/eCommerce/data-processing/data_transport.py')
 
+def run_daily_window():
+    os.system(f'spark-submit --conf spark.cores.max=6 ' +\
+    '$sparkf ~/eCommerce/data-processing/daily_window.py')
+
 data_transport = PythonOperator(
   task_id='min_to_hour',
   python_callable=run_data_transport,
@@ -48,5 +59,11 @@ logs_compression = PythonOperator(
     task_id='logs_compression',
     python_callable=run_logs_compression,
     dag=dag)
+
+daily_window = PythonOperator(
+    task_id='daily_window',
+    python_callable=run_daily_window,
+    dag=subdag)
+
 
 data_transport >> logs_compression

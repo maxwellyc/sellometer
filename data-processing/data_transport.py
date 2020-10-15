@@ -184,4 +184,4 @@ if __name__ == "__main__":
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
     min_to_hour(sql_c, spark, events, dimensions)
-    daily_window.daily_window(sql_c, spark, events, dimensions)
+    # daily_window.daily_window(sql_c, spark, events, dimensions)
