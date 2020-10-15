@@ -43,22 +43,27 @@ def run_streaming():
     '$sparkf ~/eCommerce/data-processing/streaming.py')
 
 def run_backlog_processing():
-    response = subprocess.check_output(f's3cmd du $s3/backlogs/', shell=True).decode('ascii')
-    file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
-    # use extra processors when file size greater than 10 Mb
-    max_cores = 12 if file_size > 10 else 10
-    print(max_cores,'spark cores executing')
-    os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
+    os.system(f'spark-submit --conf spark.cores.max=12 ' +\
     '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
 
 new_file_sensor = S3KeySensor(
-    task_id='new_csv_sensor',
+    task_id='new_log_sensor',
     poke_interval= 3, # (seconds); checking file every 4 seconds
-    timeout=60 * 60, # timeout in 1 hours
+    timeout=60 * 60, *24 # timeout in 24 hours
     bucket_key=f"s3://{bucket}/serverpool/*.csv",
     bucket_name=None,
     wildcard_match=True,
     dag=dag)
+
+backlog_sensor = S3KeySensor(
+    task_id='backlog_sensor',
+    poke_interval= 3, # (seconds); checking file every 4 seconds
+    timeout=60 * 60, *24 # timeout in 24 hours
+    bucket_key=f"s3://{bucket}/backlogs/*.csv",
+    bucket_name=None,
+    wildcard_match=True,
+    dag=dag)
+
 
 spark_live_process = PythonOperator(
   task_id='spark_live_process',
@@ -91,6 +96,6 @@ def run_min_to_hour():
 #   python_callable=run_min_to_hour,
 #   dag = dag)
 
-
+backlog_sensor >> check_backlog
 new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process # >> min_to_hour
 check_backlog >> process_backlogs >> spark_live_process # >> min_to_hour
