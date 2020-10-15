@@ -1,11 +1,10 @@
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
-import time, datetime, os
+import time, datetime, os, imp
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 from boto3 import client
-import min_data_window
-sys.path.append('~/eCommerce/data_processing')
+min_data_window = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/min_data_window.py')
 
 def spark_init():
     # initialize spark session and spark context####################################
