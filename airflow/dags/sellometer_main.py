@@ -40,14 +40,14 @@ args_2 = {
 dag_1 = DAG(
     dag_id='main_spark_process',
     schedule_interval=timedelta(seconds=120),
-    max_active_runs_per_dag=1,
+    max_active_runs=2,
     default_args=args_1
     )
 
 dag_2 = DAG(
     dag_id='data_transport',
     schedule_interval=timedelta(minutes=30),
-    max_active_runs_per_dag=1,
+    max_active_runs=2,
     default_args=args_2
     )
 
