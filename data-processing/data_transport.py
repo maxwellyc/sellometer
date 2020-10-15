@@ -149,6 +149,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
+            print ("Ranking:")
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
@@ -159,6 +160,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
             write_to_psql(gb, evt, dim, mode="overwrite", suffix='rank')
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
+            print ("Ranking complete! \n")
             if curr_min > next_hour:
                 print (f"++++++++Storing hourly data: {evt}_{dim}_hour")
                 df = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(seconds=1),
@@ -166,6 +168,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
                 gb = merge_df(df, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="append", suffix='hour')
+                print (f"Hourly data appended for {curr_hour} - {next_hour}")
             # periodically check if spark process processed eg. 2019-10-01-00-01-00-1.csv
             # in one batc and *-3.csv in another.
             # This process is identical as checking backlog, without the union part.

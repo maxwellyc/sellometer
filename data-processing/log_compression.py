@@ -51,7 +51,7 @@ def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",server
         return min(file_times), max(file_times)
     else:
         # if time_format == '%Y-%m-%d-%H-%M-%S':
-        return str_to_datetime("2019-10-01-00-00-00"), str_to_datetime("2019-10-01-00-00-00")
+        return str_to_datetime("2019-09-30-23-59-00"), str_to_datetime("2019-09-30-23-59-00")
         # elif time_format == '%Y-%m-%d':
         #     return str_to_datetime("2019-09-30"), str_to_datetime("2019-09-30")
 
@@ -109,8 +109,6 @@ def compress_csv(timeframe='hour'):
         print (f"Currently compressed 1-{timeframe} starting from {max_zipped_time}")
         print (f"Currently newly processed files up until {max_processed_time}")
         return
-
-
 
 if __name__ == "__main__":
     compress_csv()
