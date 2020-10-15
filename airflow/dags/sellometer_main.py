@@ -58,6 +58,8 @@ def run_streaming():
     # use extra processors when file size greater than 10 Mb
     max_cores = 12 if file_size > 10 else 10
     print(max_cores,'spark cores executing')
+    os.system("flagssssss")
+    os.system("pwd")
     os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/streaming.py')
 
