@@ -6,7 +6,7 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 # from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
-import os, subprocess,sys
+import os, subprocess, sys
 # sys.path.append('/home/ubuntu/eCommerce/data_processing')
 sys.path.insert(0,os.path.abspath(os.path.dirname('/home/ubuntu/eCommerce/data-processing/')))
 #sys.path.insert(0,os.path.abspath(os.path.dirname('/home/ubuntu/eCommerce/data_processing')))
@@ -58,21 +58,19 @@ def run_streaming():
     # use extra processors when file size greater than 10 Mb
     max_cores = 12 if file_size > 10 else 10
     print(max_cores,'spark cores executing')
-    os.system("flagssssss")
-    os.system("pwd")
-    os.system(f'spark-submit --conf spark.cores.max={max_cores} ' +\
+    subprocess.call(f'spark-submit --conf spark.cores.max={max_cores} ' +\
     '$sparkf ~/eCommerce/data-processing/streaming.py')
 
 def run_logs_compression():
-    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
+    subprocess.call(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/log_compression.py')
 
 def run_min_to_hour():
-    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
+    subprocess.call(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/min_to_hour.py')
 
 def run_backlog_processing():
-    os.system(f'spark-submit --conf spark.cores.max=4 ' +\
+    subprocess.call(f'spark-submit --conf spark.cores.max=4 ' +\
     '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
 
 new_file_sensor = S3KeySensor(
