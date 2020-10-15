@@ -111,7 +111,7 @@ logs_compression = BranchPythonOperator(
 )
 
 dummy_task = DummyOperator(
-    task_id='dummy',
+    task_id='dummy_task',
     dag=dag_1
 )
 # sensor = ExternalTaskSensor(
