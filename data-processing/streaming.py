@@ -247,5 +247,6 @@ if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
+    print ("Starting spark process!")
     stream_to_minute(sql_c, spark, events, dimensions, move_files=True)
     min_data_window.min_data_window(sql_c, spark, events, dimensions)
