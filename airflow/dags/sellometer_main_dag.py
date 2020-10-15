@@ -24,7 +24,7 @@ args = {
 
 dag = DAG(
     dag_id='main_spark_process',
-    schedule_interval=timedelta(seconds=60),
+    schedule_interval=timedelta(seconds=90),
     max_active_runs=1,
     default_args=args
     )
