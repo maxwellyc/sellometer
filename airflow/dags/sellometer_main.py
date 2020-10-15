@@ -74,7 +74,7 @@ spark_live_process = PythonOperator(
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
     python_callable=util.collect_backlogs,
-    trigger_rule='any_success'
+    trigger_rule='any_success',
     dag = dag)
 
 process_backlogs = PythonOperator(
