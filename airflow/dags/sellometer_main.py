@@ -92,5 +92,5 @@ min_to_hour = PythonOperator(
   dag = dag)
 
 
-new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process >> min_to_hour
-check_backlog >> process_backlogs >> spark_live_process >> min_to_hour
+new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process # >> min_to_hour
+check_backlog >> process_backlogs >> spark_live_process # >> min_to_hour
