@@ -144,6 +144,8 @@ def min_to_hour(sql_c, spark, events, dimensions):
     curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
     for evt in events:
         for dim in dimensions:
+            # read min data from t1 datatable
+            df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
             df = select_time_window(df_0, start_tick=curr_min )
