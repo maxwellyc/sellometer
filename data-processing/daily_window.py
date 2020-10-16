@@ -2,6 +2,7 @@ from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
 import time, datetime, os
+import logging
 
 def spark_init():
     # initialize spark session and spark context####################################
@@ -41,23 +42,23 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         .load()
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
         t_max = datetime_to_str(t_max,time_format)
-        print (f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
+        logging.info(f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
         return t_max
     except Exception as e:
         t_max = "2019-10-01 00:00:00"
-        print (e)
-        print (f'Using default time: {t_max}')
+        logging.info(e)
+        logging.info(f'Using default time: {t_max}')
         return t_max
 
 def remove_min_data_from_sql(df, curr_time, hours_window=24):
     cutoff = curr_time - datetime.timedelta(hours=hours_window)
-    print (f"Current time: {curr_time}, 24 hours cutoff time: {cutoff}")
+    logging.info(f"Current time: {curr_time}, 24 hours cutoff time: {cutoff}")
     df_cut = df.filter(df.event_time > cutoff )
-    print (curr_time, cutoff)
+    logging.info(curr_time, cutoff)
     return df_cut
 
 def select_time_window(df, start_tick, end_tick, time_format='%Y-%m-%d %H:%M:%S'):
-    print (f"Selecting data between {start_tick} - {end_tick}")
+    logging.info(f"Selecting data between {start_tick} - {end_tick}")
     df1 = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
     return df1
 
@@ -93,7 +94,7 @@ def merge_df(df, event, dim):
 def write_to_psql(df, event, dim, mode, suffix):
     # write dataframe to postgreSQL
     # suffix can be 'hour', 'minute', 'rank', this is used to name datatables
-    print (f"{mode} table {event}_{dim}_{suffix}")
+    logging.info(f"{mode} table {event}_{dim}_{suffix}")
     df.write\
     .format("jdbc")\
     .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
@@ -120,7 +121,7 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
 def print_df_time_range(df, evt="",dim=""):
     tm0 = df.agg({"event_time": "min"}).collect()[0][0]
     tm1 = df.agg({"event_time": "max"}).collect()[0][0]
-    print (f"{evt}, {dim}, minute DB time range: {tm0}, {tm1}")
+    logging.info(f"{evt}, {dim}, minute DB time range: {tm0}, {tm1}")
 
 def daily_window(sql_c, spark, events, dimensions, verbose=False):
 
@@ -131,26 +132,26 @@ def daily_window(sql_c, spark, events, dimensions, verbose=False):
             # read min data from t1 datatable
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             if verbose:
-                print ("First read-in from minute")
+                logging.info("First read-in from minute")
                 print_df_time_range(df_0,evt,dim)
 
             # remove data from more than 24 hours away from t1 table
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
             if verbose:
-                print ("After cropping 24 hours window")
+                logging.info("After cropping 24 hours window")
                 print_df_time_range(df_cut,evt,dim)
 
             # rewrite minute level data back to t1 table
             write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
             df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
             if verbose:
-                print ("Temp file being written")
+                logging.info("Temp file being written")
                 print_df_time_range(df_temp,evt,dim)
 
             write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
             if verbose:
                 df_f = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-                print ("Final write-in minute DB")
+                logging.info("Final write-in minute DB")
                 print_df_time_range(df_f,evt,dim)
 
 if __name__ == "__main__":
@@ -158,4 +159,4 @@ if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
-    daily_window(sql_c, spark, events, dimensions)
+    daily_window(sql_c, spark, events, dimensions,verbose=False)

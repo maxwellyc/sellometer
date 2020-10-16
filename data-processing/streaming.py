@@ -4,6 +4,7 @@ from pyspark.sql import functions as F
 import time, datetime, os, imp
 from pyspark.sql.functions import pandas_udf, PandasUDFType
 from boto3 import client
+import logging
 
 def spark_init():
     # initialize spark session and spark context####################################
