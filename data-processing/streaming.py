@@ -223,24 +223,6 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
-def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",serverNum=True):
-    # returns datetime.datetime objects
-    file_times = []
-    for f_name in lof:
-        try:
-            t = remove_server_num(f_name, suffix, serverNum)
-            t = str_to_datetime(t, time_format)
-            file_times.append(t)
-        except Exception as e:
-            logging.info(e)
-    if file_times:
-        return min(file_times), max(file_times)
-    else:
-        # if time_format == '%Y-%m-%d-%H-%M-%S':
-        return str_to_datetime("2019-10-01-00-00-00"), str_to_datetime("2019-10-01-00-00-00"
-        # elif time_format == '%Y-%m-%d':
-        #     return str_to_datetime("2019-09-30"), str_to_datetime("2019-09-30")
-
 def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     # initialize spark
     # read csv from s3
