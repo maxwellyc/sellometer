@@ -19,7 +19,7 @@ events = ['purchase', 'view'] # test purchase then test view
 args = {
     'owner': 'airflow',
     'retries': 0,
-    'start_date': days_ago(0,hour=1),
+    'start_date': days_ago(1),
     'depends_on_past': False,
     'wait_for_downstream':False,
     'retry_delay': timedelta(seconds=5),
