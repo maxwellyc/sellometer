@@ -56,31 +56,10 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     print (curr_time, cutoff)
     return df_cut
 
-def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
-    df = df.filter( (df.event_time >= start_tick) &
-    (df.event_time < start_tick + datetime.timedelta(hours=t_window)) )
-    return df
-
-def compress_time(df, t_window, start_tick, tstep = 60, from_csv = True ):
-    # Datetime transformation #######################################################
-    # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
-    start_time = "2019-10-01-00-00-00"
-    time_format = '%Y-%m-%d-%H-%M-%S'
-    # start time for time series plotting, I'll set this to a specific time for now
-    t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
-    # convert data and time into timestamps, remove orginal date time column
-    # reorder column so that timestamp is leftmost
-    if from_csv:
-        df = df.withColumn(
-            'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
-            )
-    if t_window:
-        df = select_time_window(df, start_tick=start_tick, t_window=t_window)
-    df = df.withColumn("event_time", ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0)
-    df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
-    # t_max = df.agg({"event_time": "max"}).collect()[0][0]
-
-    return df
+def select_time_window(df, start_tick, end_tick, time_format='%Y-%m-%d %H:%M:%S'):
+    print (f"Selecting data between {start_tick} - {end_tick}")
+    df1 = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
+    return df1
 
 def merge_df(df, event, dim):
     # when performing union on backlog dataframe and main dataframe
@@ -138,6 +117,11 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     .load()
     return df
 
+def print_df_time_range(df):
+    tm0 = df.agg({"event_time": "min"}).collect()[0][0]
+    tm1 = df.agg({"event_time": "max"}).collect()[0][0]
+    print (f"{evt}, {dim}, minute DB time range: {tm0}, {tm1}")
+
 def daily_window(sql_c, spark, events, dimensions):
 
     time_format = '%Y-%m-%d %H:%M:%S'
@@ -146,13 +130,17 @@ def daily_window(sql_c, spark, events, dimensions):
         for dim in dimensions:
             # read min data from t1 datatable
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
+            print_df_time_range(df0)
             # remove data from more than 24 hours away from t1 table
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
-            
+            print_df_time_range(df_cut)
             # rewrite minute level data back to t1 table
-            # write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
-            # df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
-            # write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
+            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
+            print_df_time_range(df_temp)
+            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            df_f = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
+            print_df_time_range(df_f)
 
 if __name__ == "__main__":
 

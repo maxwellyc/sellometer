@@ -58,8 +58,8 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
 
 def select_time_window(df, start_tick, end_tick, time_format='%Y-%m-%d %H:%M:%S'):
     print (f"Selecting data between {start_tick} - {end_tick}")
-    df = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
-    return df
+    df1 = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
+    return df1
 
 def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24, from_csv = True):
     # Datetime transformation #######################################################
@@ -137,6 +137,11 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     .load()
     return df
 
+def print_df_time_range(df, evt="",dim=""):
+    tm0 = df.agg({"event_time": "min"}).collect()[0][0]
+    tm1 = df.agg({"event_time": "max"}).collect()[0][0]
+    print (f"{evt}, {dim}, minute DB time range: {tm0}, {tm1}")
+
 def min_to_hour(sql_c, spark, events, dimensions):
 
     time_format = '%Y-%m-%d %H:%M:%S'
@@ -151,11 +156,15 @@ def min_to_hour(sql_c, spark, events, dimensions):
             # read min data from t1 datatable
             print ("Ranking:")
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
+            print ("Ranking read in:")
+            print_df_time_range(df_0,evt,dim)
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
-            df = select_time_window(df_0,
+            df_rank = select_time_window(df_0,
             start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
-            gb = merge_df(df, evt, dim, rank=True)
+            print ("Ranking selected time window:")
+            print_df_time_range(df,evt,dim)
+            gb = merge_df(df_rank, evt, dim, rank=True)
             # store past hour data in rank table for ranking
             write_to_psql(gb, evt, dim, mode="overwrite", suffix='rank')
             # compress hourly data into t2 datatable only when integer hour has passed
@@ -163,20 +172,31 @@ def min_to_hour(sql_c, spark, events, dimensions):
             print ("Ranking complete! \n")
             if curr_min > next_hour:
                 print (f"++++++++Storing hourly data: {evt}_{dim}_hour")
-                df = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(seconds=1),
+                df_hour = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(seconds=1),
                 end_tick=next_hour, tstep=3600, from_csv=False)
-                gb = merge_df(df, evt, dim)
+                print_df_time_range(df_hour,evt,dim)
+                gb = merge_df(df_hour, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="append", suffix='hour')
                 print (f"Hourly data appended for {curr_hour} - {next_hour}")
             # periodically check if spark process processed eg. 2019-10-01-00-01-00-1.csv
             # in one batc and *-3.csv in another.
             # This process is identical as checking backlog, without the union part.
-            df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
-            df = merge_df(df, evt, dim)
-            write_to_psql(df, evt, dim, mode="overwrite", suffix='minute_temp')
+            df_pd = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
+            print ("df periodically crop just read")
+            print_df_time_range(df_pd,evt,dim)
+
+            df_pd2 = merge_df(df_pd, evt, dim)
+            print ("df periodically crop just merged")
+            print_df_time_range(df_pd2,evt,dim)
+
+            write_to_psql(df_pd2, evt, dim, mode="overwrite", suffix='minute_temp')
             df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
             write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+
+            df_f = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
+            print ("df periodically crop final stored")
+            print_df_time_range(df_f,evt,dim)
 
 if __name__ == "__main__":
 
