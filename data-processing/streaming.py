@@ -68,11 +68,9 @@ def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
     # dst_dir = 'spark-processed/'
     os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
 
-def read_s3_to_df(sql_c, spark):
-    # read data from S3 ############################################################
-    # for mini batches need to change this section into dynamical
+def redirect_s3_files_for_processing(spark):
     bucket = 'maxwell-insight'
-    lof = list_s3_files()
+    lof = list_s3_files(dir="serverpool")
     curr_time = get_latest_time_from_sql_db(spark)
     # move backlog files into s3://{bucket}/backlogs/
     print (curr_time)
@@ -82,11 +80,18 @@ def read_s3_to_df(sql_c, spark):
             # if backlog file (ie earlier than latest time already in datatable)
             if tt_dt < str_to_datetime(curr_time, time_format = '%Y-%m-%d %H:%M:%S'):
                 print (f"Current time: {curr_time} --- Backlog file: {f_name}")
-                # move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
+                move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
             else:
-                print (f"Processing {f_name}")
-    # once backlog files are moved, process all that's left in serverpool folder
-    key = 'serverpool/*.csv'
+                # move to processingpool for static processing, if process serverpool, while
+                # the servers are sending files, this list of files is dynamic and will cause
+                # problems, once backlog files are moved, process all that's left
+                print (f"Moving {f_name} into processingpool.")
+                move_s3_file(bucket, 'serverpool/', 'processingpool/', f_name)
+
+def read_s3_to_df(sql_c, spark):
+    # read data from S3 ############################################################
+    redirect_s3_files_for_processing(spark)
+    key = 'processingpool/*.csv'
     s3file = f's3a://{bucket}/{key}'
     # read csv file on s3 into spark dataframe
     try:
@@ -218,6 +223,24 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
+def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",serverNum=True):
+    # returns datetime.datetime objects
+    file_times = []
+    for f_name in lof:
+        try:
+            t = remove_server_num(f_name, suffix, serverNum)
+            t = str_to_datetime(t, time_format)
+            file_times.append(t)
+        except Exception as e:
+            logging.info(e)
+    if file_times:
+        return min(file_times), max(file_times)
+    else:
+        # if time_format == '%Y-%m-%d-%H-%M-%S':
+        return str_to_datetime("2019-10-01-00-00-00"), str_to_datetime("2019-10-01-00-00-00"
+        # elif time_format == '%Y-%m-%d':
+        #     return str_to_datetime("2019-09-30"), str_to_datetime("2019-09-30")
+
 def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     # initialize spark
     # read csv from s3
@@ -240,7 +263,7 @@ def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
             write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute_check')
     if move_files:
         print ('Moving processed files')
-        move_s3_file('maxwell-insight', 'serverpool/', 'spark-processed/')
+        move_s3_file('maxwell-insight', 'processingpool/', 'spark-processed/')
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
