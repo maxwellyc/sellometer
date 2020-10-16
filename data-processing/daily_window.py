@@ -41,14 +41,15 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         .option("driver","org.postgresql.Driver")\
         .load()
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
+        t_min = df.agg({"event_time": "min"}).collect()[0][0]
         t_max = datetime_to_str(t_max,time_format)
         logging.info(f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
-        return t_max
+        return t_min, t_max
     except Exception as e:
         t_max = "2019-10-01 00:00:00"
         logging.info(e)
         logging.info(f'Using default time: {t_max}')
-        return t_max
+        return t_max, t_max
 
 def remove_min_data_from_sql(df, curr_time, hours_window=24):
     cutoff = curr_time - datetime.timedelta(hours=hours_window)
@@ -126,7 +127,9 @@ def print_df_time_range(df, evt="",dim=""):
 def daily_window(sql_c, spark, events, dimensions, verbose=False):
 
     time_format = '%Y-%m-%d %H:%M:%S'
-    curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
+    curr_min, curr_max = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
+    if (curr_max - curr_min).seconds < 60*60*24:
+        return
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
