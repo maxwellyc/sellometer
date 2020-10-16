@@ -163,7 +163,7 @@ def min_to_hour(sql_c, spark, events, dimensions):
             df_rank = select_time_window(df_0,
             start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
             print ("Ranking selected time window:")
-            print_df_time_range(df,evt,dim)
+            print_df_time_range(df_rank,evt,dim)
             gb = merge_df(df_rank, evt, dim, rank=True)
             # store past hour data in rank table for ranking
             write_to_psql(gb, evt, dim, mode="overwrite", suffix='rank')
