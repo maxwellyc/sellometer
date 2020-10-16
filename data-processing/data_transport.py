@@ -175,8 +175,8 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
             print ("Ranking complete! \n")
             if curr_min > next_hour:
                 print (f"++++++++Storing hourly data: {evt}_{dim}_hour")
-                df_hour = compress_time(df_0, start_tick=curr_hour,
-                end_tick=next_hour-datetime.timedelta(seconds=1), tstep=3600, from_csv=False)
+                df_hour = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(hours=1),
+                end_tick=next_hour, tstep=3600, from_csv=False)
                 if verbose:
                     print_df_time_range(df_hour,evt,dim)
 
