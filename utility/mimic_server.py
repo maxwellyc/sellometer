@@ -9,7 +9,7 @@ dst_dir = 'serverpool/'
 
 # send file parameters
 num_servers = 4
-t_start = dt.datetime(2019,10,1,0,0,0)
+t_start = dt.datetime(2019,10,1,0,6,0)
 t_end = dt.datetime(2019,10,8,2,23,0)
 t_freq = dt.timedelta(minutes=1)
 t_gap = 30 #seconds
