@@ -57,7 +57,7 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     return df_cut
 
 def select_time_window(df, start_tick, end_tick, time_format='%Y-%m-%d %H:%M:%S'):
-    print (f"Selecting data between {start_tick} - {end_tick}")
+    print (f"Selecting data between {start_tick} - {end_tick-datetime.timedelta(seconds=1)}")
     df1 = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
     return df1
 
@@ -142,7 +142,7 @@ def print_df_time_range(df, evt="",dim=""):
     tm1 = df.agg({"event_time": "max"}).collect()[0][0]
     print (f"{evt}, {dim}, minute DB time range: {tm0}, {tm1}")
 
-def min_to_hour(sql_c, spark, events, dimensions):
+def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
 
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
@@ -156,14 +156,17 @@ def min_to_hour(sql_c, spark, events, dimensions):
             # read min data from t1 datatable
             print ("Ranking:")
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-            print ("Ranking read in:")
-            print_df_time_range(df_0,evt,dim)
+            if verbose:
+                print ("Ranking read in:")
+                print_df_time_range(df_0,evt,dim)
             # slice 3600 second of dataframe for ranking purpose
             # rank datatable is a dynamic sliding window and updates every minute
             df_rank = select_time_window(df_0,
             start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
-            print ("Ranking selected time window:")
-            print_df_time_range(df_rank,evt,dim)
+            if verbose:
+                print ("Ranking selected time window:")
+                print_df_time_range(df_rank,evt,dim)
+
             gb = merge_df(df_rank, evt, dim, rank=True)
             # store past hour data in rank table for ranking
             write_to_psql(gb, evt, dim, mode="overwrite", suffix='rank')
@@ -172,36 +175,53 @@ def min_to_hour(sql_c, spark, events, dimensions):
             print ("Ranking complete! \n")
             if curr_min > next_hour:
                 print (f"++++++++Storing hourly data: {evt}_{dim}_hour")
-                df_hour = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(seconds=1),
-                end_tick=next_hour, tstep=3600, from_csv=False)
-                print_df_time_range(df_hour,evt,dim)
+                df_hour = compress_time(df_0, start_tick=curr_hour,
+                end_tick=next_hour-datetime.timedelta(seconds=1), tstep=3600, from_csv=False)
+                if verbose:
+                    print_df_time_range(df_hour,evt,dim)
+
                 gb = merge_df(df_hour, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="append", suffix='hour')
-                print (f"Hourly data appended for {curr_hour} - {next_hour}")
-            # periodically check if spark process processed eg. 2019-10-01-00-01-00-1.csv
-            # in one batc and *-3.csv in another.
-            # This process is identical as checking backlog, without the union part.
-            df_pd = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
-            print ("df periodically crop just read")
-            print_df_time_range(df_pd,evt,dim)
+                print (f"Hourly data appended for {curr_hour} - {next_hour-datetime.timedelta(seconds=1)}")
+            data_time_merger(spark, evt, dim, verbose)
 
-            df_pd2 = merge_df(df_pd, evt, dim)
-            print ("df periodically crop just merged")
-            print_df_time_range(df_pd2,evt,dim)
+def data_time_merger(spark, verbose=False):
+    # merge events that have same product_id & event_time, sometimes 2 entries
+    # can enter due to backlog or spark process only loaded partial data of that minute_
+    # This process is identical as checking backlog, without the union part.
+    # using multiple variables to prevent writing to original dataframe and causing error
 
-            write_to_psql(df_pd2, evt, dim, mode="overwrite", suffix='minute_temp')
-            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
-            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+    # read data from main datatable
+    df_pd = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
+    if verbose:
+        print ("df periodically crop just read")
+        print_df_time_range(df_pd,evt,dim)
 
-            df_f = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-            print ("df periodically crop final stored")
-            print_df_time_range(df_f,evt,dim)
+    # try to merge entries with duplicate product_id & event_time
+    df_pd2 = merge_df(df_pd, evt, dim)
+    if verbose:
+        print ("df periodically crop just merged")
+        print_df_time_range(df_pd2,evt,dim)
+
+    # store merged dataframe to temporay datatable
+    write_to_psql(df_pd2, evt, dim, mode="overwrite", suffix='minute_temp')
+
+    # read from temporary datatable
+    df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
+
+    # overwrite main datatable
+    write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+
+    if verbose:
+        df_f = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
+        print ("df periodically crop final stored")
+        print_df_time_range(df_f,evt,dim)
 
 if __name__ == "__main__":
 
     dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
-    min_to_hour(sql_c, spark, events, dimensions)
+    min_to_hour(sql_c, spark, events, dimensions,verbose=True)
     # daily_window.daily_window(sql_c, spark, events, dimensions)
