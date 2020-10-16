@@ -186,16 +186,17 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
                 write_to_psql(gb, evt, dim, mode="append", suffix='hour')
                 logging.info(f"Hourly data appended for {curr_hour+datetime.timedelta(hours=1)}\
                  - {end_hour-datetime.timedelta(seconds=1)}")
-            data_time_merger(spark, evt, dim, verbose)
 
-def data_time_merger(spark,evt, dim, verbose=False):
-    # merge events that have same product_id & event_time, sometimes 2 entries
-    # can enter due to backlog or spark process only loaded partial data of that minute_
-    # This process is identical as checking backlog, without the union part.
-    # using multiple variables to prevent writing to original dataframe and causing error
+            # merge events that have same product_id & event_time, sometimes 2 entries
+            # can enter due to backlog or spark process only loaded partial data of that minute_
+            # This process is identical as checking backlog, without the union part.
+            # using multiple variables to prevent writing to original dataframe and causing error
+            # read data from main datatable
+            # df_pd = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
+            # data_time_merger(df_pd, spark, evt, dim, verbose)
 
-    # read data from main datatable
-    df_pd = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
+def data_time_merger(df_pd, spark,evt, dim, verbose=False):
+
     if verbose:
         logging.info("df periodically crop just read")
         print_df_time_range(df_pd,evt,dim)
