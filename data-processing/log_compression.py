@@ -52,7 +52,7 @@ def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",server
         return min(file_times), max(file_times)
     else:
         # if time_format == '%Y-%m-%d-%H-%M-%S':
-        return str_to_datetime("2019-09-30-23-59-00"), str_to_datetime("2019-09-30-23-59-00")
+        return str_to_datetime("2019-09-30-23-00-00"), str_to_datetime("2019-09-30-23-00-00")
         # elif time_format == '%Y-%m-%d':
         #     return str_to_datetime("2019-09-30"), str_to_datetime("2019-09-30")
 
@@ -89,7 +89,7 @@ def compress_csv(timeframe='hour'):
     # the next zip file has time prefix max_zip_next
     # the current processed file has to have a complete hour from the begin time
     # in order for the compressed file to cover all files in that hour
-    if max_processed_time >= max_zip_next + datetime.timedelta(hours=hour_diff):
+    if max_processed_time > max_zip_next + datetime.timedelta(hours=hour_diff):
         try:
             next_prefix = datetime_to_str(max_zip_next, tt_format)
             df = read_s3_to_df_bk(sql_c, spark, prefix=next_prefix)
