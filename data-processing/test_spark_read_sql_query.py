@@ -16,7 +16,9 @@ def spark_init():
 
 def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     table_name = "_".join([event, dim, suffix])
-    query = "(SELECT * FROM " + table_name + ") as users"
+    query = """
+    (SELECT * FROM purchase_product_id_hour as d) foo
+    """
     df = spark.read \
         .format("jdbc") \
     .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
