@@ -53,6 +53,7 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     cutoff = curr_time - datetime.timedelta(hours=hours_window)
     print (f"Current time: {curr_time}, 24 hours cutoff time: {cutoff}")
     df_cut = df.filter(df.event_time > cutoff )
+    print (curr_time, cutoff)
     return df_cut
 
 def select_time_window(df, start_tick, t_window=1, time_format='%Y-%m-%d %H:%M:%S'):
@@ -147,10 +148,11 @@ def daily_window(sql_c, spark, events, dimensions):
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             # remove data from more than 24 hours away from t1 table
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
+            
             # rewrite minute level data back to t1 table
-            write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
-            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
-            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            # write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
+            # df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
+            # write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
 
 if __name__ == "__main__":
 
