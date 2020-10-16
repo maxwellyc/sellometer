@@ -46,7 +46,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         logging.info(f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
         return t_max
     except Exception as e:
-        t_max = "2019-10-01 00:00:00"
+        t_max = "2019-09-30 23:00:00"
         logging.info(e)
         logging.info(f'Using default time: {t_max}')
         return t_max
@@ -149,9 +149,9 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
     curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
     hours_diff = (curr_min - curr_hour).seconds // 3600
-    next_hour = curr_hour + datetime.timedelta(hours=hours_diff)
+    end_hour = curr_hour + datetime.timedelta(hours=hours_diff)
     logging.info(f"Current time in minute level table: {curr_min}")
-    logging.info(f"Storing hourly data between: {curr_hour} and {next_hour}")
+    logging.info(f"Storing hourly data between: {curr_hour} and {end_hour}")
     for evt in events:
         for dim in dimensions:
             # read min data from t1 datatable
@@ -174,18 +174,18 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
             # compress hourly data into t2 datatable only when integer hour has passed
             # since last hourly datapoint
             logging.info("Ranking complete! \n")
-            if curr_min > next_hour:
+            if curr_min > end_hour:
                 logging.info(f"++++++++Storing hourly data: {evt}_{dim}_hour")
                 df_hour = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(hours=1),
-                end_tick=next_hour, tstep=3600, from_csv=False)
+                end_tick=end_hour, tstep=3600, from_csv=False)
                 if verbose:
                     print_df_time_range(df_hour,evt,dim)
 
                 gb = merge_df(df_hour, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="append", suffix='hour')
-                logging.info(f"Hourly data appended for {curr_hour+datetime.timedelta(hours=1)}
-                 - {next_hour-datetime.timedelta(seconds=1)}")
+                logging.info(f"Hourly data appended for {curr_hour+datetime.timedelta(hours=1)}\
+                 - {end_hour-datetime.timedelta(seconds=1)}")
             data_time_merger(spark, evt, dim, verbose)
 
 def data_time_merger(spark,evt, dim, verbose=False):
