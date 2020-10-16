@@ -33,11 +33,11 @@ dag = DAG(
 
 
 def run_logs_compression():
-    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=4G ' +\
+    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/log_compression.py')
 
 def run_data_transport():
-    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=4G ' +\
+    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/data_transport.py')
 
 data_transport = PythonOperator(

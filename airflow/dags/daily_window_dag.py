@@ -33,7 +33,7 @@ dag = DAG(
     )
 
 def run_daily_window():
-    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=4G ' +\
+    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=2G ' +\
     '$sparkf ~/eCommerce/data-processing/daily_window.py')
 
 daily_window = PythonOperator(

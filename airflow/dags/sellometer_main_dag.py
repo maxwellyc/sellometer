@@ -35,11 +35,11 @@ def run_streaming():
     # use extra processors when file size greater than 10 Mb
     max_cores = 12 if file_size > 20 else 8
     print(max_cores,'spark cores executing')
-    os.system(f'spark-submit --conf spark.cores.max={max_cores} --executor-memory=2G ' +\
+    os.system(f'spark-submit --conf spark.cores.max={max_cores} --executor-memory=1.4G ' +\
     '$sparkf ~/eCommerce/data-processing/streaming.py')
 
 def run_backlog_processing():
-    os.system(f'spark-submit --conf spark.cores.max=12 --executor-memory=2G ' +\
+    os.system(f'spark-submit --conf spark.cores.max=12 --executor-memory=1.4G ' +\
     '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
 
 
