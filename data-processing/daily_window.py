@@ -117,7 +117,7 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     .load()
     return df
 
-def print_df_time_range(df):
+def print_df_time_range(df, evt="",dim=""):
     tm0 = df.agg({"event_time": "min"}).collect()[0][0]
     tm1 = df.agg({"event_time": "max"}).collect()[0][0]
     print (f"{evt}, {dim}, minute DB time range: {tm0}, {tm1}")
@@ -130,17 +130,24 @@ def daily_window(sql_c, spark, events, dimensions):
         for dim in dimensions:
             # read min data from t1 datatable
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-            print_df_time_range(df0)
+            print ("First read-in from minute")
+            print_df_time_range(df0,evt,dim)
+
             # remove data from more than 24 hours away from t1 table
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
-            print_df_time_range(df_cut)
+            print ("After cropping 24 hours window")
+            print_df_time_range(df_cut,evt,dim)
+
             # rewrite minute level data back to t1 table
             write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
             df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
-            print_df_time_range(df_temp)
+            print ("Temp file being written")
+            print_df_time_range(df_temp,evt,dim)
+
             write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
             df_f = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-            print_df_time_range(df_f)
+            print ("Final write-in minute DB")
+            print_df_time_range(df_f,evt,dim)
 
 if __name__ == "__main__":
 
