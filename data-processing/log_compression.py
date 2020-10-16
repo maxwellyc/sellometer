@@ -48,6 +48,7 @@ def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",server
             file_times.append(t)
         except Exception as e:
             logging.info(e)
+            continue
     if file_times:
         return min(file_times), max(file_times)
     else:
