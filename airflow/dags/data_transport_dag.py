@@ -37,7 +37,7 @@ def run_logs_compression():
     '$sparkf ~/eCommerce/data-processing/log_compression.py')
 
 def run_data_transport():
-    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=4G' +\
+    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=6G' +\
     '$sparkf ~/eCommerce/data-processing/data_transport.py')
 
 data_transport = PythonOperator(
