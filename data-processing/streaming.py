@@ -73,7 +73,6 @@ def redirect_s3_files_for_processing(spark):
     lof = list_s3_files(dir="serverpool")
     curr_time = get_latest_time_from_sql_db(spark)
     # move backlog files into s3://{bucket}/backlogs/
-    print (curr_time)
     for f_name in lof:
         if ".csv" in f_name:
             tt_dt = str_to_datetime(remove_server_num(f_name))
@@ -92,14 +91,16 @@ def read_s3_to_df(sql_c, spark):
     # read data from S3 ############################################################
     redirect_s3_files_for_processing(spark)
     key = 'processingpool/*.csv'
-    s3file = f's3a://{bucket}/{key}'
+    s3file = f's3a://maxwell-insight/{key}'
     # read csv file on s3 into spark dataframe
     try:
         df = sql_c.read.csv(s3file, header=True)
         # drop unused column
         df = df.drop('_c0')
-        print (f"Time of latest event in datatable: {curr_time}")
-        return df, curr_time
+        t_min = df.agg({"event_time": "min"}).collect()[0][0]
+        t_max = df.agg({"event_time": "max"}).collect()[0][0]
+        print (f"Events duration for current dataframe: {t_min} - {t_max}")
+        return df, t_max
     except:
         return None, None
 
@@ -242,7 +243,7 @@ def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     for evt in events:
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
-            write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute_bl')
+            write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
     if move_files:
         print ('Moving processed files')
         move_s3_file('maxwell-insight', 'processingpool/', 'spark-processed/')
