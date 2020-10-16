@@ -131,7 +131,7 @@ def daily_window(sql_c, spark, events, dimensions):
             # read min data from t1 datatable
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
             print ("First read-in from minute")
-            print_df_time_range(df0,evt,dim)
+            print_df_time_range(df_0,evt,dim)
 
             # remove data from more than 24 hours away from t1 table
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
