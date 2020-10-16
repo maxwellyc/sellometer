@@ -2,7 +2,6 @@ from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext
 import time, datetime, os
 from boto3 import client
-import logging
 
 def spark_init():
     # initialize spark session and spark context####################################
@@ -47,7 +46,7 @@ def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S', suffix=".csv",server
             t = str_to_datetime(t, time_format)
             file_times.append(t)
         except Exception as e:
-            logging.info(e)
+            print(e)
             continue
     if file_times:
         return min(file_times), max(file_times)
@@ -73,6 +72,7 @@ def read_s3_to_df_bk(sql_c, spark, prefix):
 
 def compress_csv(timeframe='hour'):
     sql_c, spark = spark_init()
+    print ("calling")
     lof_pool = list_s3_files(dir="spark-processed", bucket = 'maxwell-insight')
     lof_zipped = list_s3_files(dir="csv-bookkeeping", bucket = 'maxwell-insight')
     max_processed_time = folder_time_range(lof_pool)[1]
@@ -84,8 +84,8 @@ def compress_csv(timeframe='hour'):
         hour_diff = 24
     max_zipped_time = folder_time_range(lof_zipped,tt_format,'.csv.gzip',False)[1]
     max_zip_next = max_zipped_time + datetime.timedelta(hours=hour_diff)
-    logging.info("Last processed file time label:", max_processed_time)
-    logging.info("Last compressed file time label:", max_zipped_time)
+    print("Last processed file time label:", max_processed_time)
+    print("Last compressed file time label:", max_zipped_time)
     # the next zip file has time prefix max_zip_next
     # the current processed file has to have a complete hour from the begin time
     # in order for the compressed file to cover all files in that hour
@@ -96,7 +96,7 @@ def compress_csv(timeframe='hour'):
 
             df = df.withColumn('_c0', df['_c0'].cast('integer'))
             comp_f_name = next_prefix + ".csv.gzip"
-            logging.info(comp_f_name)
+            print(comp_f_name)
 
             # sort by index and compress
             df.orderBy('_c0')\
@@ -108,11 +108,11 @@ def compress_csv(timeframe='hour'):
             remove_s3_file('maxwell-insight', 'spark-processed/', prefix=next_prefix)
 
         except Exception as e:
-            logging.info(e)
+            print(e)
     else:
-        logging.info("Not enough time has passed since last compression.")
-        logging.info(f"Currently compressed 1-{timeframe} starting from {max_zipped_time}")
-        logging.info(f"Currently newly processed files up until {max_processed_time}")
+        print("Not enough time has passed since last compression.")
+        print(f"Currently compressed 1-{timeframe} starting from {max_zipped_time}")
+        print(f"Currently newly processed files up until {max_processed_time}")
         return
 
 if __name__ == "__main__":
