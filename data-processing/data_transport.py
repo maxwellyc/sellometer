@@ -186,7 +186,7 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
                 print (f"Hourly data appended for {curr_hour} - {next_hour-datetime.timedelta(seconds=1)}")
             data_time_merger(spark, evt, dim, verbose)
 
-def data_time_merger(spark, verbose=False):
+def data_time_merger(spark,evt, dim, verbose=False):
     # merge events that have same product_id & event_time, sometimes 2 entries
     # can enter due to backlog or spark process only loaded partial data of that minute_
     # This process is identical as checking backlog, without the union part.

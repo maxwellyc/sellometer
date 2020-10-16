@@ -122,7 +122,7 @@ def print_df_time_range(df, evt="",dim=""):
     tm1 = df.agg({"event_time": "max"}).collect()[0][0]
     print (f"{evt}, {dim}, minute DB time range: {tm0}, {tm1}")
 
-def daily_window(sql_c, spark, events, dimensions):
+def daily_window(sql_c, spark, events, dimensions, verbose=False):
 
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
@@ -130,24 +130,28 @@ def daily_window(sql_c, spark, events, dimensions):
         for dim in dimensions:
             # read min data from t1 datatable
             df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-            print ("First read-in from minute")
-            print_df_time_range(df_0,evt,dim)
+            if verbose:
+                print ("First read-in from minute")
+                print_df_time_range(df_0,evt,dim)
 
             # remove data from more than 24 hours away from t1 table
             df_cut = remove_min_data_from_sql(df_0, curr_min, hours_window = 24)
-            print ("After cropping 24 hours window")
-            print_df_time_range(df_cut,evt,dim)
+            if verbose:
+                print ("After cropping 24 hours window")
+                print_df_time_range(df_cut,evt,dim)
 
             # rewrite minute level data back to t1 table
             write_to_psql(df_cut, evt, dim, mode="overwrite", suffix='minute_temp')
             df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
-            print ("Temp file being written")
-            print_df_time_range(df_temp,evt,dim)
+            if verbose:
+                print ("Temp file being written")
+                print_df_time_range(df_temp,evt,dim)
 
             write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
-            df_f = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
-            print ("Final write-in minute DB")
-            print_df_time_range(df_f,evt,dim)
+            if verbose:
+                df_f = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
+                print ("Final write-in minute DB")
+                print_df_time_range(df_f,evt,dim)
 
 if __name__ == "__main__":
 
