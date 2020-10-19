@@ -181,7 +181,7 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
             if curr_min > end_hour:
                 t1 = datetime.datetime.now()
                 print(f"++++++++Storing hourly data: {evt}_{dim}_hour")
-                df_hour = compress_time(df_0, start_tick=curr_hour+datetime.timedelta(hours=1),
+                df_hour = compress_time(df_0, start_tick=curr_hour,
                 end_tick=end_hour, tstep=3600, from_csv=False)
                 if verbose:
                     print_df_time_range(df_hour,evt,dim)
@@ -189,7 +189,7 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
                 gb = merge_df(df_hour, evt, dim)
                 # append temp table into t2 datatable
                 write_to_psql(gb, evt, dim, mode="append", suffix='hour')
-                print(f"Hourly data appended for {curr_hour+datetime.timedelta(hours=1)}\
+                print(f"Hourly data appended for {curr_hour}\
                  - {end_hour-datetime.timedelta(seconds=1)}")
                 t2 = datetime.datetime.now()
                 print(f"Hourly data stored! Duration: {(t2-t1).seconds} seconds.\t{evt}_{dim} \n")
