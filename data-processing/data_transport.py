@@ -34,7 +34,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
     # default file names and locations
     try:
         query = f"""
-        (SELECT * FROM view_brand_{suffix}
+        (SELECT event_time FROM view_brand_{suffix}
         ORDER BY event_time DESC
         LIMIT 1
         ) as foo
@@ -47,8 +47,8 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
         .load()
-        t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        print(f'Latest event time in table <purchase_product_id_{suffix}> is: {datetime_to_str(t_max,time_format)}')
+        t_max = df.select('event_time').collect()[0][0]
+        print(f'Latest event time in {suffix}-ly table is: {datetime_to_str(t_max,time_format)}')
         return t_max
     except Exception as e:
         t_max = "2019-10-01 00:00:00"
@@ -131,16 +131,23 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
-def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
-    table_name = "_".join([event, dim, suffix])
+def read_sql_to_df(spark, t0='2019-10-01 00:00:00', t1='2020-10-01 00:00:00',
+event='purchase', dim='product_id',suffix='minute'):
+    query = f"""
+    (SELECT * FROM {event}_{dim}_{suffix}
+    WHERE event_time BETWEEN \'{t0}\' and \'{t1}\'
+    ORDER BY event_time
+    ) as foo
+    """
     df = spark.read \
         .format("jdbc") \
     .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-    .option("dbtable", table_name) \
+    .option("dbtable", query) \
     .option("user",os.environ['psql_username'])\
     .option("password",os.environ['psql_pw'])\
     .option("driver","org.postgresql.Driver")\
     .load()
+
     return df
 
 def print_df_time_range(df, evt="",dim=""):
@@ -165,12 +172,14 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
             # read min data from t1 datatable
             t1 = datetime.datetime.now()
             print("Ranking:")
-            df_0 = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute')
+            # slice 3600 second of dataframe for ranking purpose
+            # rank datatable is a dynamic sliding window and updates every minute
+            cutoff_t0 = datetime_to_str(curr_hour,time_format)
+            cutoff_t1 = datetime_to_str(curr_min, time_format)
+            df_0 = read_sql_to_df(spark,cutoff_t0,cutoff_t1,evt,dim,'minute')
             if verbose:
                 print("Ranking read in:")
                 print_df_time_range(df_0,evt,dim)
-            # slice 3600 second of dataframe for ranking purpose
-            # rank datatable is a dynamic sliding window and updates every minute
             df_rank = select_time_window(df_0,
             start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
             if verbose:

@@ -27,13 +27,13 @@ args = {
 
 dag = DAG(
     dag_id='daily_window',
-    schedule_interval=timedelta(minutes=30),
+    schedule_interval=timedelta(hours=1),
     max_active_runs=1,
     default_args=args
     )
 
 def run_daily_window():
-    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=2G ' +\
+    os.system(f'spark-submit --conf spark.cores.max=14 --executor-memory=4G ' +\
     '$sparkf ~/eCommerce/data-processing/daily_window.py')
 
 daily_window = PythonOperator(
