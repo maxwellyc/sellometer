@@ -42,8 +42,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         .option("driver","org.postgresql.Driver")\
         .load()
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        t_max = datetime_to_str(t_max,time_format)
-        print(f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
+        print(f'Latest event time in table <purchase_product_id_{suffix}> is: {datetime_to_str(t_max,time_format)}')
         return t_max
     except Exception as e:
         t_max = "2019-09-30 23:00:00"
@@ -57,7 +56,7 @@ def remove_min_data_from_sql(df, curr_time, hours_window=24):
     df_cut = df.filter(df.event_time > cutoff )
     return df_cut
 
-def select_time_window(df, start_tick, end_tick, time_format='%Y-%m-%d %H:%M:%S'):
+def select_time_window(df, start_tick, end_tick):
     print(f"Selecting data between {start_tick} - {end_tick-datetime.timedelta(seconds=1)}")
     df1 = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
     return df1
@@ -79,7 +78,6 @@ def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24,
         df = select_time_window(df, start_tick=start_tick, end_tick=end_tick)
     df = df.withColumn("event_time", ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0)
     df = df.withColumn("event_time", F.to_timestamp(df.event_time))
-    # t_max = df.agg({"event_time": "max"}).collect()[0][0]
 
     return df
 
@@ -147,8 +145,8 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
 
     time_format = '%Y-%m-%d %H:%M:%S'
     t1 = datetime.datetime.now()
-    curr_min = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
-    curr_hour = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='hour'), time_format)
+    curr_min = get_latest_time_from_sql_db(spark, suffix='minute'), time_format
+    curr_hour = get_latest_time_from_sql_db(spark, suffix='hour'), time_format
     hours_diff = (curr_min - curr_hour).seconds // 3600
     end_hour = curr_hour + datetime.timedelta(hours=hours_diff)
     print(f"Current time in minute level table: {curr_min}")
