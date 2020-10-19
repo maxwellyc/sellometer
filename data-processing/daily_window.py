@@ -42,6 +42,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         .load()
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
         t_min = df.agg({"event_time": "min"}).collect()[0][0]
+        print(t_max, type(t_max))
         t_max = datetime_to_str(t_max,time_format)
         print(f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
         return t_min, t_max

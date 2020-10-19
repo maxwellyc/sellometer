@@ -43,7 +43,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute'):
         return t_max
     except:
         t_max = "2019-10-01 00:00:00"
-        print (f'Using default time: {t_max}')
+        print (f'No existing tables found, using default time: {t_max}')
         return t_max
 
 def write_time_tick_to_log(time_tick):
@@ -121,7 +121,6 @@ def compress_time(df, tstep = 60, from_csv = True):
     # df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
     df = df.withColumn("event_time", F.to_timestamp(df.event_time))
     # t_max = df.agg({"event_time": "max"}).collect()[0][0]
-    df.show(50)
 
     return df
     ################################################################################
