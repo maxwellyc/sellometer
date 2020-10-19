@@ -33,10 +33,16 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
     # reads previous processed time in logs/min_tick.txt and returns next time tick
     # default file names and locations
     try:
+        query = f"""
+        (SELECT * FROM view_brand_{suffix}
+        ORDER BY event_time DESC
+        LIMIT 1
+        ) as foo
+        """
         df = spark.read \
             .format("jdbc") \
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-        .option("dbtable", f'view_product_id_{suffix}') \
+        .option("dbtable", query) \
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
@@ -232,5 +238,5 @@ if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
-    min_to_hour(sql_c, spark, events, dimensions,verbose=False)
+    min_to_hour(sql_c, spark, events, dimensions,verbose=True)
     # daily_window.daily_window(sql_c, spark, events, dimensions)

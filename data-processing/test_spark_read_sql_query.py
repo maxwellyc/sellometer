@@ -15,10 +15,8 @@ def spark_init():
 
 
 def read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix='minute'):
-    table_name = "_".join([event, dim, suffix])
-        #
     query = f"""
-    (SELECT * FROM {event}_{dim}_{suffix} as dt
+    (SELECT * FROM {event}_{dim}_{suffix}
     WHERE event_time BETWEEN \'{t0}\' and \'{t1}\'
     ORDER BY event_time
     ) as foo
@@ -32,11 +30,30 @@ def read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix=
     .option("driver","org.postgresql.Driver")\
     .load()
 
-    df.show(100)
     return df
+
+def test(spark, suffix='minute'):
+    query = f"""
+    (SELECT * FROM view_brand_{suffix}
+    ORDER BY event_time DESC
+    LIMIT 1
+    ) as foo
+    """
+    df = spark.read \
+        .format("jdbc") \
+    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
+    .option("dbtable", query) \
+    .option("user",os.environ['psql_username'])\
+    .option("password",os.environ['psql_pw'])\
+    .option("driver","org.postgresql.Driver")\
+    .load()
+    print (df)
+    t_max = df.agg({"event_time": "max"}).collect()[0][0]
+    print (t_max)
 
 if __name__ == "__main__":
     sql_c, spark = spark_init()
     t0 = '2019-10-01 00:12:00'
     t1 = '2019-10-01 01:10:00'
-    read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix='minute')
+    test(spark, suffix='minute')
+    #read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix='minute')
