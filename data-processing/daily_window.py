@@ -128,7 +128,6 @@ def daily_window(sql_c, spark, events, dimensions, verbose=False):
 
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_min, curr_max = get_latest_time_from_sql_db(spark, suffix='minute')
-    curr_min, curr_max = str_to_datetime(curr_min, time_format), str_to_datetime(curr_max, time_format)
     if (curr_max - curr_min).seconds < 60*60*24:
         return
     for evt in events:
