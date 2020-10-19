@@ -48,7 +48,8 @@ def test(spark, suffix='minute'):
     .option("driver","org.postgresql.Driver")\
     .load()
     df.show()
-    t_max = df.agg({"event_time": "max"}).collect()[0][0]
+    t_max = df.select('event_time').collect()[0][0]
+    #t_max = df.agg({"event_time": "max"}).collect()[0][0]
     print (t_max)
     print (df)
 
