@@ -32,7 +32,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute'):
         df = spark.read \
             .format("jdbc") \
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-        .option("dbtable", f'view_product_id_{suffix}') \
+        .option("dbtable", f'purchase_product_id_{suffix}') \
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
@@ -245,7 +245,7 @@ def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     for evt in events:
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
-            write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute_exp')
+            write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
     if move_files:
         print ('Moving processed files')
         move_s3_file('maxwell-insight', 'processingpool/', 'spark-processed/')
