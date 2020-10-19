@@ -259,19 +259,19 @@ def process_backlogs(events, dimensions):
     sql_c, spark = spark_init()
     new_df = {}
     new_df = stream_to_minute(sql_c,spark, events, dimensions,src_dir='backlogs/')
-    # t_min = new_df['view']['brand'].agg({"event_time": "min"}).collect()[0][0] - datetime.timedelta(minutes=1)
-    # t_max = new_df['view']['brand'].agg({"event_time": "max"}).collect()[0][0] + datetime.timedelta(minutes=1)
+    t_min = new_df['view']['brand'].agg({"event_time": "min"}).collect()[0][0] - datetime.timedelta(minutes=1)
+    t_max = new_df['view']['brand'].agg({"event_time": "max"}).collect()[0][0] + datetime.timedelta(minutes=1)
     for evt in events:
         for dim in dimensions:
-            # df_intact = read_sql_to_df(spark,t1=t_min,event=evt, dim=dim,suffix='minute')
-            # df_corrupt = read_sql_to_df(spark,t0=t_min+datetime.timedelta(minutes=1),
-            # event=evt, dim=dim,suffix='minute')
-            # df_new = df_corrupt.union(new_df[evt][dim])
-            # df_new = merge_df(df_new, evt, dim)
-            # df_fixed = df_intact.union(df_new)
-            df = read_sql_to_df_org(spark,event=evt, dim=dim,suffix='minute')
-            df_fixed = df.union(new_df[evt][dim])
-            df_fixed = merge_df(df_fixed, evt, dim)
+            df_intact = read_sql_to_df(spark,t1=t_min,event=evt, dim=dim,suffix='minute')
+            df_corrupt = read_sql_to_df(spark,t0=t_min+datetime.timedelta(minutes=1),
+            event=evt, dim=dim,suffix='minute')
+            df_new = df_corrupt.union(new_df[evt][dim])
+            df_new = merge_df(df_new, evt, dim)
+            df_fixed = df_intact.union(df_new)
+            # df = read_sql_to_df_org(spark,event=evt, dim=dim,suffix='minute')
+            # df_fixed = df.union(new_df[evt][dim])
+            # df_fixed = merge_df(df_fixed, evt, dim)
             write_to_psql(df_fixed, evt, dim, mode="overwrite", suffix='minute_bl')
             df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
             write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
