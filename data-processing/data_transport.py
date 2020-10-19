@@ -36,7 +36,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         df = spark.read \
             .format("jdbc") \
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-        .option("dbtable", f'purchase_product_id_{suffix}') \
+        .option("dbtable", f'view_product_id_{suffix}') \
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
@@ -48,7 +48,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         t_max = "2019-09-30 23:00:00"
         print(e)
         print(f'Using default time: {t_max}')
-        return t_max
+        return str_to_datetime(t_max,time_format)
 
 def remove_min_data_from_sql(df, curr_time, hours_window=24):
     cutoff = curr_time - datetime.timedelta(hours=hours_window)
