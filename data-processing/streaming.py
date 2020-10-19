@@ -119,8 +119,9 @@ def compress_time(df, tstep = 60, from_csv = True):
             )
     df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
     # df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
-    df = df.withColumn("event_time", F.to_timestamp(df.event_time), 'UTC')
+    df = df.withColumn("event_time", F.to_timestamp(df.event_time))
     # t_max = df.agg({"event_time": "max"}).collect()[0][0]
+    df.show(50)
 
     return df
     ################################################################################
