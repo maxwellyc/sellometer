@@ -145,8 +145,8 @@ def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
 
     time_format = '%Y-%m-%d %H:%M:%S'
     t1 = datetime.datetime.now()
-    curr_min = get_latest_time_from_sql_db(spark, suffix='minute'), time_format
-    curr_hour = get_latest_time_from_sql_db(spark, suffix='hour'), time_format
+    curr_min = get_latest_time_from_sql_db(spark, suffix='minute')
+    curr_hour = get_latest_time_from_sql_db(spark, suffix='hour')
     hours_diff = (curr_min - curr_hour).seconds // 3600
     end_hour = curr_hour + datetime.timedelta(hours=hours_diff)
     print(f"Current time in minute level table: {curr_min}")
