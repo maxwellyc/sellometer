@@ -14,12 +14,13 @@ def spark_init():
     return sql_c, spark
 
 
-def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
+def read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix='minute'):
     table_name = "_".join([event, dim, suffix])
-    query = """
-    (SELECT * FROM purchase_product_id_hour as d
-        WHERE event_time
-    ) foo
+    query = f"""
+    (SELECT * FROM {event}_{dim}_{suffix} as dt
+    WHERE event_time BETWEEN {t0} and {t1}
+    ORDER BY event_time
+    ) as foo
     """
     df = spark.read \
         .format("jdbc") \
@@ -35,4 +36,6 @@ def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
 
 if __name__ == "__main__":
     sql_c, spark = spark_init()
-    read_sql_to_df(spark, event='purchase', dim='product_id',suffix='hour')
+    t0 = '2019-10-01 00:10:00'
+    t1 = '2019-10-01 01:10:00'
+    read_sql_to_df(spark,t0, t1, event='purchase', dim='product_id',suffix='minute')

@@ -45,7 +45,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         print(f'Latest event time in table <purchase_product_id_{suffix}> is: {datetime_to_str(t_max,time_format)}')
         return t_max
     except Exception as e:
-        t_max = "2019-09-30 23:00:00"
+        t_max = "2019-10-01 00:00:00"
         print(e)
         print(f'Using default time: {t_max}')
         return str_to_datetime(t_max,time_format)
