@@ -42,7 +42,6 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         .load()
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
         t_min = df.agg({"event_time": "min"}).collect()[0][0]
-        print(t_max, type(t_max))
         t_max = datetime_to_str(t_max,time_format)
         print(f'Latest event time in table <purchase_product_id_{suffix}> is: {t_max}')
         return t_min, t_max
@@ -128,7 +127,8 @@ def print_df_time_range(df, evt="",dim=""):
 def daily_window(sql_c, spark, events, dimensions, verbose=False):
 
     time_format = '%Y-%m-%d %H:%M:%S'
-    curr_min, curr_max = str_to_datetime(get_latest_time_from_sql_db(spark, suffix='minute'), time_format)
+    curr_min, curr_max = get_latest_time_from_sql_db(spark, suffix='minute')
+    curr_min, curr_max = str_to_datetime(curr_min, time_format), str_to_datetime(curr_max, time_format)
     if (curr_max - curr_min).seconds < 60*60*24:
         return
     for evt in events:
