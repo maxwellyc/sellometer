@@ -76,7 +76,8 @@ def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24,
     if end_tick:
         if not start_tick: start_tick = end_tick - datetime.timedelta(hours=t_windows)
         df = select_time_window(df, start_tick=start_tick, end_tick=end_tick)
-    df = df.withColumn("event_time", ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0)
+    df = df.withColumn("event_time",
+    ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0 + tstep)
     df = df.withColumn("event_time", F.to_timestamp(df.event_time))
 
     return df

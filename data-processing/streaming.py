@@ -104,26 +104,26 @@ def read_s3_to_df(sql_c, spark):
     except:
         return None, None
 
-def compress_time(df, tstep = 60, from_csv = True):
+def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24, from_csv = True):
     # Datetime transformation #######################################################
     # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
-    start_time = "2019-10-01 00:00:00"
-    time_format = '%Y-%m-%d %H:%M:%S'
+    start_time = "2019-10-01-00-00-00"
+    time_format = '%Y-%m-%d-%H-%M-%S'
     # start time for time series plotting, I'll set this to a specific time for now
     t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
     # convert data and time into timestamps, remove orginal date time column
     # reorder column so that timestamp is leftmost
     if from_csv:
-        df = df.withColumn(
-            'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
-            )
-    df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
-    # df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
+        df = df.withColumn('event_time',
+            F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss'))
+    if end_tick:
+        if not start_tick: start_tick = end_tick - datetime.timedelta(hours=t_windows)
+        df = select_time_window(df, start_tick=start_tick, end_tick=end_tick)
+    df = df.withColumn("event_time",
+    ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0 + tstep)
     df = df.withColumn("event_time", F.to_timestamp(df.event_time))
-    # t_max = df.agg({"event_time": "max"}).collect()[0][0]
 
     return df
-    ################################################################################
 
 def clean_data(spark, df):
     # Data cleaning ################################################################
@@ -235,7 +235,7 @@ def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     # clean data
     df_0 = clean_data(spark, df_0)
     # compress time into minute granularity, used for live monitoring
-    df_0 = compress_time(df_0, tstep = 60)
+    df_0 = compress_time(df_0, tstep = 60, from_csv=True)
     # # compress time into hour granularity
     main_df = split_by_event(events, df_0)
     # groupby different product dimensions
