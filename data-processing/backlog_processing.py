@@ -181,13 +181,18 @@ def write_to_psql(df, event, dim, mode, suffix):
     .save()
     return
 
-def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
-    table_name = "_".join([event, dim, suffix])
-    # df = pd.read_sql_table(table_name, engine)
+def read_sql_to_df(spark, t0='2019-10-01 00:00:00', t1='2020-10-01 00:00:00',
+event='purchase', dim='product_id',suffix='minute'):
+    query = f"""
+    (SELECT * FROM {event}_{dim}_{suffix}
+    WHERE event_time BETWEEN \'{t0}\' and \'{t1}\'
+    ORDER BY event_time
+    ) as foo
+    """
     df = spark.read \
         .format("jdbc") \
     .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-    .option("dbtable", table_name) \
+    .option("dbtable", query) \
     .option("user",os.environ['psql_username'])\
     .option("password",os.environ['psql_pw'])\
     .option("driver","org.postgresql.Driver")\
@@ -242,15 +247,19 @@ def process_backlogs(events, dimensions):
     sql_c, spark = spark_init()
     new_df = {}
     new_df = stream_to_minute(sql_c,spark, events, dimensions,src_dir='backlogs/')
+    t_min = new_df.agg({"event_time": "min"}).collect()[0][0] - datetime.timedelta(minutes=1)
+    t_max = new_df.agg({"event_time": "max"}).collect()[0][0] + datetime.timedelta(minutes=1)
     for evt in events:
         for dim in dimensions:
-            print (evt, dim)
-            df = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
-            df_new = df.union(new_df[evt][dim])
+            df_intact = read_sql_to_df(spark,t1=t_min,event=evt, dim=dim,suffix='minute')
+            df_corrupt = read_sql_to_df(spark,t0=t_min+datetime.timedelta(minutes=1),
+            event=evt, dim=dim,suffix='minute')
+            df_new = df_corrupt.union(new_df[evt][dim])
             df_new = merge_df(df_new, evt, dim)
-            write_to_psql(df_new, evt, dim, mode="overwrite", suffix='minute_bl')
-            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
-            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            df_fixed = df_intact.union(df_new)
+            # write_to_psql(df_new, evt, dim, mode="overwrite", suffix='minute_bl')
+            # df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
+            write_to_psql(df_fixed, evt, dim, mode="overwrite", suffix='minute')
 
     move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
 
