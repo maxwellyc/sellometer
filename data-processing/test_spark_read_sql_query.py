@@ -19,7 +19,7 @@ def read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix=
         #
     query = f"""
     (SELECT * FROM {event}_{dim}_{suffix} as dt
-    WHERE event_time BETWEEN \'{t0}\' and \'{t1}\' 
+    WHERE event_time BETWEEN \'{t0}\' and \'{t1}\'
     ORDER BY event_time
     ) as foo
     """
@@ -37,6 +37,6 @@ def read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix=
 
 if __name__ == "__main__":
     sql_c, spark = spark_init()
-    t0 = '2019-10-01 00:10:00'
+    t0 = '2019-10-01 00:12:00'
     t1 = '2019-10-01 01:10:00'
     read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix='minute')
