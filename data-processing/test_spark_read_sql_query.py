@@ -34,7 +34,7 @@ def read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix=
 
 def test(spark, suffix='minute'):
     query = f"""
-    (SELECT * FROM view_brand_{suffix}
+    (SELECT event_time FROM view_brand_{suffix}
     ORDER BY event_time DESC
     LIMIT 1
     ) as foo
@@ -50,6 +50,7 @@ def test(spark, suffix='minute'):
     df.show()
     t_max = df.agg({"event_time": "max"}).collect()[0][0]
     print (t_max)
+    print (df)
 
 if __name__ == "__main__":
     sql_c, spark = spark_init()
