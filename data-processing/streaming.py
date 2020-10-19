@@ -118,7 +118,8 @@ def compress_time(df, tstep = 60, from_csv = True):
             'event_time', F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss')
             )
     df = df.withColumn("event_time", ((df.event_time - t0) / tstep).cast('integer') * tstep + t0)
-    df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
+    # df = df.withColumn("event_time", F.from_utc_timestamp(F.to_timestamp(df.event_time), 'UTC'))
+    df = df.withColumn("event_time", F.to_timestamp(df.event_time), 'UTC')
     # t_max = df.agg({"event_time": "max"}).collect()[0][0]
 
     return df
@@ -243,7 +244,7 @@ def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     for evt in events:
         for dim in dimensions:
             # store minute-by-minute data into t1 datatable: _minute
-            write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
+            write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute_exp')
     if move_files:
         print ('Moving processed files')
         move_s3_file('maxwell-insight', 'processingpool/', 'spark-processed/')

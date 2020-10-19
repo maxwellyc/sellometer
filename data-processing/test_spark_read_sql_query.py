@@ -17,7 +17,9 @@ def spark_init():
 def read_sql_to_df(spark, event='purchase', dim='product_id',suffix='minute'):
     table_name = "_".join([event, dim, suffix])
     query = """
-    (SELECT * FROM purchase_product_id_hour as d) foo
+    (SELECT * FROM purchase_product_id_hour as d
+        WHERE event_time
+    ) foo
     """
     df = spark.read \
         .format("jdbc") \
