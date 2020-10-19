@@ -257,9 +257,9 @@ def process_backlogs(events, dimensions):
             df_new = df_corrupt.union(new_df[evt][dim])
             df_new = merge_df(df_new, evt, dim)
             df_fixed = df_intact.union(df_new)
-            # write_to_psql(df_new, evt, dim, mode="overwrite", suffix='minute_bl')
-            # df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
-            write_to_psql(df_fixed, evt, dim, mode="overwrite", suffix='minute')
+            write_to_psql(df_fixed, evt, dim, mode="overwrite", suffix='minute_bl')
+            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
+            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
 
     move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
 
