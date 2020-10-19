@@ -38,4 +38,4 @@ if __name__ == "__main__":
     sql_c, spark = spark_init()
     t0 = '2019-10-01 00:10:00'
     t1 = '2019-10-01 01:10:00'
-    read_sql_to_df(spark,t0, t1, event='purchase', dim='product_id',suffix='minute')
+    read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix='minute')
