@@ -47,11 +47,7 @@ def test(spark, suffix='minute'):
     .option("password",os.environ['psql_pw'])\
     .option("driver","org.postgresql.Driver")\
     .load()
-    df.show()
     t_max = df.select('event_time').collect()[0][0]
-    #t_max = df.agg({"event_time": "max"}).collect()[0][0]
-    print (t_max)
-    print (df)
 
 if __name__ == "__main__":
     sql_c, spark = spark_init()
