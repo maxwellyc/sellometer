@@ -16,9 +16,9 @@ def spark_init():
 
 def read_sql_to_df_time(spark,t0, t1, event='purchase', dim='product_id',suffix='minute'):
     table_name = "_".join([event, dim, suffix])
-        # (SELECT * FROM {event}_{dim}_{suffix} as dt
+        #
     query = f"""
-    (SELECT * FROM purchase_product_id_minute as dt
+    (SELECT * FROM {event}_{dim}_{suffix} as dt
     WHERE event_time BETWEEN '2019-10-01 00:10:00' and '2019-10-01 01:10:00'
     ORDER BY event_time
     ) as foo
