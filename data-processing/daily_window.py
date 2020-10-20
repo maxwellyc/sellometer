@@ -84,6 +84,9 @@ def daily_window(sql_c, spark, events, dimensions):
     curr_max = get_latest_time_from_sql_db(spark, suffix='minute')
     curr_min = get_latest_time_from_sql_db(spark, suffix='minute', latest=False)
     print (curr_min, curr_max)
+    print (curr_min + datetime.timedelta(hours=24))
+    print (curr_max)
+    print (curr_min + datetime.timedelta(hours=24) > curr_max )
     print ((curr_max - curr_min).seconds )
     if (curr_max - curr_min).seconds < 60*60*24:
         return
