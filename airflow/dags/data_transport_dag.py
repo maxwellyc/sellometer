@@ -7,7 +7,10 @@ from airflow.operators.dummy_operator import DummyOperator
 # from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
 import os, subprocess, sys, imp
-util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/check_backlog.py')
+
+# load self defined modules
+util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
+
 
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
@@ -61,7 +64,7 @@ process_backlogs = PythonOperator(
 
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
-    python_callable=util.collect_backlogs,
+    python_callable=util.peek_backlogs,
     trigger_rule='one_success',
     dag = dag)
 

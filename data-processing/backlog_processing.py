@@ -1,284 +1,61 @@
-from pyspark import SparkContext, SparkConf
-from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
-from pyspark.sql import functions as F
-import time, datetime, os
-from pyspark.sql.functions import pandas_udf, PandasUDFType
-from boto3 import client
+import datetime, imp
 
-import psycopg2
-import os
-from sqlalchemy import create_engine
-
-def spark_init():
-    # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("backlog_processing")
-    sc = SparkContext(conf=conf)
-    spark = SparkSession(sc)
-    sql_c = SQLContext(sc)
-    return sql_c, spark
-
-def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
-    return datetime.datetime.strptime(f_name, time_format)
-
-def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
-    return dt_obj.strftime(time_format)
-
-def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
-    # bucket = 'maxwell-insight'
-    # src_dir = 'serverpool/'
-    # dst_dir = 'spark-processed/'
-    os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
-
-def get_next_time_tick_from_log(next=True, debug=False):
-    # reads previous processed time in logs/min_tick.txt and returns next time tick
-    # default file names and locations
-    def_tick = "2019-09-30-23-59-00"
-    time_fn = "min_tick.txt"
-    f_dir = "logs"
-    if time_fn in os.listdir(f_dir):
-        f = open(f"{f_dir}/{time_fn}",'r')
-        time_tick = f.readlines()[0].strip("\n")
-    else:
-        time_tick = def_tick
-    # debug override
-    if debug:
-        time_tick = '2019-10-01-00-19-00'
-    time_tick = str_to_datetime(time_tick)
-    if next:
-        time_tick += datetime.timedelta(minutes=1)
-    time_tick = datetime_to_str(time_tick)
-    return time_tick
-
-def read_s3_to_df(sql_c, spark, bucket = 'maxwell-insight', src_dir='serverpool/'):
-    ################################################################################
-    # read data from S3 ############################################################
-    s3file = f's3a://{bucket}/{src_dir}*.csv'
-    # read csv file on s3 into spark dataframe
-    df = sql_c.read.csv(s3file, header=True)
-    # drop unused column
-    df = df.drop('_c0')
-    return df
-    ################################################################################
-
-def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24, from_csv = True):
-    # Datetime transformation #######################################################
-    # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
-    start_time = "2019-10-01-00-00-00"
-    time_format = '%Y-%m-%d-%H-%M-%S'
-    # start time for time series plotting, I'll set this to a specific time for now
-    t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
-    # convert data and time into timestamps, remove orginal date time column
-    # reorder column so that timestamp is leftmost
-    if from_csv:
-        df = df.withColumn('event_time',
-            F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss'))
-    if end_tick:
-        if not start_tick: start_tick = end_tick - datetime.timedelta(hours=t_windows)
-        df = select_time_window(df, start_tick=start_tick, end_tick=end_tick)
-    df = df.withColumn("event_time",
-    ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0 + tstep)
-    df = df.withColumn("event_time", F.to_timestamp(df.event_time))
-
-    return df
-
-def clean_data(spark,df):
-    # Data cleaning ################################################################
-
-    # if missing category code, fill with category id.
-    df = df.withColumn('category_code', F.coalesce('category_code','category_id'))
-    # if missing brand, fill with product id
-    df = df.withColumn('brand', F.coalesce('brand','product_id'))
-
-    # category_code have different layers of category,
-    # eg. electronics.smartphones and electronics.video.tv
-    # we need to create 3 columns of different levels of categories
-    # this function uniforms all category_code into 3 levels category.
-    def fill_cat_udf(code):
-        code = str(code)
-        ss = code.split('.')
-        if len(ss) == 3:
-            return code
-        elif len(ss) == 2:
-            return code + '.' + ss[-1]
-        elif len(ss) == 1:
-            return code + '.' + code + '.' + code
-
-    fill_cat = spark.udf.register("fill_cat", fill_cat_udf)
-
-    # df = df.select(fill_cat(F.col("category_code")))
-
-    df = df.withColumn("category_code", fill_cat(F.col("category_code")))
-
-    split_col = F.split(F.col("category_code"),'[.]')
-
-    df = df.withColumn('category_l1', split_col.getItem(0))
-    df = df.withColumn('category_l2', split_col.getItem(1))
-    df = df.withColumn('category_l3', split_col.getItem(2))
-
-    # level 3 category (lowest level) will determine category type, no need for category_id anymore
-    df = df.drop('category_id')
-    df = df.drop('category_code')
-
-    ################################################################################
-    # create separate dataframe for view and purchase,
-    # data transformation will be different for these two types of events.
-    return df
-
-def split_by_event(events, df):
-    main_df = {}
-    for evt in events:
-        main_df[evt] = df.filter(df['event_type'] == evt)
-        main_df[evt] = main_df[evt].drop('event_type')
-
-        # if same user session viewed same product_id twice, even at differnt event_time, remove duplicate entry.
-        # same user refreshing the page should not reflect more interest on the same product
-        # need to be careful here as user can buy a product twice within the same session,
-        # we should not remove duplicate on purchase_df
-        if evt == 'view':
-            main_df[evt] = (main_df[evt]
-                .orderBy('event_time')
-                .coalesce(1)
-                .dropDuplicates(subset=['user_session','product_id']))
-
-    return main_df
-
-def group_by_dimensions(main_df, events, dimensions):
-    main_gb = {}
-    # total view counts per dimesion, total sales amount per dimension
-    for evt in events:
-        main_gb[evt] = {}
-        for dim in dimensions:
-            # total view counts per dimension, if product_id, also compute mean price
-            # total $$$ amount sold per dimension, if product_id also compute count and mean
-            if dim == 'product_id':
-                if evt == 'view':
-                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
-                                    .agg(F.count('price'),F.mean('price')))
-                elif evt == 'purchase':
-                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
-                                    .agg(F.sum('price'),F.count('price'),F.mean('price')))
-            else:
-                if evt == 'view':
-                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
-                                    .agg(F.count('price')))
-                elif evt == 'purchase':
-                    main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
-                                    .agg(F.sum('price')))
-    return main_gb
-
-
-def write_to_psql(df, event, dim, mode, suffix):
-    # write dataframe to postgreSQL
-    # suffix can be 'hour', 'minute', 'rank', this is used to name datatables
-    df.write\
-    .format("jdbc")\
-    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-    .option("dbtable", f"{event}_{dim}_{suffix}")\
-    .option("user",os.environ['psql_username'])\
-    .option("password",os.environ['psql_pw'])\
-    .option("driver","org.postgresql.Driver")\
-    .mode(mode)\
-    .save()
-    return
-
-def read_sql_to_df(spark, t0='2019-10-01 00:00:00', t1='2020-10-01 00:00:00',
-event='purchase', dim='product_id',suffix='minute'):
-    query = f"""
-    (SELECT * FROM {event}_{dim}_{suffix}
-    WHERE event_time BETWEEN \'{t0}\' and \'{t1}\'
-    ORDER BY event_time
-    ) as foo
-    """
-    df = spark.read \
-        .format("jdbc") \
-    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-    .option("dbtable", query) \
-    .option("user",os.environ['psql_username'])\
-    .option("password",os.environ['psql_pw'])\
-    .option("driver","org.postgresql.Driver")\
-    .load()
-
-    return df
-
-def read_sql_to_df_org(spark, event='purchase', dim='product_id',suffix='minute'):
-    df = spark.read \
-        .format("jdbc") \
-    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-    .option("dbtable", f"{event}_{dim}_{suffix}") \
-    .option("user",os.environ['psql_username'])\
-    .option("password",os.environ['psql_pw'])\
-    .option("driver","org.postgresql.Driver")\
-    .load()
-
-    return df
-
-def stream_to_minute(sql_c, spark, events, dimensions, src_dir):
-    # initialize spark
-    # read csv from s3
-    df_0 = read_s3_to_df(sql_c, spark, src_dir=src_dir)
-    if not df_0:
-        print ("No files were read into dataframe")
-        return
-    # clean data
-    df_0 = clean_data(spark, df_0)
-    # compress time into minute granularity, used for live monitoring
-    df_0 = compress_time(df_0, tstep = 60)
-    # # compress time into hour granularity
-    main_df = split_by_event(events, df_0)
-    # groupby different product dimensions
-    main_gb = group_by_dimensions(main_df, events, dimensions)
-    return main_gb
-
-def merge_df(df, event, dim):
-    # when performing union on backlog dataframe and main dataframe
-    # need to recalculate average values
-    if dim == 'product_id':
-        if event == 'view':
-            df = df.withColumn('total_price', F.col('count(price)') * F.col('avg(price)'))
-            df = df.groupby(dim, 'event_time').agg(F.sum('count(price)'), F.sum('total_price'))
-            df = df.withColumnRenamed('sum(count(price))','count(price)')
-            df = df.withColumn('avg(price)', F.col('sum(total_price)') / F.col('count(price)'))
-            df = df.drop('sum(total_price)')
-        elif event == 'purchase':
-            df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'), F.sum('count(price)'))
-            df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
-            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
-            df = df.withColumn('avg(price)', F.col('sum(price)') / F.col('count(price)'))
-    else:
-        if event == 'view':
-            df = df.groupby(dim, 'event_time').agg(F.sum('count(price)'))
-            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
-        elif event == 'purchase':
-            df = df.groupby(dim, 'event_time').agg(F.sum('sum(price)'))
-            df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
-
-    return df
+# load self defined modules
+util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
+sprocess = imp.load_source('sprocess', '/home/ubuntu/eCommerce/data-processing/input_processing.py')
+ingestion = imp.load_source('ingestion', '/home/ubuntu/eCommerce/data-processing/ingestion.py')
 
 def process_backlogs(events, dimensions):
-    # initialize spark
-    sql_c, spark = spark_init()
+    ''' Process backlog files sent from server,
+        If server sent event logs with timestamp earlier than latest event
+        in t1 datatable, these logs will be moved to a backlog folder on S3
+        awaiting processing.
+        Optimization 1:
+        Identify min and max time in backlog files, this will be used to slice t1
+        datatable, and only union & merge backlog dataframe with corrupted portion
+        of the table to reduce computation.
+        In the future, this will be optimized with SQL query to only process timestamps
+        directly affected by backlogs.
+    '''
+
+    sql_c, spark = util.spark_init("backlog_processing")
+    # new_df (two layer dictionary) stores dataframes processed from backlog files
+    # keys are [event][dimension]
     new_df = {}
-    new_df = stream_to_minute(sql_c,spark, events, dimensions,src_dir='backlogs/')
+    new_df = ingestion.ingest(sql_c,spark, events, dimensions,src_dir='backlogs/')
+
     t_min = new_df['view']['brand'].agg({"event_time": "min"}).collect()[0][0] - datetime.timedelta(minutes=1)
-    t_max = new_df['view']['brand'].agg({"event_time": "max"}).collect()[0][0] + datetime.timedelta(minutes=1)
+    # t_max = new_df['view']['brand'].agg({"event_time": "max"}).collect()[0][0] + datetime.timedelta(minutes=1)
+
     for evt in events:
         for dim in dimensions:
-            df_intact = read_sql_to_df(spark,t1=t_min,event=evt, dim=dim,suffix='minute')
-            df_corrupt = read_sql_to_df(spark,t0=t_min+datetime.timedelta(minutes=1),
-            event=evt, dim=dim,suffix='minute')
-            df_new = df_corrupt.union(new_df[evt][dim])
-            df_new = merge_df(df_new, evt, dim)
-            df_fixed = df_intact.union(df_new)
-            # df = read_sql_to_df_org(spark,event=evt, dim=dim,suffix='minute')
-            # df_fixed = df.union(new_df[evt][dim])
-            # df_fixed = merge_df(df_fixed, evt, dim)
-            write_to_psql(df_fixed, evt, dim, mode="overwrite", suffix='minute_bl')
-            df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
-            write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            # read intact portion of t1 datatable before earliest timestamp in backlog
+            df_intact = util.read_sql_to_df(spark,t1=t_min,event=evt, dim=dim,suffix='minute')
 
-    move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
+            # read corrupt portion of t1 datatable into dataframe, to be merged with backlog
+            df_corrupt = util.read_sql_to_df(spark,t0=t_min+datetime.timedelta(minutes=1),
+            event=evt, dim=dim,suffix='minute')
+
+            # union corrupt t1 dataframe with backlog datafarame
+            df_new = df_corrupt.union(new_df[evt][dim])
+
+            # Merge duplicate entries, see merge_df doc for detailed explanation
+            df_new = sprocess.merge_df(df_new, evt, dim)
+
+            # union fixed portion of corrupted table with intact portion
+            df_fixed = df_intact.union(df_new)
+
+            # write to temporary table and read back to avoid erasing original table
+            # prematurely
+            util.write_to_psql(df_fixed, evt, dim, mode="overwrite", suffix='minute_bl')
+            df_temp = util.read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
+            util.write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+
+    # after backlogs are processed, move file to processed folder on S3
+    util.move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
+    spark.stop()
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
-    events = ['purchase', 'view'] # test purchase then test view
-#    process_backlogs(events, dimensions)
+    events = ['purchase', 'view']
+    process_backlogs(events, dimensions)

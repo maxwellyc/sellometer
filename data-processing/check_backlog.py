@@ -18,6 +18,3 @@ def collect_backlogs():
     except Exception as e:
         print (e)
         return 'dummy_task'
-
-if __name__ == "__main__":
-    print (collect_backlogs())
