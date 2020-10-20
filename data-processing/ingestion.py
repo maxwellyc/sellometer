@@ -1,7 +1,4 @@
-from pyspark import SparkContext, SparkConf
-from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
-import os, imp
-from boto3 import client
+import imp
 
 # load self defined modules
 util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
@@ -23,13 +20,13 @@ def redirect_s3_files_for_processing(spark,dir="serverpool",bucket = 'maxwell-in
         thus will not cause the race condition described above.
     '''
     lof = util.list_s3_files(dir=dir, bucket=bucket)
-    curr_time = util.get_latest_time_from_db(spark)
+    curr_time = util.get_latest_time_from_db(spark, max_time=True)
 
     for f_name in lof:
         if ".csv" in f_name:
             tt_dt = util.str_to_datetime(util.remove_server_num(f_name))
             # if earlier than latest event_time already in t1 table, it is backlog
-            if tt_dt < util.str_to_datetime(curr_time, time_format = '%Y-%m-%d %H:%M:%S'):
+            if tt_dt < curr_time:
                 util.move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
             # move logs ready to be processed into <processingpool>
             else:

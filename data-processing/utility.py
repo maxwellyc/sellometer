@@ -27,24 +27,36 @@ def remove_server_num(f_name):
     '''
     return '-'.join(f_name.strip(".csv").split('-')[:-1])
 
-def get_latest_time_from_db(spark, evt='view', dim='brand',suffix='minute'):
-    # reads previous processed time in logs/min_tick.txt and returns next time tick
-    # default file names and locations
+def get_latest_time_from_db(spark,evt='view',dim='brand',suffix='minute',max_time=True):
+    ''' From postgreSQL database, collect min or max of event_time
+        default to evt='view' because this event type is much more populated
+        default to dim='brand' because this dimension is more collapsed, resulting
+        in a smaller table but without lossing all possible event_time
+        Return default time if the t1 tables are not created yet.
+    '''
+    sort_order = "DESC" if latest else "ASC"
+
     try:
+        query = f"""
+        (SELECT event_time FROM {evt}_{dim}_{suffix}
+        ORDER BY event_time {sort_order}
+        LIMIT 1
+        ) as foo
+        """
+
         df = spark.read \
             .format("jdbc") \
         .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-        .option("dbtable", f'{evt}_{dim}_{suffix}') \
+        .option("dbtable", query) \
         .option("user",os.environ['psql_username'])\
         .option("password",os.environ['psql_pw'])\
         .option("driver","org.postgresql.Driver")\
         .load()
-        t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        t_max = datetime_to_str(t_max,time_format = '%Y-%m-%d %H:%M:%S')
-        return t_max
-    except:
-        t_max = "2019-10-01 00:00:00"
-        return t_max
+
+        return df.select('event_time').collect()[0][0]
+
+    except Exception as e:
+        return util.str_to_datetime('2019-10-01-00-00-00')
 
 # AWS S3 IO related ============================================================
 
@@ -86,7 +98,7 @@ def read_s3_to_df(sql_c, spark, bucket='maxwell-insight', src_dir='serverpool/')
         return
     return df
 
-def read_sql_to_df(spark, t0='2019-10-01 00:00:00', t1='2020-10-01 00:00:00',
+def read_sql_to_df(spark, t0='2019-10-01 00:00:00', t1='2119-10-01 00:00:00',
                     event='purchase', dim='product_id',suffix='minute'):
     query = f"""
     (SELECT * FROM {event}_{dim}_{suffix}

@@ -36,11 +36,6 @@ def run_ingestion():
     os.system(f'spark-submit --conf spark.cores.max={max_cores} --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/ingestion.py')
 
-def run_backlog_processing():
-    os.system(f'spark-submit --conf spark.cores.max=12 --executor-memory=3G ' +\
-    '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
-
-
 new_file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
     poke_interval= 5, # (seconds); checking file every 5 seconds

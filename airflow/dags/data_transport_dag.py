@@ -43,6 +43,10 @@ def run_data_transport():
     os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/data_transport.py')
 
+def run_backlog_processing():
+    os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=3G ' +\
+    '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
+
 data_transport = PythonOperator(
   task_id='min_to_hour',
   python_callable=run_data_transport,
@@ -53,10 +57,6 @@ logs_compression = PythonOperator(
     python_callable=run_logs_compression,
     dag=dag)
 
-dummy_task = DummyOperator(
-    task_id='dummy_task',
-    dag=dag)
-
 process_backlogs = PythonOperator(
     task_id='process_backlogs',
     python_callable=run_backlog_processing,
@@ -65,7 +65,6 @@ process_backlogs = PythonOperator(
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
     python_callable=util.peek_backlogs,
-    trigger_rule='one_success',
     dag = dag)
 
 check_backlog >> logs_compression >> data_transport
