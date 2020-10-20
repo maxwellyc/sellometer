@@ -84,8 +84,10 @@ def daily_window(sql_c, spark, events, dimensions):
     curr_max = get_latest_time_from_sql_db(spark, suffix='minute')
     curr_min = get_latest_time_from_sql_db(spark, suffix='minute', latest=False)
     print (curr_min, curr_max)
+    print ((curr_max - curr_min).seconds )
     if (curr_max - curr_min).seconds < 60*60*24:
         return
+    print ("flag")
     for evt in events:
         for dim in dimensions:
             # remove data from more than 24 hours away from t1 table
