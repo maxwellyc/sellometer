@@ -39,11 +39,9 @@ def get_latest_time_from_sql_db(spark, suffix='minute'):
         .load()
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
         t_max = datetime_to_str(t_max,time_format = '%Y-%m-%d %H:%M:%S')
-        print (f'Latest event time in DB is: {t_max}')
         return t_max
     except:
         t_max = "2019-10-01 00:00:00"
-        print (f'No existing tables found, using default time: {t_max}')
         return t_max
 
 def write_time_tick_to_log(time_tick):
@@ -78,13 +76,11 @@ def redirect_s3_files_for_processing(spark):
             tt_dt = str_to_datetime(remove_server_num(f_name))
             # if backlog file (ie earlier than latest time already in datatable)
             if tt_dt < str_to_datetime(curr_time, time_format = '%Y-%m-%d %H:%M:%S'):
-                print (f"Current time: {curr_time} --- Backlog file: {f_name}")
                 move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
             else:
                 # move to processingpool for static processing, if process serverpool, while
                 # the servers are sending files, this list of files is dynamic and will cause
                 # problems, once backlog files are moved, process all that's left
-                print (f"Moving {f_name} into processingpool.")
                 move_s3_file(bucket, 'serverpool/', 'processingpool/', f_name)
 
 def read_s3_to_df(sql_c, spark):
@@ -99,7 +95,6 @@ def read_s3_to_df(sql_c, spark):
         df = df.drop('_c0')
         t_min = df.agg({"event_time": "min"}).collect()[0][0]
         t_max = df.agg({"event_time": "max"}).collect()[0][0]
-        print (f"Events duration for current dataframe: {t_min} - {t_max}")
         return df, t_max
     except:
         return None, None
@@ -230,7 +225,6 @@ def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
     # read csv from s3
     df_0, time_tick = read_s3_to_df(sql_c, spark)
     if not df_0:
-        print ("No files were read into dataframe")
         return
     # clean data
     df_0 = clean_data(spark, df_0)
@@ -246,12 +240,12 @@ def stream_to_minute(sql_c, spark, events, dimensions, move_files=False):
             # store minute-by-minute data into t1 datatable: _minute
             write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
     if move_files:
-        print ('Moving processed files')
         move_s3_file('maxwell-insight', 'processingpool/', 'spark-processed/')
+    return
 
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
     events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
-    print ("Starting spark process!")
     stream_to_minute(sql_c, spark, events, dimensions, move_files=True)
+    spark.stop()

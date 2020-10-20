@@ -67,21 +67,4 @@ spark_live_process = PythonOperator(
   trigger_rule='none_failed',
   dag = dag)
 
-check_backlog = BranchPythonOperator(
-    task_id='check_backlog',
-    python_callable=util.collect_backlogs,
-    trigger_rule='one_success',
-    dag = dag)
-
-process_backlogs = PythonOperator(
-    task_id='process_backlogs',
-    python_callable=run_backlog_processing,
-    dag = dag)
-
-dummy_task = DummyOperator(
-    task_id='dummy_task',
-    dag=dag)
-
-backlog_sensor >> check_backlog
-new_file_sensor >> check_backlog >>  dummy_task >> spark_live_process # >> min_to_hour
-check_backlog >> process_backlogs >> spark_live_process # >> min_to_hour
+new_file_sensor >> spark_live_process

@@ -7,7 +7,7 @@ from airflow.operators.dummy_operator import DummyOperator
 # from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
 import os, subprocess, sys, imp
-
+util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/check_backlog.py')
 
 bucket = 'maxwell-insight'
 src_dir = 'serverpool/'
@@ -26,7 +26,7 @@ args = {
     }
 dag = DAG(
     dag_id='data_transport',
-    schedule_interval=timedelta(minutes=10),
+    schedule_interval=timedelta(minutes=15),
     max_active_runs=1,
     default_args=args
     )
@@ -50,4 +50,20 @@ logs_compression = PythonOperator(
     python_callable=run_logs_compression,
     dag=dag)
 
-data_transport >> logs_compression
+dummy_task = DummyOperator(
+    task_id='dummy_task',
+    dag=dag)
+
+process_backlogs = PythonOperator(
+    task_id='process_backlogs',
+    python_callable=run_backlog_processing,
+    dag = dag)
+
+check_backlog = BranchPythonOperator(
+    task_id='check_backlog',
+    python_callable=util.collect_backlogs,
+    trigger_rule='one_success',
+    dag = dag)
+
+check_backlog >> logs_compression >> data_transport
+check_backlog >> process_backlogs >> data_transport

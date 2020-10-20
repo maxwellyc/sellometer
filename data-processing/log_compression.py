@@ -71,8 +71,6 @@ def read_s3_to_df_bk(sql_c, spark, prefix):
     return sql_c.read.csv(s3file, header=True)
 
 def compress_csv(timeframe='hour'):
-    sql_c, spark = spark_init()
-    print ("calling")
     lof_pool = list_s3_files(dir="spark-processed", bucket = 'maxwell-insight')
     lof_zipped = list_s3_files(dir="csv-bookkeeping", bucket = 'maxwell-insight')
     max_processed_time = folder_time_range(lof_pool)[1]
@@ -84,20 +82,17 @@ def compress_csv(timeframe='hour'):
         hour_diff = 24
     max_zipped_time = folder_time_range(lof_zipped,tt_format,'.csv.gzip',False)[1]
     max_zip_next = max_zipped_time + datetime.timedelta(hours=hour_diff)
-    print("Last processed file time label:", max_processed_time)
-    print("Last compressed file time label:", max_zipped_time)
     # the next zip file has time prefix max_zip_next
     # the current processed file has to have a complete hour from the begin time
     # in order for the compressed file to cover all files in that hour
     if max_processed_time > max_zip_next + datetime.timedelta(hours=hour_diff):
         try:
+            sql_c, spark = spark_init()
             next_prefix = datetime_to_str(max_zip_next, tt_format)
             df = read_s3_to_df_bk(sql_c, spark, prefix=next_prefix)
 
             df = df.withColumn('_c0', df['_c0'].cast('integer'))
             comp_f_name = next_prefix + ".csv.gzip"
-            print(comp_f_name)
-
             # sort by index and compress
             df.orderBy('_c0')\
             .coalesce(1)\
@@ -106,14 +101,10 @@ def compress_csv(timeframe='hour'):
             .option("compression","gzip")\
             .csv(f"s3a://maxwell-insight/csv-bookkeeping/{comp_f_name}")
             remove_s3_file('maxwell-insight', 'spark-processed/', prefix=next_prefix)
-
         except Exception as e:
-            print(e)
-    else:
-        print("Not enough time has passed since last compression.")
-        print(f"Currently compressed 1-{timeframe} starting from {max_zipped_time}")
-        print(f"Currently newly processed files up until {max_processed_time}")
-        return
+            return
+    spark.stop()
+    return
 
 if __name__ == "__main__":
     compress_csv()
