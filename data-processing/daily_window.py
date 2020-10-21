@@ -83,13 +83,14 @@ def daily_window(sql_c, spark, events, dimensions):
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_max = get_latest_time_from_sql_db(spark, suffix='minute')
     curr_min = get_latest_time_from_sql_db(spark, suffix='minute', latest=False)
-    if curr_min + datetime.timedelta(hours=24) > curr_max:
+    if curr_min + datetime.timedelta(hours=30) > curr_max:
         return
     print ("flag")
     for evt in events:
         for dim in dimensions:
             # remove data from more than 24 hours away from t1 table
-            cutoff = datetime_to_str(curr_max - datetime.timedelta(hours=24))
+            cutoff = datetime_to_str(curr_max - datetime.timedelta(hours=24),time_format)
+            print (cutoff)
             df_0 = read_sql_to_df(spark,t0=cutoff,event=evt,dim=dim,suffix='minute')
             # rewrite minute level data back to t1 table
             write_to_psql(df_0, evt, dim, mode="overwrite", suffix='minute_temp')
