@@ -27,7 +27,7 @@ def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H
         order = "ASC"
     try:
         query = f"""
-        (SELECT event_time FROM view_brand_{suffix}
+        (SELECT event_time FROM view_category_l3_{suffix}
         ORDER BY event_time {order}
         LIMIT 1
         ) as foo
@@ -83,6 +83,7 @@ def daily_window(sql_c, spark, events, dimensions):
     time_format = '%Y-%m-%d %H:%M:%S'
     curr_max = get_latest_time_from_sql_db(spark, suffix='minute')
     curr_min = get_latest_time_from_sql_db(spark, suffix='minute', latest=False)
+    print (curr_min, curr_max)
     if curr_min + datetime.timedelta(hours=30) > curr_max:
         return
     print ("flag")
