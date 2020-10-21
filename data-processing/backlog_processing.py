@@ -2,8 +2,9 @@ import datetime, imp
 
 # load self defined modules
 util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
-sprocess = imp.load_source('sprocess', '/home/ubuntu/eCommerce/data-processing/input_processing.py')
+psf = imp.load_source('psf', '/home/ubuntu/eCommerce/data-processing/processing_funcs.py')
 ingestion = imp.load_source('ingestion', '/home/ubuntu/eCommerce/data-processing/ingestion.py')
+config = imp.load_source('config', '/home/ubuntu/eCommerce/data-processing/config.py')
 
 def process_backlogs(events, dimensions):
     ''' Process backlog files sent from server,
@@ -40,7 +41,7 @@ def process_backlogs(events, dimensions):
             df_new = df_corrupt.union(new_df[evt][dim])
 
             # Merge duplicate entries, see merge_df doc for detailed explanation
-            df_new = sprocess.merge_df(df_new, evt, dim)
+            df_new = psf.merge_df(df_new, evt, dim)
 
             # union fixed portion of corrupted table with intact portion
             df_fixed = df_intact.union(df_new)
@@ -51,11 +52,10 @@ def process_backlogs(events, dimensions):
             df_temp = util.read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_bl')
             util.write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
 
+    spark.stop()
     # after backlogs are processed, move file to processed folder on S3
     util.move_s3_file('maxwell-insight', 'backlogs/', 'spark-processed/')
-    spark.stop()
+    return
 
 if __name__ == "__main__":
-    dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
-    events = ['purchase', 'view']
-    process_backlogs(events, dimensions)
+    process_backlogs(config.events, config.dimensions)

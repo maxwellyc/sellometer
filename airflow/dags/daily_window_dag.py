@@ -27,7 +27,7 @@ args = {
 
 dag = DAG(
     dag_id='daily_window',
-    schedule_interval=timedelta(hours=4),
+    schedule_interval=timedelta(hours=1),
     max_active_runs=1,
     default_args=args
     )

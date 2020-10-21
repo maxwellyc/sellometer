@@ -2,202 +2,99 @@ from pyspark import SparkContext, SparkConf
 from pyspark.sql import SparkSession, SQLContext, DataFrameWriter
 from pyspark.sql import functions as F
 import time, datetime, os, imp
-import logging
-# daily_window = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/daily_window.py')
 
-def spark_init():
-    # initialize spark session and spark context####################################
-    conf = SparkConf().setAppName("data_transport")
-    sc = SparkContext(conf=conf)
-    spark = SparkSession(sc)
-    sql_c = SQLContext(sc)
-    return sql_c, spark
+# load self defined modules
+util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
+psf = imp.load_source('psf', '/home/ubuntu/eCommerce/data-processing/processing_funcs.py')
+ingestion = imp.load_source('ingestion', '/home/ubuntu/eCommerce/data-processing/ingestion.py')
+config = imp.load_source('config', '/home/ubuntu/eCommerce/data-processing/config.py')
 
-def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
-    return datetime.datetime.strptime(f_name, time_format)
 
-def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
-    return dt_obj.strftime(time_format)
+def rolling_rank(df_0, evt, dim, curr_min,time_format):
+    ''' Aggregated data over past hour (rolling window) for the purpose of ranking,
+        will create {evt}_{dim}_rank datatables.
+        These tables support variable selection in Grafana UI.
+        These were originally used to update past hour sales metrics as well,
+        but has since been decommissioned.
+    '''
+    # filter to keep only data within past hour, be wary of the inclusiveness
+    # of the time ranges defined in util.select_time_window()
+    df_rank = util.select_time_window(df_0,
+    start_tick = curr_min - datetime.timedelta(minutes=59),
+    end_tick = curr_min + datetime.timedelta(minutes=1))
 
-def remove_server_num(f_name,suffix='.csv',serverNum=True):
-    # remove server # from file name
-    # eg. '2019-10-01-01-00-00-3.csv' > '2019-10-01-01-00-00'
-    if "temp/" in f_name:
-        f_name = f_name[5:]
-    if serverNum:
-        return '-'.join(f_name.split(suffix)[0].split('-')[:-1])
-    else:
-        return f_name.split(suffix)[0]
+    # aggregate (GROUP BY dim) entires in the past hour
+    gb = psf.merge_df(df_rank, evt, dim, rank=True)
 
-def get_latest_time_from_sql_db(spark, suffix='minute', time_format='%Y-%m-%d %H:%M:%S'):
-    # reads previous processed time in logs/min_tick.txt and returns next time tick
-    # default file names and locations
-    try:
-        query = f"""
-        (SELECT event_time FROM view_brand_{suffix}
-        ORDER BY event_time DESC
-        LIMIT 1
-        ) as foo
-        """
-        df = spark.read \
-            .format("jdbc") \
-        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-        .option("dbtable", query) \
-        .option("user",os.environ['psql_username'])\
-        .option("password",os.environ['psql_pw'])\
-        .option("driver","org.postgresql.Driver")\
-        .load()
-        t_max = df.select('event_time').collect()[0][0]
-        return t_max
-    except Exception as e:
-        t_max = "2019-10-01 00:00:00"
-        return str_to_datetime(t_max,time_format)
-
-def remove_min_data_from_sql(df, curr_time, hours_window=24):
-    cutoff = curr_time - datetime.timedelta(hours=hours_window)
-    df_cut = df.filter(df.event_time > cutoff )
-    return df_cut
-
-def select_time_window(df, start_tick, end_tick):
-    df1 = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
-    return df1
-
-def compress_time(df, start_tick=None, end_tick=None, tstep = 3600, t_window=24, from_csv = True):
-    # Datetime transformation #######################################################
-    # tstep: unit in seconds, timestamp will be grouped in steps with stepsize of t_step seconds
-    start_time = "2019-10-01-00-00-00"
-    time_format = '%Y-%m-%d-%H-%M-%S'
-    # start time for time series plotting, I'll set this to a specific time for now
-    t0 = int(time.mktime(datetime.datetime.strptime(start_time, time_format).timetuple()))
-    # convert data and time into timestamps, remove orginal date time column
-    # reorder column so that timestamp is leftmost
-    if from_csv:
-        df = df.withColumn('event_time',
-            F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss'))
-    if end_tick:
-        if not start_tick: start_tick = end_tick - datetime.timedelta(hours=t_windows)
-        df = select_time_window(df, start_tick=start_tick, end_tick=end_tick)
-    df = df.withColumn("event_time",
-    ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0 + tstep)
-    df = df.withColumn("event_time", F.to_timestamp(df.event_time))
-
-    return df
-
-def merge_df(df, event, dim, rank = False):
-    # when performing union on backlog dataframe and main dataframe
-    # need to recalculate average values
-    if rank:
-        gb_cols = [dim]
-    else:
-        gb_cols = [dim, 'event_time']
-    if dim == 'product_id':
-        if event == 'view':
-            df = df.withColumn('total_price', F.col('count(price)') * F.col('avg(price)'))
-            df = df.groupby(gb_cols).agg(F.sum('count(price)'), F.sum('total_price'))
-            df = df.withColumnRenamed('sum(count(price))','count(price)')
-            df = df.withColumn('avg(price)', F.col('sum(total_price)') / F.col('count(price)'))
-            df = df.drop('sum(total_price)')
-        elif event == 'purchase':
-            df = df.groupby(gb_cols).agg(F.sum('sum(price)'), F.sum('count(price)'))
-            df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
-            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
-            df = df.withColumn('avg(price)', F.col('sum(price)') / F.col('count(price)'))
-    else:
-        if event == 'view':
-            df = df.groupby(gb_cols).agg(F.sum('count(price)'))
-            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
-        elif event == 'purchase':
-            df = df.groupby(gb_cols).agg(F.sum('sum(price)'))
-            df = df.withColumnRenamed('sum(sum(price))', 'sum(price)')
-    return df
-
-def write_to_psql(df, event, dim, mode, suffix):
-    # write dataframe to postgreSQL
-    # suffix can be 'hour', 'minute', 'rank', this is used to name datatables
-    df.write\
-    .format("jdbc")\
-    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-    .option("dbtable", f"{event}_{dim}_{suffix}")\
-    .option("user",os.environ['psql_username'])\
-    .option("password",os.environ['psql_pw'])\
-    .option("driver","org.postgresql.Driver")\
-    .mode(mode)\
-    .save()
+    # overwrite ranked dataframe into sql table
+    util.write_to_psql(gb, evt, dim, mode="overwrite", suffix='rank')
     return
 
-def read_sql_to_df(spark, t0='2019-10-01 00:00:00', t1='2020-10-01 00:00:00',
-event='purchase', dim='product_id',suffix='minute'):
-    query = f"""
-    (SELECT * FROM {event}_{dim}_{suffix}
-    WHERE event_time BETWEEN \'{t0}\' and \'{t1}\'
-    ORDER BY event_time
-    ) as foo
-    """
-    df = spark.read \
-        .format("jdbc") \
-    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-    .option("dbtable", query) \
-    .option("user",os.environ['psql_username'])\
-    .option("password",os.environ['psql_pw'])\
-    .option("driver","org.postgresql.Driver")\
-    .load()
-    return df
+def min_to_hour(df_0, start_tick, end_tick, evt, dim):
+    ''' Process minute-level data in t1 datatables into hourly data in t2 datatables
+    '''
 
-def min_to_hour(sql_c, spark, events, dimensions, verbose=False):
+    # perform floor operation on event_time to the nearest hour
+    # for aggregation on the hour
+    df_hour = psf.compress_time(df_0, start_tick, end_tick,
+                tstep=3600, from_csv=False)
 
-    time_format = '%Y-%m-%d %H:%M:%S'
-    t1 = datetime.datetime.now()
-    curr_min = get_latest_time_from_sql_db(spark, suffix='minute')
-    curr_hour = get_latest_time_from_sql_db(spark, suffix='hour')
+    # group by product dimension and event_time so that all events
+    # having the same timestamp (within same hour) are aggregated
+    gb = psf.merge_df(df_hour, evt, dim)
+
+    # append groupby (dataframe) to t2 datatables and complete the process
+    util.write_to_psql(gb, evt, dim, mode="append", suffix='hour')
+    return
+
+def data_transport(sql_c, spark, events, dimensions, verbose=False,
+        time_format = '%Y-%m-%d %H:%M:%S'):
+    ''' Performs the following:
+        1. Generate ranking datatable.
+        2. Generate t2 datatables (hourly) from t1 datatables (minute-level).
+
+        For event_time in t2 datatables, curr_hour is an aggregated value for
+        event_time between curr_hour - 1hr to curr_hour
+        ie A 10:00:00 entry in t2 datatable is aggregated using events between
+        09:00:00 - 09:59:00 of the t1 datatable.
+
+        Read comments marked as IMPORTANT for more details on how hourly
+        data points are aggregated.
+    '''
+    # read latest event_time in t1 datatable and t2 datatable
+    curr_min = util.get_latest_time_from_db(spark, suffix='minute')
+    curr_hour = util.get_latest_time_from_db(spark, suffix='hour')
+
+    # ************************* IMPORTANT *************************
+    # calculate difference in latest times in t1 and t2 table, this is to
+    # inform whether a full hour of data is available and ready to be aggregated
+    # latest hour to be stored in t2 datatable for the current process.
+    # eg. IF curr_min = 10:01:00 && curr_hour = 08:00:00
+    #     THEN hours_diff = 2
+    #     THEN end_hour = 10:00:00
+    # The process below will generate hourly data with either 09:00:00 or 10:00:00
+    # event_time (timestamps) in the t2 datatables
+    # ************************* IMPORTANT *************************
     hours_diff = (curr_min - curr_hour).seconds // 3600
     end_hour = curr_hour + datetime.timedelta(hours=hours_diff)
-    t2 = datetime.datetime.now()
+
     for evt in events:
         for dim in dimensions:
-            # read min data from t1 datatable
-            # slice 3600 second of dataframe for ranking purpose
-            # rank datatable is a dynamic sliding window and updates every minute
-            cutoff_t0 = datetime_to_str(curr_hour,time_format)
-            cutoff_t1 = datetime_to_str(curr_min, time_format)
-            df_0 = read_sql_to_df(spark,cutoff_t0,cutoff_t1,evt,dim,'minute')
-            df_rank = select_time_window(df_0,
-            start_tick=curr_min-datetime.timedelta(hours=1), end_tick=curr_min )
-            gb = merge_df(df_rank, evt, dim, rank=True)
-            # store past hour data in rank table for ranking
-            write_to_psql(gb, evt, dim, mode="overwrite", suffix='rank')
-            # compress hourly data into t2 datatable only when integer hour has passed
-            # since last hourly datapoint
-            if curr_min > end_hour:
-                df_hour = compress_time(df_0, start_tick=curr_hour,
-                end_tick=end_hour, tstep=3600, from_csv=False)
-                gb = merge_df(df_hour, evt, dim)
-                # append temp table into t2 datatable
-                write_to_psql(gb, evt, dim, mode="append", suffix='hour')
-            # merge events that have same product_id & event_time, sometimes 2 entries
-            # can enter due to backlog or spark process only loaded partial data of that minute_
-            # This process is identical as checking backlog, without the union part.
-            # using multiple variables to prevent writing to original dataframe and causing error
-            # read data from main datatable
-            # df_pd = read_sql_to_df(spark, event=evt, dim=dim,suffix='minute')
-            # data_time_merger(df_pd, spark, evt, dim, verbose)
 
-def data_time_merger(df_pd, spark,evt, dim, verbose=False):
-    # try to merge entries with duplicate product_id & event_time
-    df_pd2 = merge_df(df_pd, evt, dim)
-    # store merged dataframe to temporay datatable
-    write_to_psql(df_pd2, evt, dim, mode="overwrite", suffix='minute_temp')
+            # read dataframe between curr_min and curr_hour
+            df_0 = util.read_sql_to_df(spark,curr_hour,curr_min,evt,dim,'minute')
 
-    # read from temporary datatable
-    df_temp = read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
+            # generate ranking datatable
+            rolling_rank(df_0, evt, dim, curr_min,time_format)
 
-    # overwrite main datatable
-    write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            # aggregate new hourly data only when at least one hour has passed
+            # since the lastest hour in t2 datatables
+            if curr_hour > end_hour:
+                min_to_hour(df_0, curr_hour, end_hour, evt, dim)
+    return
 
 
 if __name__ == "__main__":
-
-    dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
-    events = ['purchase', 'view'] # test purchase then test view
     sql_c, spark = spark_init()
-    min_to_hour(sql_c, spark, events, dimensions,verbose=True)
-    # daily_window.daily_window(sql_c, spark, events, dimensions)
+    data_transport(sql_c, spark, config.events, config.dimensions,verbose=True)
+    spark.stop()

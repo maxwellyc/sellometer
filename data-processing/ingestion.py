@@ -2,7 +2,9 @@ import imp
 
 # load self defined modules
 util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
-sprocess = imp.load_source('sprocess', '/home/ubuntu/eCommerce/data-processing/input_processing.py')
+psf = imp.load_source('psf', '/home/ubuntu/eCommerce/data-processing/processing_funcs.py')
+config = imp.load_source('config', '/home/ubuntu/eCommerce/data-processing/config.py')
+
 
 def redirect_s3_files_for_processing(spark,dir="serverpool",bucket = 'maxwell-insight'):
     ''' Read list of files from AWS S3 serverpool, this folder contains files sent from
@@ -31,6 +33,7 @@ def redirect_s3_files_for_processing(spark,dir="serverpool",bucket = 'maxwell-in
             # move logs ready to be processed into <processingpool>
             else:
                 util.move_s3_file(bucket, 'serverpool/', 'processingpool/', f_name)
+    return
 
 def ingest(sql_c, spark, events, dimensions, from_csv = True, move_files=False):
     ''' Performs listed tasks:
@@ -42,6 +45,8 @@ def ingest(sql_c, spark, events, dimensions, from_csv = True, move_files=False):
         5. Split different type of events and store in separate t1 datatables.
         6. Aggregate on different product dimensions (product_id, brand, category etc.)
         7. Return groupby object dictionary
+
+        Returns two-layer dictionary of groupby (dataframe) objects.
     '''
     # 1. redirect files
     redirect_s3_files_for_processing(spark)
@@ -52,16 +57,16 @@ def ingest(sql_c, spark, events, dimensions, from_csv = True, move_files=False):
         return
 
     # 3. clean data
-    df_0 = sprocess.clean_data(spark, df_0)
+    df_0 = psf.clean_data(spark, df_0)
 
     # 4. compress time into minute granularity
-    df_0 = sprocess.compress_time(df_0, tstep = 60, from_csv)
+    df_0 = psf.compress_time(df_0, tstep = 60, from_csv)
 
     # 5. split event type
-    main_df = sprocess.split_event(events, df_0)
+    main_df = psf.split_event(events, df_0)
 
     # 6. Aggregate on different product dimensions
-    main_gb = sprocess.group_by_dimensions(main_df, events, dimensions)
+    main_gb = psf.agg_by_dimensions(main_df, events, dimensions)
 
     return main_gb
 
@@ -77,12 +82,10 @@ def store_all_ingested(main_gb, events, dimensions, move_files=True):
             util.write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
     if move_files:
         util.move_s3_file('maxwell-insight', 'processingpool/', 'spark-processed/')
+    return
 
 if __name__ == "__main__":
-    dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
-    events = ['purchase', 'view']
-
     sql_c, spark = spark_init("ingestion")
-    main_gb = ingest(sql_c, spark, events, dimensions, move_files=True)
-    store_all_ingested(main_gb,  events, dimensions)
+    main_gb = ingest(sql_c, spark, config.events, config.dimensions, move_files=True)
+    store_all_ingested(main_gb,  config.events, config.dimensions)
     spark.stop()

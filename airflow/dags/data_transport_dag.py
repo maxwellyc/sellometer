@@ -64,7 +64,7 @@ process_backlogs = PythonOperator(
 
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
-    python_callable=util.peek_backlogs,
+    python_callable=util.check_backlog,
     dag = dag)
 
 check_backlog >> logs_compression >> data_transport

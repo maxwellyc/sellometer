@@ -4,37 +4,55 @@ import datetime, os
 from boto3 import client
 
 def spark_init(s_name):
-    ''' Create spark session and SQL context '''
+    ''' Create spark session and SQL context
+    '''
     conf = SparkConf().setAppName()
     sc = SparkContext(conf=conf)
     spark = SparkSession(sc)
     sql_c = SQLContext(sc)
     return sql_c, spark
 
-# Date, time related utility functions =======================================
+# Date, time, file name related ================================================
 
 def str_to_datetime(f_name, time_format='%Y-%m-%d-%H-%M-%S'):
-    ''' Convert string to datetime object '''
+    ''' Convert string to datetime object
+    '''
     return datetime.datetime.strptime(f_name, time_format)
 
 def datetime_to_str(dt_obj, time_format='%Y-%m-%d-%H-%M-%S'):
-    ''' Convert datetime object to string '''
+    ''' Convert datetime object to string
+    '''
     return dt_obj.strftime(time_format)
 
-def remove_server_num(f_name):
+def select_time_window(df, start_tick, end_tick):
+    ''' Filter dataframe to only keep entries between timestamps
+        start_tick (inclusive) and end_tick (exclusive)
+    '''
+    df1 = df.filter( (df.event_time < end_tick) & (df.event_time >= start_tick) )
+    return df1
+
+def remove_server_num(f_name,suffix='.csv',serverNum=True):
     ''' Remove server # from file name in order to get time
         ie. '2019-10-01-01-00-00-3.csv' -> '2019-10-01-01-00-00'
     '''
-    return '-'.join(f_name.strip(".csv").split('-')[:-1])
+    if "temp/" in f_name:
+        f_name = f_name[5:]
+    if serverNum:
+        return '-'.join(f_name.split(suffix)[0].split('-')[:-1])
+    else:
+        return f_name.split(suffix)[0]
 
-def get_latest_time_from_db(spark,evt='view',dim='brand',suffix='minute',max_time=True):
+def get_latest_time_from_db(spark,evt='view',dim='category_l3',
+        suffix='minute',max_time=True):
     ''' From postgreSQL database, collect min or max of event_time
         default to evt='view' because this event type is much more populated
-        default to dim='brand' because this dimension is more collapsed, resulting
-        in a smaller table but without lossing all possible event_time
-        Return default time if the t1 tables are not created yet.
+        default to dim='category_l3' because this dimension is more collapsed,
+        resulting in a smaller table to be read but still maintains all possible
+        event_time.
+        Returns default time if the t1 tables are not created yet.
+        Returns a datetime.datetime object.
     '''
-    sort_order = "DESC" if latest else "ASC"
+    sort_order = "DESC" if max_time else "ASC"
 
     try:
         query = f"""
@@ -56,23 +74,49 @@ def get_latest_time_from_db(spark,evt='view',dim='brand',suffix='minute',max_tim
         return df.select('event_time').collect()[0][0]
 
     except Exception as e:
-        return util.str_to_datetime('2019-10-01-00-00-00')
+        return str_to_datetime('2019-10-01-00-00-00')
 
-# AWS S3 IO related ============================================================
+def folder_time_range(lof, time_format='%Y-%m-%d-%H-%M-%S',
+        suffix=".csv",serverNum=True):
+    ''' Returns range of time indicated by files in lof (list of files)
+        Returns 2 datetime.datetime objects
+    '''
+    file_times = []
+    for f_name in lof:
+        try:
+            t = remove_server_num(f_name, suffix, serverNum)
+            t = str_to_datetime(t, time_format)
+            file_times.append(t)
+        except Exception as e:
+            continue
+    if file_times:
+        return min(file_times), max(file_times)
+    else:
+        return [str_to_datetime("2019-09-30-23-00-00")]*2
+
+# AWS S3 related ============================================================
 
 def move_s3_file(bucket, src_dir, dst_dir, f_name='*.csv'):
-    ''' Move files (file name = <f_name>) on AWS S3 from <src_dir> to <dst_dir>'''
+    ''' Move files (file name = <f_name>) on AWS S3 from <src_dir> to <dst_dir>
+    '''
     os.system(f's3cmd mv s3://{bucket}/{src_dir}{f_name} s3://{bucket}/{dst_dir}')
 
+def remove_s3_file(bucket, src_dir, prefix):
+    ''' Remove files in AWS S3 with specific {prefix}
+        src_dir should end with '/'
+    '''
+    os.system(f's3cmd rm s3://{bucket}/{src_dir}{prefix}*.csv')
+
 def list_s3_files(dir="serverpool", bucket = 'maxwell-insight'):
-    ''' List files in AWS S3 directory and return as list'''
+    ''' List all files in a AWS S3 directory, return as list
+    '''
     dir += "/"
     conn = client('s3')
-    list_of_files = [key['Key'].replace(dir,"",1)
-    for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents']]
-    return list_of_files
+    lof = [ key['Key'].replace(dir,"",1)
+    for key in conn.list_objects(Bucket=bucket, Prefix=dir)['Contents'] ]
+    return lof
 
-def peek_backlogs():
+def check_backlog():
     ''' Check if backlog folder is empty. If not empty, this function
         will return the Airflow task name for backlog processing to trigger
         backlog processing, otherwise this will trigger the compression process
@@ -85,21 +129,26 @@ def peek_backlogs():
                 return 'process_backlogs'
     except Exception as e:
         continue
-    return 'dummy_task'
+    return 'logs_compression'
+
 
 # Read / Write data related ====================================================
 
-def read_s3_to_df(sql_c, spark, bucket='maxwell-insight', src_dir='serverpool/'):
-    ''' Spark read data from AWS S3 into spark dataframe'''
-    s3file = f's3a://{bucket}/{src_dir}*.csv'
+def read_s3_to_df(sql_c, spark, bucket='maxwell-insight',
+        src_dir='serverpool/', prefix=''):
+    ''' Spark read data from AWS S3 into spark dataframe
+    '''
+    s3file = f's3a://{bucket}/{src_dir}{prefix}*.csv'
     try:
-        df = sql_c.read.csv(s3file, header=True)
+        return sql_c.read.csv(s3file, header=True)
     except:
         return
-    return df
 
 def read_sql_to_df(spark, t0='2019-10-01 00:00:00', t1='2119-10-01 00:00:00',
-                    event='purchase', dim='product_id',suffix='minute'):
+        event='purchase', dim='product_id',suffix='minute'):
+    ''' Read postgreSQL datatable into spark dataframe BETWEEN t0 AND t1
+        using SQL query
+    '''
     query = f"""
     (SELECT * FROM {event}_{dim}_{suffix}
     WHERE event_time BETWEEN \'{t0}\' and \'{t1}\'
