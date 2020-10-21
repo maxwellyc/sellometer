@@ -281,4 +281,4 @@ def process_backlogs(events, dimensions):
 if __name__ == "__main__":
     dimensions = ['product_id', 'brand', 'category_l3']#, 'category_l2', 'category_l3']
     events = ['purchase', 'view'] # test purchase then test view
-    process_backlogs(events, dimensions)
+#    process_backlogs(events, dimensions)
