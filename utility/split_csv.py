@@ -46,5 +46,5 @@ def main(key = '2020-Feb'):
 
 
 if __name__ == "__main__":
-    for key in ["2019-Oct","2019-Nov","2020-Jan","2020-Feb","2020-Mar","2020-Apr"]:
+    for key in ["2019-Oct"]:#,"2019-Nov","2020-Jan","2020-Feb","2020-Mar","2020-Apr"]:
         main(key)
