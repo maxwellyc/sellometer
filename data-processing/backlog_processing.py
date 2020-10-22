@@ -25,8 +25,10 @@ def process_backlogs(events, dimensions):
     new_df = {}
     new_df = ingestion.ingest(sql_c,spark, events, dimensions,src_dir='backlogs/')
 
-    t_min = new_df['view']['brand'].agg({"event_time": "min"}).collect()[0][0] - datetime.timedelta(minutes=1)
-    # t_max = new_df['view']['brand'].agg({"event_time": "max"}).collect()[0][0] + datetime.timedelta(minutes=1)
+    t_min = new_df['view']['brand'].agg({"event_time": "min"}).collect()[0][0]\
+            - datetime.timedelta(minutes=1)
+    # t_max = new_df['view']['brand'].agg({"event_time": "max"}).collect()[0][0]\
+    #            + datetime.timedelta(minutes=1)
 
     for evt in events:
         for dim in dimensions:

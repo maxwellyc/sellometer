@@ -24,7 +24,8 @@ def daily_window(events, dimensions, window_hours=24):
     for evt in events:
         for dim in dimensions:
             # remove data from more than 24 hours away from t1 table
-            cutoff = util.datetime_to_str(curr_max - datetime.timedelta(hours=window_hours))
+            cutoff = util.datetime_to_str(curr_max - datetime.timedelta(hours=window_hours),
+                        time_format='%Y-%m-%d %H:%M:%S')
             df_0 = util.read_sql_to_df(spark,t0=cutoff,event=evt,dim=dim,suffix='minute')
 
             # write to temporary table and read back to avoid erasing original table
@@ -32,7 +33,7 @@ def daily_window(events, dimensions, window_hours=24):
             util.write_to_psql(df_0, evt, dim, mode="overwrite", suffix='minute_temp')
             df_temp = util.read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
             util.write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
-    return 
+    return
     spark.stop()
 
 if __name__ == "__main__":

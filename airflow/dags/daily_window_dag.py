@@ -34,7 +34,7 @@ dag = DAG(
 
 # Use 14 cores to block other process from working on datatable to stop race condition
 def run_daily_window():
-    os.system(f'spark-submit --conf spark.cores.max=14 --executor-memory=4G ' +\
+    os.system(f'spark-submit --conf spark.cores.max=14 --executor-memory=5G ' +\
     '$sparkf ~/eCommerce/data-processing/daily_window.py')
 
 daily_window = PythonOperator(
