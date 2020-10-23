@@ -3,7 +3,9 @@
 Sellometer is a data pipeline that processes real-time online events of a retail website and stores the transformed data into a tiered database to support various business needs such as live monitoring and sales analytics etc.
 
 [Demo Slides](https://docs.google.com/presentation/d/1i-34t8AvreuHTTEn04651ZIpnlO9v5nVoev7dgu0TBY/edit?usp=sharing),
+
 [Web UI](http://sellometer.xyz/)
+
 [Recorded UI Demo](https://www.youtube.com/watch?v=iGup8EMZQYc)
 
 ## Table of Contents
@@ -27,7 +29,7 @@ Impulse buying constitutes a large portion of retail sales [source](https://www.
 ## Architecture
 ![pipeline](https://raw.githubusercontent.com/maxwellyc/sellometer/master/images/pipeline.png)
 
-The data pipeline / architecture is shown above. First, an AWS EC2 instance will move CSV files from an AWS S3 bucket to another in order to (crudely) imitate the behavior of web servers sending preprocessed data files. Once the files are in the destination bucket, an S3 sensor in the Apache Airflow DAG will be triggered and its downstream Spark task will be triggered to process data in the CSV files and transforms the data into a schema optimized for live monitoring, which will be stored in a PostgreSQL database, and finally a Grafana dashboard will serve as the web UI.
+The architecture (data pipeline) is shown above. First, an AWS EC2 instance will move CSV files from an AWS S3 bucket to another in order to (crudely) imitate the behavior of web servers sending preprocessed data files. Once the files are in the destination bucket, an S3 sensor in the Apache Airflow DAG will be triggered and its downstream Spark task will be triggered to process data in the CSV files and transforms the data into a schema optimized for live monitoring, which will be stored in a PostgreSQL database, and finally a Grafana dashboard will serve as the web UI.
 
 ## Dataset
 Behavior data across 7 months (10/2019 - 4/2020) from a large multi-category online store can be obtained from [Kaggle](https://www.kaggle.com/mkechinov/ecommerce-behavior-data-from-multi-category-store?select=2019-Oct.csv) and [this Google Drive](https://drive.google.com/drive/folders/1Nan8X33H8xrXS5XhCKZmSpClFTCJsSpE) in CSV format.
