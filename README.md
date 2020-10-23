@@ -11,18 +11,17 @@ Sellometer is a data pipeline that processes real-time online events of a retail
 2. [Architecture](README.md#architecture)
 3. [Dataset](README.md#dataset)
 4. [Engineering Challenges](README.md#engineering-challenges)
-5. [Processing](README.md#processing)
-6. [Setup](README.md#setup)
+5. [Setup](README.md#setup)
 
 ## Introduction
 Large online retailers such as Amazon and eBay receive millions of transactions per hour across billions of product listings. Other user behaviors such as viewing a product, add to cart, remove from cart are also being tracked by the web servers during a shopping trip.
 Typically, these data will be processed in batch, on a day to day basis. However, there is also a pressing need for real-time monitoring of such events, a few examples would be:
 #### Abnormality detection:
-    A wrong item listing price can cause huge loss to the retailer, and such events cannot be detected by simply monitoring the web servers' health.
+A wrong item listing price can cause huge loss to the retailer, and such events cannot be detected by simply monitoring the web servers' health.
 #### Low inventory alert:
-    Having up-to-date knowledge of item inventory can prevent loss of sales due to items running out of stock, and can also be integrated into the retailer's logistical chain to drive down logistical costs on the long run.
+Having up-to-date knowledge of item inventory can prevent loss of sales due to items running out of stock, and can also be integrated into the retailer's logistical chain to drive down logistical costs on the long run.
 #### Left-in-cart reminder:
-    Impulse buying constitutes a large portion of retail sales [source](https://www.handystorefixtures.com/blog/impulse-buying-statistics-every-retailer-should-know), items that are added and left in cart can quickly lose their appeal to a wavering consumer, having a live system that can monitor this behavior allows the retailers to send a quick email reminder to the consumer, along with up-to-date recommendation of similar products could dramatically boost sales.
+Impulse buying constitutes a large portion of retail sales [source](https://www.handystorefixtures.com/blog/impulse-buying-statistics-every-retailer-should-know), items that are added and left in cart can quickly lose their appeal to a wavering consumer, having a live system that can monitor this behavior allows the retailers to send a quick email reminder to the consumer, along with up-to-date recommendation of similar products could dramatically boost sales.
 
 ## Architecture
 ![pipeline](https://raw.githubusercontent.com/maxwellyc/sellometer/master/images/pipeline.png)
