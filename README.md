@@ -87,13 +87,14 @@ In case of an event surge, such as a build up of files due to the same reasons t
 #### Race condition
 Race condition could occur when various tasks mentioned above sometimes working on the same data tables, which can cause apparent issues related to the reliability of data being stored. For example, the backlog processing task would have to first read the minute-level data tables into a Spark DataFrame, eg. last data point from 10:45 pm, and then proceeds to merge the backlog data points with the data points already in place. During this time, the live processing cluster can be writing new data from 10:46 pm into the same data tables. Once the time the backlog processing task finishes its processing, it'll proceed to overwrite the minute-level data table with the set of data table ending at 10:45 pm, completely erasing the 10:46 pm data point.
 
-Currently this is handled by forcing the backlog processing task to occupy all computation resources and prevent the real-time processing tasks from running, this corresponds to the [current Airflow DAG](README.md#airflow-dags) setting. Another solution would be to set the backlog processing task directly upstream of the real-time processing task in the DAG (see figure below).
+Currently this is handled by forcing the backlog processing task to occupy all computation resources and prevent the real-time processing tasks from running, this corresponds to the [current Airflow DAG](README.md#airflow-dags) setup. Another solution would be to set the backlog processing task directly upstream of the real-time processing task in the DAG (see figure below).
 ![Backlog DAG](https://raw.githubusercontent.com/maxwellyc/sellometer/master/images/backlog_dag.png)
 
 Both the above solutions were tried and neither is ideal since they would all disrupt / delay real-time processing. A third solution that recently came to my mind is to identify the backlog files' timestamps, and directly perform INSERT and DELETE on the SQL level once the correct data is computed and merged with what's in the original data table, this solution does not involve the overwriting action and thus does not impact entries of another timestamp.
 
 
 ## Airflow DAGs
+The current DAGs for real-time processing (top) and housekeeping (bottom):
 ![Airflow DAGs](https://raw.githubusercontent.com/maxwellyc/sellometer/master/images/airflow.png)
 
 ## Setup
