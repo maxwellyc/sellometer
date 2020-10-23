@@ -37,6 +37,15 @@ The combined size of these CSV files is around 55 GB.
 #### Data concentration
 The original dataset listed above is very sparse in terms of behavior (events) over unit time, in order to mimic the traffic of major online retailers such as Amazon.com, these 7 months worth of data was concentrated into roughly 8 days (30:1). This concentration provided us with an average hourly sales around 10 Million USD, at the same order of magnitude as Amazon.com.
 
+#### Data cleaning
+Category_code and brand can have null values. Some products have 3 layers of categories / sub-categories, such as for the second row product in the dataset above: "appliance - environment - water_heater", others can have only two or one.
+
+Null brand values are filled using product_id, null category_code are filled using category_id (numeric).
+Partly missing categories are filled with the category directly above, eg.
+    electronics.smartphone -> electronics.smartphone.smartphone
+
+Viewing of the same product with the same user_session is only counted as one viewing event.
+
 #### Data transformation
 The concentrated data has time resolution in seconds (same as the original). These are often times too granulized to be graphed, as even the most popular items are sold in single digit quantities every second. Thus, live monitoring data is prepared on a minute-level granularity, and then further grouped into different product dimensions, ie product_id, brand, and 3 levels of category.
 As an example, the schema for purchase events, grouped by product_id is:
@@ -49,6 +58,12 @@ As an example, the schema for purchase events, grouped by product_id is:
 |-- avg_price   (float)
 ```
 GMV stands for Gross Merchandise Value which indicate a total sales monetary-value for merchandise sold for a given time period.
+
+#### Errors in the data
+
+A long period with completing zero purchase events is present in the data, while viewing event looks normal.
+
+Some time during 2019 December - 2020 January , the category_code for items that were originally "electronics.smartphone" has been permanently changed into "construction.tools.light", or unless Apple and Samsung started making thousand-dollar light bulbs that I'm not aware of and all of a sudden became a huge hit (~67% of sales).
 
 ## Engineering Challenges
 
