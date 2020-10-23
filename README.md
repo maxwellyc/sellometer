@@ -53,14 +53,18 @@ GMV stands for Gross Merchandise Value which indicate a total sales monetary-val
 
 #### Tiered data storage
 The minute-level data accumulates at a rate of ~1.3 GB / day (resulted from 8 GB of input data). If all were stored in one giant data table, the latency of querying will become larger and larger, eventually reaching a point where live monitoring losses isn't really 'live'. Given the use case of live monitoring, data on a larger time scale, such as more than 24 hours ago, is less likely to be visited. Therefore, to control the query latency and also to preserver storage, a tiered data storage scheme was devised.
+
 The first tier data storage is designed for live monitoring, which contains minute-level data for the past 24 hours. Earlier data will be deleted from the data tables every hour, the combined size of these data tables is roughly 1.3 GB.
+
 The second tier data storage is a set of data tables using aggregated data of the first tier, with hourly granularity, this will store all hourly data from the past month. In the current project, since only 8 days of concentrated data is available, this tier of storage will keep accumulating until the input data runs out. The hourly data accumulates at a rate of ~200 MB / day.
+
 The third tier data storage serves the purpose of long term bookkeeping, which will compress multiple input files (mini CSV files) over an hour or a day, into one gzipped CSV file.
 For scalability, one could always insert arbitrarily more tiers into this scheme, using the same code that is being used to transfer data from the first tier into the second tier, or introduce other time granularity ratio between tiers, as these are fully customizable from the design of the code.
 
 #### Backlog processing
 In the event that one or more web servers (among many) experience server hiccup or network congestion, data in the live monitoring data tables could've already moved far ahead in terms of time, which will require certain metrics to be re-aggregated and corrected in the minute-level and hourly data tables.
 These files from an earlier time period that have "missed the train", will be identified and moved into a "backlogs" directory that stores backlog files on AWS S3 by the real-time processing task. An Apache Airflow sensor will monitor this directory every 10 minutes, if backlog files are present, the backlog processing task will be activated to process and correct the corresponding entries in the minute-level data tables used for live monitoring.
+
 Unfortunately during the course of this 3 weeks Insight project, this has not been implemented to also correct the entries in the hourly data tables, but the fundamental idea is identical.
 
 #### Event surge (dynamic resource allocation)
@@ -68,20 +72,29 @@ In case of an event surge, such as a build up of files due to the same reasons t
 
 #### Race condition
 Race condition could occur when various tasks mentioned above sometimes working on the same data tables, which can cause apparent issues related to the reliability of data being stored. For example, the backlog processing task would have to first read the minute-level data tables into a Spark DataFrame, eg. last data point from 10:45 pm, and then proceeds to merge the backlog data points with the data points already in place. During this time, the live processing cluster can be writing new data from 10:46 pm into the same data tables. Once the time the backlog processing task finishes its processing, it'll proceed to overwrite the minute-level data table with the set of data table ending at 10:45 pm, completely erasing the 10:46 pm data point.
+
 Currently this is handled by forcing the backlog data to occupy all resources and prevent the real-time processing tasks from running. Another solution would be to set the backlog processing task directly upstream of the real-time processing task in the Airflow DAG. Both solutions were tested and aren't ideal since they would disrupt live monitoring.
+
 A third solution that recently came to my mind is to identify the backlog files' timestamps, and directly perform INSERT and DELETE on the SQL level once the correct data is computed and merged with what's in the original data table, this solution does not involve the overwriting action and thus does not impact entries of another timestamp.
 
 
 ## Setup
 #### Tools Version
 Database: PostgreSQL 10.14 (jdbc driver jar: postgresql-42.2.16.jre7.jar)
+
 Task scheduler: Apache Airflow 1.10.12
+
 Computing framework: Apache Spark 2.4.3 Using Scala version 2.11.12, OpenJDK 64-Bit Server VM, 1.8.0_265
+
 Spark runtime packages: --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.hadoop:hadoop-aws:2.7.7
+
 Web UI: Grafana 7.2.1
 
 #### AWS resources
 Spark Cluster: 8 m5a.large (2 vCPUs, 8GB, Ubuntu 18.04.5 LTS) EC2 instances
+
 PostgreSQL: 1 m5a.large (2 vCPUs, 8GB, Ubuntu 18.04.5 LTS) EC2 instance
+
 Web hosting:  1 m5a.large (2 vCPUs, 8GB, Ubuntu 18.04.5 LTS) EC2 instance
+
 Imitate web server: 1 m5a.large (2 vCPUs, 8GB, Ubuntu 18.04.5 LTS) EC2 instance
