@@ -1,15 +1,14 @@
+''' Sellometer main Airflow DAG for real-time processing and maintains daily window
+'''
+import os
+import subprocess
 from datetime import timedelta
 from airflow.models import DAG
 from airflow.operators.sensors import S3KeySensor
 from airflow.operators.python_operator import PythonOperator
-from airflow.operators.dummy_operator import DummyOperator
-# from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
-import os, subprocess, sys, imp
-
-bucket = 'maxwell-insight'
-dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
-events = ['purchase', 'view'] # test purchase then test view
+# from airflow.operators.dummy_operator import DummyOperator
+# from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
 args = {
     'owner': 'airflow',
@@ -28,27 +27,42 @@ dag = DAG(
     )
 
 def run_ingestion():
+    ''' spark-submit real-time processing pyspark script.
+        Dynamical resource allocation by using file size information on
+        AWS S3 bucket to determine resource for spark job.
+    '''
     response = subprocess.check_output(f's3cmd du $s3/serverpool/', shell=True).decode('ascii')
     file_size = float(response.split(" ")[0]) / 1024 / 1024 # total file size in Mbytes
     # use extra processors when file size greater than 10 Mb
     max_cores = 12 if file_size > 20 else 8
-    print(max_cores,'spark cores executing')
     os.system(f'spark-submit --conf spark.cores.max={max_cores} --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/ingestion.py')
 
+def run_daily_window():
+    ''' spark-submit pyspark script that maintains 24-hour window for the
+     minute-level datatable on PostgreSQL DB
+    '''
+    os.system(f'spark-submit --conf spark.cores.max=14 --executor-memory=5G ' +\
+    '$sparkf ~/eCommerce/data-processing/daily_window.py')
+
 new_file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
-    poke_interval= 5, # (seconds); checking file every 5 seconds
-    timeout= 30, # timeout in 1 hours
-    bucket_key=f"s3://{bucket}/serverpool/*.csv",
+    poke_interval=5, # (seconds); checking file every 5 seconds
+    timeout=30, # timeout in 1 hours
+    bucket_key=f"s3://maxwell-insight/serverpool/*.csv",
     bucket_name=None,
     wildcard_match=True,
     dag=dag)
 
 spark_ingestion = PythonOperator(
-  task_id='spark_live_process',
-  python_callable=run_ingestion,
-  trigger_rule='none_failed',
-  dag = dag)
+    task_id='spark_ingestion',
+    python_callable=run_ingestion,
+    trigger_rule='none_failed',
+    dag=dag)
 
-new_file_sensor >> spark_ingestion
+daily_window = PythonOperator(
+    task_id='daily_window',
+    python_callable=run_daily_window,
+    dag=dag)
+
+new_file_sensor >> spark_ingestion >> daily_window

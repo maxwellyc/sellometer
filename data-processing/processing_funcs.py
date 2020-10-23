@@ -1,11 +1,17 @@
+''' This module contains main (Spark) processing functions that transform
+Spark DataFrame and are reused frequently in ingestion.py, data_transport.py,
+and backlog_processing.py
+'''
+
+import time
+import datetime as dt
+import imp
 from pyspark.sql import functions as F
-import time, datetime, imp
 
 # load self defined modules
-util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
+UTIL = imp.load_source('UTIL', '/home/ubuntu/eCommerce/data-processing/utility.py')
 
-def compress_time(df, start_tick=None, end_tick=None,
-        tstep=3600, t_window=24, from_csv = True):
+def compress_time(df, start_tick=None, end_tick=None, tstep=3600, from_csv=True):
     ''' Performs time compression, "compress" time by flooring the real
         event_time to the nearest minute or hour (smaller value), eg:
             10:15:26 ---(tstep=60)---> 10:15:00
@@ -20,30 +26,32 @@ def compress_time(df, start_tick=None, end_tick=None,
     # t0 can be any time before event_time of the current dateset, this is merely
     # used to compute the difference in seconds to the event's timestamp
     # It is a integer representing seconds away from epoch time.
-    t0 = int(time.mktime(util.str_to_datetime("2019-10-01-00-00-00").timetuple()))
+    t0 = int(time.mktime(UTIL.str_to_datetime("2019-10-01-00-00-00").timetuple()))
 
     # If read directly from csv, the event_time is of string type (VARCHAR)
     # here it is converted into timestamps if from_csv == True
     if from_csv:
-        df = df.withColumn('event_time',
-            F.unix_timestamp(F.col("event_time"), 'yyyy-MM-dd HH:mm:ss'))
+        df = df.withColumn('event_time', F.unix_timestamp(F.col("event_time"),
+                                                          'yyyy-MM-dd HH:mm:ss'))
 
     # If start_tick and / or end_tick is provided when calling this function,
     # the dataframe will be filtered based on these timestamps accordingly
     if end_tick:
-        if not start_tick: start_tick = end_tick - datetime.timedelta(hours=t_windows)
-        df = util.select_time_window(df, start_tick=start_tick, end_tick=end_tick)
+        if not start_tick:
+            start_tick = end_tick - dt.timedelta(hours=24)
+        df = UTIL.select_time_window(df, start_tick=start_tick, end_tick=end_tick)
 
     # The "compression" part by flooring time to nearest minute or hour etc.
     df = df.withColumn("event_time",
-    ((df.event_time.cast("long") - t0) / tstep).cast('long') * tstep + t0 + tstep)
+                       ((df.event_time.cast("long") - t0) / tstep).cast('long')\
+                       * tstep + t0 + tstep)
 
     # Convert integer value timestamp into datetime.datetime object
     df = df.withColumn("event_time", F.to_timestamp(df.event_time))
 
     return df
 
-def clean_data(spark,df):
+def clean_data(spark, df):
     ''' Performs data cleaning by:
         Filling null values in category_code and brand using other information.
 
@@ -51,10 +59,10 @@ def clean_data(spark,df):
     '''
 
     # if missing category_code (string), fill with category_id (numeric).
-    df = df.withColumn('category_code', F.coalesce('category_code','category_id'))
+    df = df.withColumn('category_code', F.coalesce('category_code', 'category_id'))
 
     # if missing brand (string), fill with product_id (numeric)
-    df = df.withColumn('brand', F.coalesce('brand','product_id'))
+    df = df.withColumn('brand', F.coalesce('brand', 'product_id'))
 
     # category_code have different layers separated with periods -- '.'
     # eg. electronics.smartphones and electronics.video.tv
@@ -62,6 +70,7 @@ def clean_data(spark,df):
     # This UDF standardizes all category_code into 3 category levels
 
     def fill_cat_udf(code):
+        ''' Spark UDF that uniformly transforms all category_id into 3 layers'''
         code = str(code)
         ss = code.split('.')
         # if all 3 category levels already present in category_code
@@ -81,7 +90,7 @@ def clean_data(spark,df):
 
     # split category_code column into 3 columns representing 3 levels of category
     df = df.withColumn("category_code", fill_cat(F.col("category_code")))
-    split_col = F.split(F.col("category_code"),'[.]')
+    split_col = F.split(F.col("category_code"), '[.]')
     df = df.withColumn('category_l1', split_col.getItem(0))
     df = df.withColumn('category_l2', split_col.getItem(1))
     df = df.withColumn('category_l3', split_col.getItem(2))
@@ -109,9 +118,9 @@ def split_event(events, df):
         # even at differnt event_time, this will only be counted as one view.
         if evt == 'view':
             main_df[evt] = (main_df[evt]
-                .orderBy('event_time')
-                .coalesce(1)
-                .dropDuplicates(subset=['user_session','product_id']))
+                            .orderBy('event_time')
+                            .coalesce(1)
+                            .dropDuplicates(subset=['user_session', 'product_id']))
     return main_df
 
 def agg_by_dimensions(main_df, events, dimensions):
@@ -144,20 +153,21 @@ def agg_by_dimensions(main_df, events, dimensions):
             if dim == 'product_id':
                 if evt == 'view':
                     main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
-                                    .agg(F.count('price'),F.mean('price')))
+                                         .agg(F.count('price'), F.mean('price')))
                 elif evt == 'purchase':
                     main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
-                                    .agg(F.sum('price'),F.count('price'),F.mean('price')))
+                                         .agg(F.sum('price'), F.count('price'),
+                                              F.mean('price')))
             else:
                 if evt == 'view':
                     main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
-                                    .agg(F.count('price')))
+                                         .agg(F.count('price')))
                 elif evt == 'purchase':
                     main_gb[evt][dim] = (main_df[evt].groupby(dim, 'event_time')
-                                    .agg(F.sum('price')))
+                                         .agg(F.sum('price')))
     return main_gb
 
-def merge_df(df, event, dim, rank = False):
+def merge_df(df, event, dim, rank=False):
     ''' The merge process deals with scenarios when there exist two entries with
         same product_id (or brand, category etc.) and same event_time, this means
         the backlog data needs to be added to the t1 table entry
@@ -168,7 +178,8 @@ def merge_df(df, event, dim, rank = False):
         Returns dataframe object.
     '''
     gb_cols = [dim]
-    if not rank: gb_cols = gb_cols.append('event_time')
+    if not rank:
+        gb_cols = gb_cols.append('event_time')
 
     if dim == 'product_id':
         if event == 'view':
@@ -177,7 +188,7 @@ def merge_df(df, event, dim, rank = False):
             # total_count, then divide these two to get new average.
             df = df.withColumn('total_price', F.col('count(price)') * F.col('avg(price)'))
             df = df.groupby(gb_cols).agg(F.sum('count(price)'), F.sum('total_price'))
-            df = df.withColumnRenamed('sum(count(price))','count(price)')
+            df = df.withColumnRenamed('sum(count(price))', 'count(price)')
             df = df.withColumn('avg(price)', F.col('sum(total_price)') / F.col('count(price)'))
             df = df.drop('sum(total_price)')
         elif event == 'purchase':
@@ -195,7 +206,7 @@ def merge_df(df, event, dim, rank = False):
     return df
 
 
-def duplicate_time_merger(df_pd, spark,evt, dim, verbose=False):
+def duplicate_time_merger(df_pd, spark, evt, dim):
     ''' Merge events that have same product_id & event_time, sometimes 2 entries
         can enter due to backlog or spark process only loaded partial data of that minute_
         This process is identical as checking backlog, without the union part.
@@ -204,15 +215,15 @@ def duplicate_time_merger(df_pd, spark,evt, dim, verbose=False):
         This function will be used for later expansion of Sellometer and is currently
         inactive.
     '''
-    df_pd = util.read_sql_to_df(spark, event=evt, dim=dim, suffix='minute')
+    df_pd = UTIL.read_sql_to_df(spark, event=evt, dim=dim, suffix='minute')
     # try to merge entries with duplicate product_id & event_time
-    df_pd2 = sprocess.merge_df(df_pd, evt, dim)
+    df_pd2 = merge_df(df_pd, evt, dim)
     # store merged dataframe to temporay datatable
-    util.write_to_psql(df_pd2, evt, dim, mode="overwrite", suffix='minute_temp')
+    UTIL.write_to_psql(df_pd2, evt, dim, mode="overwrite", suffix='minute_temp')
 
     # read from temporary datatable
-    df_temp = util.read_sql_to_df(spark,event=evt,dim=dim,suffix='minute_temp')
+    df_temp = UTIL.read_sql_to_df(spark, event=evt, dim=dim, suffix='minute_temp')
 
     # overwrite main datatable
-    util.write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+    UTIL.write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
     return

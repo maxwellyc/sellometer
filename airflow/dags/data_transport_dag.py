@@ -1,23 +1,20 @@
-from datetime import datetime, timedelta
+''' Sellometer housekeeping Airflow DAG that processes minute-level datatable
+into hourly level datatable, compress raw csv log files, and process backlogs
+'''
+import os
+import imp
+from datetime import timedelta
 from airflow.models import DAG
-from airflow.operators.sensors import S3KeySensor
 from airflow.operators.python_operator import PythonOperator, BranchPythonOperator
-from airflow.operators.bash_operator import BashOperator
-from airflow.operators.dummy_operator import DummyOperator
-# from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
-import os, subprocess, sys, imp
+# from airflow.operators.sensors import S3KeySensor
+# from airflow.operators.bash_operator import BashOperator
+# from airflow.operators.dummy_operator import DummyOperator
+# from airflow.sensors.external_task_sensor import ExternalTaskSensor
+
 
 # load self defined modules
-util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
-
-
-bucket = 'maxwell-insight'
-src_dir = 'serverpool/'
-dst_dir = 'spark-processed/'
-
-dimensions = ['product_id', 'brand', 'category_l3'] #  'category_l1','category_l2'
-events = ['purchase', 'view'] # test purchase then test view
+UTIL = imp.load_source('UTIL', '/home/ubuntu/eCommerce/data-processing/utility.py')
 
 args = {
     'owner': 'airflow',
@@ -36,21 +33,24 @@ dag = DAG(
 
 
 def run_logs_compression():
+    ''' spark-submit pyspark script for compressing csv log files '''
     os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/log_compression.py')
 
 def run_data_transport():
+    ''' spark-submit pyspark script for minute-level to hourly table data transport '''
     os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/data_transport.py')
 
 def run_backlog_processing():
+    ''' spark-submit pyspark script for backlog processing '''
     os.system(f'spark-submit --conf spark.cores.max=6 --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/backlog_processing.py')
 
 data_transport = PythonOperator(
-  task_id='min_to_hour',
-  python_callable=run_data_transport,
-  dag = dag)
+    task_id='min_to_hour',
+    python_callable=run_data_transport,
+    dag=dag)
 
 logs_compression = PythonOperator(
     task_id='logs_compression',
@@ -60,12 +60,12 @@ logs_compression = PythonOperator(
 process_backlogs = PythonOperator(
     task_id='process_backlogs',
     python_callable=run_backlog_processing,
-    dag = dag)
+    dag=dag)
 
 check_backlog = BranchPythonOperator(
     task_id='check_backlog',
-    python_callable=util.check_backlog,
-    dag = dag)
+    python_callable=UTIL.check_backlog,
+    dag=dag)
 
 check_backlog >> logs_compression >> data_transport
 check_backlog >> process_backlogs >> data_transport

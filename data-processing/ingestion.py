@@ -1,12 +1,16 @@
+''' Module for processing (real-time) csv files containing online events and
+store into minute-level datatable in PostgreSQL DB.
+Also partitions backlog files and moving files to appropriate folders on AWS S3.
+'''
 import imp
 
 # load self defined modules
-util = imp.load_source('util', '/home/ubuntu/eCommerce/data-processing/utility.py')
-psf = imp.load_source('psf', '/home/ubuntu/eCommerce/data-processing/processing_funcs.py')
-config = imp.load_source('config', '/home/ubuntu/eCommerce/data-processing/config.py')
+UTIL = imp.load_source('UTIL', '/home/ubuntu/eCommerce/data-processing/utility.py')
+PSF = imp.load_source('PSF', '/home/ubuntu/eCommerce/data-processing/processing_funcs.py')
+CONFIG = imp.load_source('CONFIG', '/home/ubuntu/eCommerce/data-processing/config.py')
 
 
-def redirect_s3_files_for_processing(spark,dir="serverpool",bucket = 'maxwell-insight'):
+def partition_server_files(spark, src_dir="serverpool", bucket='maxwell-insight'):
     ''' Read list of files from AWS S3 serverpool, this folder contains files sent from
         server.
         Find current time in t1 datatable, if files in serverpool contains event from
@@ -21,21 +25,21 @@ def redirect_s3_files_for_processing(spark,dir="serverpool",bucket = 'maxwell-in
         Files movement in and out of <processingpool> is confined within this module and
         thus will not cause the race condition described above.
     '''
-    lof = util.list_s3_files(dir=dir, bucket=bucket)
-    curr_time = util.get_latest_time_from_db(spark, max_time=True)
+    lof = UTIL.list_s3_files(src_dir=src_dir, bucket=bucket)
+    curr_time = UTIL.get_latest_time_from_db(spark, max_time=True)
 
     for f_name in lof:
         if ".csv" in f_name:
-            tt_dt = util.str_to_datetime(util.remove_server_num(f_name))
+            tt_dt = UTIL.str_to_datetime(UTIL.remove_server_num(f_name))
             # if earlier than latest event_time already in t1 table, it is backlog
             if tt_dt < curr_time:
-                util.move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
+                UTIL.move_s3_file(bucket, 'serverpool/', 'backlogs/', f_name)
             # move logs ready to be processed into <processingpool>
             else:
-                util.move_s3_file(bucket, 'serverpool/', 'processingpool/', f_name)
+                UTIL.move_s3_file(bucket, 'serverpool/', 'processingpool/', f_name)
     return
 
-def ingest(sql_c, spark, events, dimensions, from_csv = True, move_files=False):
+def ingest(sql_c, spark, events, dimensions, from_csv=True):
     ''' Performs listed tasks:
         1. Move files in <serverpool> into correct folders
         2. Read files in <processingpool> into Spark dataframe
@@ -49,24 +53,24 @@ def ingest(sql_c, spark, events, dimensions, from_csv = True, move_files=False):
         Returns two-layer dictionary of groupby (dataframe) objects.
     '''
     # 1. redirect files
-    redirect_s3_files_for_processing(spark)
+    partition_server_files(spark)
 
     # 2. read files into dataframe
-    df_0 = util.read_s3_to_df(sql_c, spark, src_dir="processingpool/")
+    df_0 = UTIL.read_s3_to_df(sql_c, src_dir="processingpool/")
     if not df_0:
-        return
+        return None
 
     # 3. clean data
-    df_0 = psf.clean_data(spark, df_0)
+    df_0 = PSF.clean_data(spark, df_0)
 
     # 4. compress time into minute granularity
-    df_0 = psf.compress_time(df_0, tstep = 60, from_csv)
+    df_0 = PSF.compress_time(df_0, tstep=60, from_csv=from_csv)
 
     # 5. split event type
-    main_df = psf.split_event(events, df_0)
+    main_df = PSF.split_event(events, df_0)
 
     # 6. Aggregate on different product dimensions
-    main_gb = psf.agg_by_dimensions(main_df, events, dimensions)
+    main_gb = PSF.agg_by_dimensions(main_df, events, dimensions)
 
     return main_gb
 
@@ -79,13 +83,13 @@ def store_all_ingested(main_gb, events, dimensions, move_files=True):
     '''
     for evt in events:
         for dim in dimensions:
-            util.write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
+            UTIL.write_to_psql(main_gb[evt][dim], evt, dim, mode="append", suffix='minute')
     if move_files:
-        util.move_s3_file('maxwell-insight', 'processingpool/', 'spark-processed/')
+        UTIL.move_s3_file('maxwell-insight', 'processingpool/', 'spark-processed/')
     return
 
 if __name__ == "__main__":
-    sql_c, spark = spark_init("ingestion")
-    main_gb = ingest(sql_c, spark, config.events, config.dimensions, move_files=True)
-    store_all_ingested(main_gb,  config.events, config.dimensions)
-    spark.stop()
+    SQL_C, SPARK = UTIL.spark_init("ingestion")
+    GB = ingest(SQL_C, SPARK, CONFIG.EVENTS, CONFIG.DIMENSIONS)
+    store_all_ingested(GB, CONFIG.EVENTS, CONFIG.DIMENSIONS)
+    SPARK.stop()
