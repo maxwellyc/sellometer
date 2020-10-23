@@ -110,10 +110,10 @@ Spark runtime packages: --packages com.amazonaws:aws-java-sdk:1.7.4,org.apache.h
 Web UI: Grafana 7.2.1
 
 #### AWS resources
-Spark Cluster: 8 m5a.large (2 vCPUs, 8GB, Ubuntu 18.04.5 LTS) EC2 instances
+Spark Cluster: 8 m5a.large (2 vCPUs,  GB, Ubuntu 18.04.5 LTS) EC2 instances
 
-PostgreSQL: 1 m5a.large (2 vCPUs, 8GB, Ubuntu 18.04.5 LTS) EC2 instance
+PostgreSQL: 1 m5a.large (2 vCPUs, 8 GB, Ubuntu 18.04.5 LTS) EC2 instance
 
-Web hosting:  1 m5a.large (2 vCPUs, 8GB, Ubuntu 18.04.5 LTS) EC2 instance
+Web hosting:  1 m5a.large (2 vCPUs, 8 GB, Ubuntu 18.04.5 LTS) EC2 instance
 
-Imitate web server: 1 m5a.large (2 vCPUs, 8GB, Ubuntu 18.04.5 LTS) EC2 instance
+Imitate web server: 1 m5a.large (2 vCPUs, 8 GB, Ubuntu 18.04.5 LTS) EC2 instance
