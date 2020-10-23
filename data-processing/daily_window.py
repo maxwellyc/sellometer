@@ -38,6 +38,7 @@ def daily_window(events, dimensions, window_hours=24):
             UTIL.write_to_psql(df_0, evt, dim, mode="overwrite", suffix='minute_temp')
             df_temp = UTIL.read_sql_to_df(spark, event=evt, dim=dim, suffix='minute_temp')
             UTIL.write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+
     spark.stop()
     return
 

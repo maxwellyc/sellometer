@@ -67,12 +67,12 @@ def get_latest_time_from_db(spark, evt='view', dim='category_l3',
 
         df = spark.read \
             .format("jdbc") \
-        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-        .option("dbtable", query) \
-        .option("user", os.environ['psql_username'])\
-        .option("password", os.environ['psql_pw'])\
-        .option("driver", "org.postgresql.Driver")\
-        .load()
+            .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
+            .option("dbtable", query) \
+            .option("user", os.environ['psql_username'])\
+            .option("password", os.environ['psql_pw'])\
+            .option("driver", "org.postgresql.Driver")\
+            .load()
 
         return df.select('event_time').collect()[0][0]
 
@@ -159,12 +159,12 @@ def read_sql_to_df(spark, t0='2019-10-01 00:00:00', t1='2119-10-01 00:00:00',
     """
     df = spark.read \
         .format("jdbc") \
-    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
-    .option("dbtable", query) \
-    .option("user", os.environ['psql_username'])\
-    .option("password", os.environ['psql_pw'])\
-    .option("driver", "org.postgresql.Driver")\
-    .load()
+        .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce") \
+        .option("dbtable", query) \
+        .option("user", os.environ['psql_username'])\
+        .option("password", os.environ['psql_pw'])\
+        .option("driver", "org.postgresql.Driver")\
+        .load()
     return df
 
 def write_to_psql(df, event, dim, mode, suffix):
@@ -174,12 +174,12 @@ def write_to_psql(df, event, dim, mode, suffix):
         The rank table is for ranking
     '''
     df.write\
-    .format("jdbc")\
-    .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
-    .option("dbtable", f"{event}_{dim}_{suffix}")\
-    .option("user", os.environ['psql_username'])\
-    .option("password", os.environ['psql_pw'])\
-    .option("driver", "org.postgresql.Driver")\
-    .mode(mode)\
-    .save()
+      .format("jdbc")\
+      .option("url", "jdbc:postgresql://10.0.0.5:5431/ecommerce")\
+      .option("dbtable", f"{event}_{dim}_{suffix}")\
+      .option("user", os.environ['psql_username'])\
+      .option("password", os.environ['psql_pw'])\
+      .option("driver", "org.postgresql.Driver")\
+      .mode(mode)\
+      .save()
     return

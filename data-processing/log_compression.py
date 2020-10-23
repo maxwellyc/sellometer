@@ -58,11 +58,11 @@ def logs_compression(compress_block='hour'):
 
             # sort by index and gzip
             df.orderBy('_c0')\
-            .coalesce(1)\
-            .write\
-            .option("header", True)\
-            .option("compression", "gzip")\
-            .csv(f"s3a://maxwell-insight/csv-bookkeeping/{prefix}.csv.gzip")
+              .coalesce(1)\
+              .write\
+              .option("header", True)\
+              .option("compression", "gzip")\
+              .csv(f"s3a://maxwell-insight/csv-bookkeeping/{prefix}.csv.gzip")
 
             # remove csv files already compressed from <spark-processed> on AWS S3
             UTIL.remove_s3_file('maxwell-insight', 'spark-processed/', prefix=prefix)
