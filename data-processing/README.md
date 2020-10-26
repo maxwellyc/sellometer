@@ -1,7 +1,7 @@
 ## Table of Contents
 1. [Main data processing](README.md#main-data-processing)
 2. [Reusable functions](README.md#reusable-functions)
-3. [Config](README.md#config.py)
+3. [Config](README.md#config-file)
 
 ## Main data processing
 
@@ -32,5 +32,5 @@ Contains utility functions that deals with time(stamps), file handling with AWS 
 This module contains reusable functions that process and transform Spark dataframes, these functions are used frequently in ingestion.py, data_transport.py,
 and backlog_processing.py
 
-## config.py
-Currently contains 3 global variables used in the main data processing modules. Other variables that indicates S3 path locations etc should also be integrated here in the future.
+## Config File
+Currently contains (in config.py) 3 global variables used in the main data processing modules. Other variables that indicates S3 path locations etc should also be integrated here in the future.
