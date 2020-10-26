@@ -5,7 +5,7 @@ Sellometer is a data pipeline that processes real-time online events of a retail
 [Demo Slides](https://docs.google.com/presentation/d/1i-34t8AvreuHTTEn04651ZIpnlO9v5nVoev7dgu0TBY/edit?usp=sharing), [Web UI](http://sellometer.xyz/), [Recorded UI Demo](https://www.youtube.com/watch?v=iGup8EMZQYc)
 
 ## Table of Contents
-1. [Introduction](README.md#introduction)
+1. [Introduction](README.md##introduction)
 2. [Architecture](README.md#architecture)
 3. [Dataset](README.md#dataset)
 4. [Engineering Challenges](README.md#engineering-challenges)
