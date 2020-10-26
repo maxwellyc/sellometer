@@ -1,46 +1,54 @@
-''' Maintains 24-hour window for minute-level PostgreSQL datatable.
-    This will soon be replaced by direct SQL commands which will dramatically
-    speed up the process. (10/23/2020)
+''' Maintains time window of tables in PostgreSQL DB using SQL calls.
 '''
 import datetime as dt
 import imp
-
+import os
+import psycopg2
 # load self defined modules
 UTIL = imp.load_source('UTIL', '/home/ubuntu/eCommerce/data-processing/utility.py')
 CONFIG = imp.load_source('CONFIG', '/home/ubuntu/eCommerce/data-processing/config.py')
 
-def daily_window(events, dimensions, window_hours=24):
+def sql_query(events, dimensions, query):
+    ''' Make SQL calls directly in SQL database (PostgreSQL) '''
+    try:
+        connection = psycopg2.connect(user=os.environ['psql_username'],
+                                      password=os.environ['psql_pw',
+                                      host="10.0.0.5",
+                                      port="5431",
+                                      database="ecommerce")
+
+        cursor = connection.cursor()
+        cursor.execute(";".join(query), multi=True)
+        connection.commit()
+
+    except (Exception, psycopg2.Error) as error:
+        pass
+
+    finally:
+        # closing database connection.
+        if (connection):
+            cursor.close()
+            connection.close()
+
+def maintain_time_window(events, dimensions, suffix='minute', window_hours=24):
+    ''' Maintain data tables to a fixed size, depending on the size of the time window.
+        For t1 tables, use suffix='minute'; for t2 tables, suffix='hour'.
     '''
-        Maintains 24-hour (default) window of t1 datatable by
-        removing time more than 24-hours (default) away from curr_max
-        Only triggers if curr_max - curr_min > 4 hours, we don't want this
-        expensive operation to update every passing minute.
-    '''
-    sql_c, spark = UTIL.spark_init("daily_window")
-
-    # get time range from current t1 datatable
-    curr_max = UTIL.get_latest_time_from_db(spark, suffix='minute')
-    curr_min = UTIL.get_latest_time_from_db(spark, suffix='minute', max_time=False)
-
-    # if less than 30 hours in t1 datatable, ignore this process
-    if curr_min + dt.timedelta(hours=30) > curr_max:
-        return
-
+    sql_c, spark = spark_init('maintain_time_window')
+    max_time = UTIL.get_latest_time_from_db(spark, suffix=suffix)
+    cutoff = UTIL.datetime_to_str(max_time - dt.timedelta(hours=window_hours),
+                                  '%Y-%m-%d %H:%M:%S')
+    sql_delete_query = []
     for evt in events:
         for dim in dimensions:
-            # remove data from more than 24 hours away from t1 table
-            cutoff = UTIL.datetime_to_str(curr_max - dt.timedelta(hours=window_hours),
-                                          time_format='%Y-%m-%d %H:%M:%S')
-            df_0 = UTIL.read_sql_to_df(spark, t0=cutoff, event=evt, dim=dim, suffix='minute')
-
-            # write to temporary table and read back to avoid erasing original table
-            # prematurely
-            UTIL.write_to_psql(df_0, evt, dim, mode="overwrite", suffix='minute_temp')
-            df_temp = UTIL.read_sql_to_df(spark, event=evt, dim=dim, suffix='minute_temp')
-            UTIL.write_to_psql(df_temp, evt, dim, mode="overwrite", suffix='minute')
+            sql_delete_query.append(f"""DELETE FROM {evt}_{dim}_{suffix}
+                                    WHERE event_time < \'{cutoff}\'
+                                    """)
+    sql_delete_query.append("""VACUUM FULL""")
+    sql_delete(evt, dim, sql_delete_query)
 
     spark.stop()
     return
 
 if __name__ == "__main__":
-    daily_window(CONFIG.EVENTS, CONFIG.DIMENSIONS)
+    maintain_time_window(CONFIG.EVENTS, CONFIG.DIMENSIONS)

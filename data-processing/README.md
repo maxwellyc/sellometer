@@ -33,4 +33,4 @@ This module contains reusable functions that process and transform Spark datafra
 and backlog_processing.py
 
 ## Config
-Currently contains (in config.py) 3 global variables used in the main data processing modules. Other variables that indicates S3 path locations etc should also be integrated here in the future.
+Currently contains (in config.py) 3 global variables used in the main data processing modules. Other variables such as the ones that indicates S3 path locations, PostgreSQL logins etc. should also be integrated here in the future.
