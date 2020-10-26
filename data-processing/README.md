@@ -1,9 +1,9 @@
 ## Table of Contents
 1. [Main data processing](README.md#main-data-processing)
-2. [Reusable functions](README.md#reuseable-functions)
+2. [Reusable functions](README.md#reusable-functions)
 3. [Config](README.md#config.py)
 
-##Main data processing
+## Main data processing
 
 #### ingestion.py
 Module for processing (real-time) CSV files containing online events and store into minute-level data table (t1 table) in PostgreSQL DB.
@@ -24,7 +24,7 @@ Currently this does not correct the t2 table, but the idea is identical to fixin
 #### log_compression.py
 Compresses several small CSV files into a larger, gzipped CSV file. The CSV files sent from the servers are minute-by-minute, these data are read into Spark dataframe together and then written back into a gzipped CSV file across an hour or a day, depending on customizable variable.
 
-##Reusable functions
+## Reusable functions
 #### utility.py
 Contains utility functions that deals with time(stamps), file handling with AWS S3 and IO operation with PostgreSQL database.
 
@@ -32,5 +32,5 @@ Contains utility functions that deals with time(stamps), file handling with AWS 
 This module contains reusable functions that process and transform Spark dataframes, these functions are used frequently in ingestion.py, data_transport.py,
 and backlog_processing.py
 
-##config.py
+## config.py
 Currently contains 3 global variables used in the main data processing modules. Other variables that indicates S3 path locations etc should also be integrated here in the future.
