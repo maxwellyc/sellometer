@@ -20,7 +20,7 @@ args = {
     }
 
 dag = DAG(
-    dag_id='ingestion',
+    dag_id='streaming',
     schedule_interval=timedelta(seconds=60),
     max_active_runs=1,
     default_args=args
