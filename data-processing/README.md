@@ -13,8 +13,8 @@ Also identifies backlog CSV files (files with event time earlier than that alrea
 Read data from minute-level data table (PostgreSQL) and aggregates into hourly data, finally storing the hourly data table (t2 table) into PostgreSQL DB.
 Also creates table for ranking purpose (sliding window).
 
-#### daily_window.py
-Maintains 24-hour window for minute-level PostgreSQL data table. This will soon be replaced by direct SQL commands which will dramatically speed up the process. (10/23/2020)
+#### table_time_window.py
+Maintains time window of tables in PostgreSQL DB using SQL calls.
 
 #### backlog_processing.py
 Process backlog CSV files located inside <backlogs> folder on AWS S3, the data processing (from CSV) is identical to the main ingestion process, and in fact uses ingestion.py
