@@ -5,14 +5,14 @@ Sellometer is a data pipeline that processes real-time online events of a retail
 [Demo Slides](https://docs.google.com/presentation/d/1i-34t8AvreuHTTEn04651ZIpnlO9v5nVoev7dgu0TBY/edit?usp=sharing), [Web UI](http://sellometer.xyz/), [Recorded UI Demo](https://www.youtube.com/watch?v=iGup8EMZQYc)
 
 ## Table of Contents
-1. [Introduction](README.md##introduction)
+1. [Introduction](README.md#introduction)
 2. [Architecture](README.md#architecture)
 3. [Dataset](README.md#dataset)
 4. [Engineering Challenges](README.md#engineering-challenges)
 5. [Airflow DAGs](README.md#airflow-dags)
 5. [Setup](README.md#setup)
 
-##Introduction
+## Introduction
 Large online retailers such as Amazon and eBay receive millions of transactions per hour across billions of product listings. Other user behaviors such as viewing a product, add to cart, remove from cart are also being tracked by the web servers during a shopping trip.
 Typically, these data will be processed in batch, on a day to day basis. However, there is also a pressing need for real-time monitoring of such events, a few examples would be:
 #### Abnormality detection:
@@ -22,12 +22,12 @@ Having up-to-date knowledge of item inventory can prevent loss of sales due to i
 #### Left-in-cart reminder:
 Impulse buying constitutes a large portion of retail sales [source](https://www.handystorefixtures.com/blog/impulse-buying-statistics-every-retailer-should-know), items that are added and left in cart can quickly lose their appeal to a wavering consumer, having a live system that can monitor this behavior allows the retailers to send a quick email reminder to the consumer, along with up-to-date recommendation of similar products could dramatically boost sales.
 
-##Architecture
+## Architecture
 ![pipeline](https://raw.githubusercontent.com/maxwellyc/sellometer/master/images/pipeline.png)
 
 The architecture (data pipeline) is shown above. First, an AWS EC2 instance will move CSV files from an AWS S3 bucket to another in order to (crudely) imitate the behavior of web servers sending preprocessed data files. Once the files are in the destination bucket, an S3 sensor in the Apache Airflow DAG will be triggered and its downstream Spark task will be triggered to process data in the CSV files and transforms the data into a schema optimized for live monitoring, which will be stored in a PostgreSQL database, and finally a Grafana dashboard will serve as the web UI.
 
-##Dataset
+## Dataset
 Behavior data across 7 months (10/2019 - 4/2020) from a large multi-category online store can be obtained from [Kaggle](https://www.kaggle.com/mkechinov/ecommerce-behavior-data-from-multi-category-store?select=2019-Oct.csv) and [this Google Drive](https://drive.google.com/drive/folders/1Nan8X33H8xrXS5XhCKZmSpClFTCJsSpE) in CSV format.
 The combined size of these CSV files is around 55 GB.
 ![dataset](https://raw.githubusercontent.com/maxwellyc/sellometer/master/images/dataset.png)
@@ -63,7 +63,7 @@ A long period with completing zero purchase events is present in the data, while
 
 Some time during 2019 December - 2020 January , the category_code for items that were originally "electronics.smartphone" has been permanently changed into "construction.tools.light", or unless Apple and Samsung started making thousand-dollar light bulbs that I'm not aware of and all of a sudden became a huge hit (~67% of sales).
 
-##Engineering Challenges
+## Engineering Challenges
 
 #### Tiered data storage
 The minute-level data accumulates at a rate of ~1.3 GB / day (resulted from 8 GB of input data). If all were stored in one giant data table, the latency of querying will become larger and larger, eventually reaching a point where live monitoring losses isn't really 'live'. Given the use case of live monitoring, data on a larger time scale, such as more than 24 hours ago, is less likely to be visited. Therefore, to control the query latency and also to preserver storage, a tiered data storage scheme was devised.
@@ -93,11 +93,11 @@ Currently this is handled by forcing the backlog processing task to occupy all c
 Both the above solutions were tried and neither is ideal since they would all disrupt / delay real-time processing. A third solution that recently came to my mind is to identify the backlog files' timestamps, and directly perform INSERT and DELETE on the SQL level once the correct data is computed and merged with what's in the original data table, this solution does not involve the overwriting action and thus does not impact entries of another timestamp.
 
 
-##Airflow DAGs
+## Airflow DAGs
 The current DAGs for real-time processing (top) and housekeeping (bottom):
 ![Airflow DAGs](https://raw.githubusercontent.com/maxwellyc/sellometer/master/images/airflow.png)
 
-##Setup
+## Setup
 #### Tools Version
 Database: PostgreSQL 10.14 (jdbc driver jar: postgresql-42.2.16.jre7.jar)
 
