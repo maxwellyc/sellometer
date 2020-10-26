@@ -1,6 +1,8 @@
-''' This module handles compression of smaller csv files across an hour or a day
-into csv.gzip files'''
-
+''' Compresses several small CSV files into a larger, gzipped CSV file.
+The CSV files sent from the servers are minute-by-minute, these data are read
+into Spark dataframe together and then written back into a gzipped CSV file
+across an hour or a day, depending on customizable variable.
+'''
 import datetime as dt
 import logging
 import imp

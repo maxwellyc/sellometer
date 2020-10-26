@@ -1,8 +1,7 @@
-''' This module contains main (Spark) processing functions that transform
-Spark DataFrame and are reused frequently in ingestion.py, data_transport.py,
+''' This module contains reusable functions that process and transform Spark
+dataframes, these functions are used frequently in ingestion.py, data_transport.py,
 and backlog_processing.py
 '''
-
 import time
 import datetime as dt
 import imp

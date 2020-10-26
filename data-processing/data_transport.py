@@ -1,5 +1,6 @@
-''' Aggregate data from minute-level datatable into hourly data and stores into
-PostgreSQL DB, also generate ranking over the past hour (sliding window)
+''' Read data from minute-level data table (PostgreSQL) and aggregates into
+hourly data, finally storing the hourly data back into PostgreSQL DB.
+Also creates table for ranking purpose (sliding window).
 '''
 import datetime as dt
 import imp

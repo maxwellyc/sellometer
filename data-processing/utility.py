@@ -1,5 +1,5 @@
-''' Utility functions that deals with timestamps, file handling with AWS S3
-and IO operation on postgreSQL database.
+''' Contains utility functions that deals with time(stamps), file handling
+with AWS S3 and IO operation with PostgreSQL database.
 '''
 import datetime as dt
 import os

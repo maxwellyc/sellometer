@@ -1,6 +1,10 @@
-''' Process backlog data (data from an earlier timer sent after some delay), this
-module will go into the minute-level datatable and reaggregate results.
-Currently this does not fix the hourly datatable, but will be included soon (1`0/23/2020)
+''' Process backlog CSV files located inside <backlogs> folder on AWS S3,
+the data processing (from CSV) is identical to the main ingestion process,
+and in fact uses ingestion.py for said processing. This module then combines
+the backlog (Spark) data with data from the main t1 table, re-aggregate rows
+that now have duplicates (event_time, product_id/brand/category) due to backlog.
+Currently this does not correct the t2 table, but the idea is identical to
+fixing the t1 table.
 '''
 import datetime as dt
 import imp

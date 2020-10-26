@@ -1,6 +1,8 @@
-''' Module for processing (real-time) csv files containing online events and
-store into minute-level datatable in PostgreSQL DB.
-Also partitions backlog files and moving files to appropriate folders on AWS S3.
+''' Module for processing (real-time) CSV files containing online events and
+store into minute-level data table (t1 table) in PostgreSQL DB.
+Also identifies backlog CSV files (files with event time earlier than that
+already in the t1 table), and partitions CSV files into appropriate folders,
+either <backlogs> or <processingpool> on AWS S3.
 '''
 import imp
 
