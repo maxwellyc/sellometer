@@ -38,12 +38,12 @@ def run_ingestion():
     os.system(f'spark-submit --conf spark.cores.max={max_cores} --executor-memory=3G ' +\
     '$sparkf ~/eCommerce/data-processing/ingestion.py')
 
-def run_daily_window():
+def run_time_window():
     ''' spark-submit pyspark script that maintains 24-hour window for the
      minute-level datatable on PostgreSQL DB
     '''
     os.system(f'spark-submit --conf spark.cores.max=14 --executor-memory=5G ' +\
-    '$sparkf ~/eCommerce/data-processing/daily_window.py')
+    '$sparkf ~/eCommerce/data-processing/table_time_window.py')
 
 new_file_sensor = S3KeySensor(
     task_id='new_csv_sensor',
@@ -60,9 +60,9 @@ spark_ingestion = PythonOperator(
     trigger_rule='none_failed',
     dag=dag)
 
-daily_window = PythonOperator(
-    task_id='daily_window',
-    python_callable=run_daily_window,
+table_time_window = PythonOperator(
+    task_id='table_time_window',
+    python_callable=run_time_window,
     dag=dag)
 
-new_file_sensor >> spark_ingestion >> daily_window
+new_file_sensor >> spark_ingestion >> table_time_window
